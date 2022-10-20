@@ -1,11 +1,16 @@
 import Button from "@material-ui/core/Button";
+import ListItemIcon from "@material-ui/core/ListItemIcon";
 import MenuItem from "@material-ui/core/MenuItem";
 import Select from "@material-ui/core/Select";
+import Typography from "@material-ui/core/Typography";
+import StarIcon from "@material-ui/icons/Star";
+import type { ActiveMessagingServiceFragment } from "@spoke/spoke-codegen";
 import {
   useEditCampaignMessagingServiceMutation,
   useGetCampaignMessagingServiceDataQuery,
   useGetOrganizationMessagingServicesQuery
 } from "@spoke/spoke-codegen";
+import sortBy from "lodash/sortBy";
 import React, { useEffect, useState } from "react";
 import { compose } from "recompose";
 
@@ -51,10 +56,13 @@ const CampaignMessagingServiceForm = (props: FullComponentProps) => {
     }
   }, [campaignLoading, messagingServicesLoading, campaignData]);
 
-  const messagingServices =
+  const messagingServicesUnsorted: ActiveMessagingServiceFragment[] =
     messagingServicesData?.organization?.messagingServices?.edges.map(
       ({ node }) => node
     ) ?? [];
+  const messagingServices = sortBy(messagingServicesUnsorted, [
+    ({ isDefault }) => (isDefault ? 0 : 1)
+  ]);
 
   const messagingServiceChanged = (
     event: React.ChangeEvent<{ value: any; name?: string }>
@@ -88,11 +96,20 @@ const CampaignMessagingServiceForm = (props: FullComponentProps) => {
         onChange={messagingServiceChanged}
         fullWidth
       >
-        {messagingServices.map((service) => (
-          <MenuItem key={service.id} value={service.id}>
-            {service.name}
-          </MenuItem>
-        ))}
+        {messagingServices.map((service) => {
+          const serviceName =
+            service.name || `${service.serviceType}: ${service.id}`;
+          const suffix = service.isDefault ? " (Default)" : "";
+          const label = `${serviceName}${suffix}`;
+          return (
+            <MenuItem key={service.id} value={service.id}>
+              <ListItemIcon>
+                {service.isDefault && <StarIcon fontSize="small" />}
+              </ListItemIcon>
+              <Typography variant="inherit">{label}</Typography>
+            </MenuItem>
+          );
+        })}
         ;
       </Select>
       <Button

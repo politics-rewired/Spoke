@@ -17,7 +17,11 @@ import { config } from "../../config";
 import { parseIanaZone } from "../../lib/datetime";
 import { hasRole } from "../../lib/permissions";
 import { applyScript } from "../../lib/scripts";
-import { replaceAll } from "../../lib/utils";
+import {
+  replaceAll,
+  VALID_CONTENT_TYPES,
+  withTempDownload
+} from "../../lib/utils";
 import logger from "../../logger";
 import pgPool from "../db";
 import { eventBus, EventType } from "../event-bus";
@@ -40,6 +44,7 @@ import { addExportCampaign } from "../tasks/export-campaign";
 import { addExportForVan } from "../tasks/export-for-van";
 import { TASK_IDENTIFIER as exportOptOutsIdentifier } from "../tasks/export-opt-outs";
 import { addFilterLandlines } from "../tasks/filter-landlines";
+import { QUEUE_AUTOSEND_ORGANIZATION_INITIALS_TASK_IDENTIFIER } from "../tasks/queue-autosend-initials";
 import { getWorker } from "../worker";
 import {
   giveUserMoreTexts,
@@ -86,6 +91,7 @@ import {
 } from "./lib/alerts";
 import { getStepsToUpdate } from "./lib/bulk-script-editor";
 import { copyCampaign, editCampaign } from "./lib/campaign";
+import { getFileType } from "./lib/file-type";
 import { saveNewIncomingMessage } from "./lib/message-sending";
 import { processNumbers } from "./lib/opt-out";
 import { formatPage } from "./lib/pagination";
@@ -832,7 +838,11 @@ const rootMutations = {
 
       const messagingServices = await r
         .knex("messaging_service")
-        .where({ organization_id: campaign.organizationId, active: true });
+        .where({
+          organization_id: campaign.organizationId,
+          active: true
+        })
+        .orderByRaw(`is_default desc nulls last`);
 
       if (messagingServices.length === 0) {
         throw new Error("No active messaging services found");
@@ -1935,8 +1945,11 @@ const rootMutations = {
           .where({ id })
           .returning("*");
 
-        const taskIdentifier = "queue-autosend-initials";
-        await trx.raw(`select graphile_worker.add_job(?)`, [taskIdentifier]);
+        const taskIdentifier = QUEUE_AUTOSEND_ORGANIZATION_INITIALS_TASK_IDENTIFIER;
+        await trx.raw(`select graphile_worker.add_job(?, ?)`, [
+          taskIdentifier,
+          { organization_id: organizationId }
+        ]);
 
         return updatedCampaign;
       });
@@ -1983,6 +1996,60 @@ const rootMutations = {
 
       const result = updatedCampaign || campaign;
       return result;
+    },
+
+    updateCampaignAutosendingLimit: async (
+      _ignore,
+      { campaignId, limit },
+      { user }
+    ) => {
+      const id = parseInt(campaignId, 10);
+
+      const campaign = await r
+        .knex("all_campaign")
+        .where({ id })
+        .first(["organization_id"]);
+
+      const organizationId = campaign.organization_id;
+      await accessRequired(user, organizationId, "ADMIN", true);
+
+      const updatedCampaign =
+        limit === null
+          ? await r
+              .knex("all_campaign")
+              .update({
+                autosend_limit: null,
+                autosend_limit_max_contact_id: null
+              })
+              .where({ id })
+              .returning("*")
+              .then((rows) => rows[0])
+          : await r.knex
+              .raw(
+                `
+                  update all_campaign
+                  set
+                    autosend_limit = ?::int,
+                    autosend_limit_max_contact_id = (
+                      select max(id)
+                      from (
+                        select id
+                        from campaign_contact
+                        where true
+                          and campaign_id = ?::int
+                          and archived = false
+                        order by id asc
+                        limit ?::int
+                      ) campaign_contact_ids
+                    )
+                  where id = ?::int
+                  returning *
+                `,
+                [limit, id, limit, id]
+              )
+              .then(({ rows }) => rows[0]);
+
+      return updatedCampaign;
     },
 
     unMarkForSecondPass: async (_ignore, { campaignId }, { user }) => {
@@ -3429,43 +3496,58 @@ const rootMutations = {
           .where({ id: organizationId })
           .update({ deleted_at: null, deleted_by: null });
       } else {
-        await r
-          .knex("organization")
-          .where({ id: organizationId })
-          .update({ deleted_at: r.knex.fn.now(), deleted_by: user.id });
+        await r.knex.transaction(async (trx) => {
+          await trx("organization")
+            .where({ id: organizationId })
+            .update({ deleted_at: r.knex.fn.now(), deleted_by: user.id });
 
-        switch (deactivateMode) {
-          case DeactivateMode.Nosuspend:
-            break;
-          case DeactivateMode.Suspendall:
-            await r
-              .knex("user_organization")
-              .where({ organization_id: organizationId })
-              .whereNot({ role: UserRoleType.OWNER })
-              .update({ role: UserRoleType.SUSPENDED });
-            break;
-          case DeactivateMode.Deleteall:
-            {
-              await r
-                .knex("user_organization")
+          switch (deactivateMode) {
+            case DeactivateMode.Nosuspend:
+              break;
+            case DeactivateMode.Suspendall:
+              await trx("user_organization")
                 .where({ organization_id: organizationId })
-                .delete();
+                .whereNot({ role: UserRoleType.OWNER })
+                .update({ role: UserRoleType.SUSPENDED });
+              break;
+            case DeactivateMode.Deleteall:
+              {
+                await trx("user_organization")
+                  .where({ organization_id: organizationId })
+                  .delete();
 
-              const org = await r
-                .knex("organization")
-                .where({ id: organizationId })
-                .first();
+                const org = await r
+                  .reader("organization")
+                  .where({ id: organizationId })
+                  .first(["name"]);
 
-              await sendEmail({
-                to: "support@spokerewired.com",
-                subject: "Automated organization shutdown request",
-                text: `This is an automated org shutdown request triggered through the superadmin. Organization id: ${organizationId}, name: ${org.name}, from instance hosted at ${config.BASE_URL}.`
-              });
-            }
-            break;
-          default:
-            break;
-        }
+                const messagingServices = await r
+                  .reader("messaging_service")
+                  .where({ organization_id: organizationId })
+                  .select("messaging_service_sid");
+
+                const messagingServiceSids = messagingServices
+                  .map(({ messaging_service_sid }) => messaging_service_sid)
+                  .join("\n");
+                const switchboard = config.SWITCHBOARD_BASE_URL ?? "[default]";
+
+                const text = [
+                  "This is an automated org shutdown request triggered through the superadmin.",
+                  `Organization id: ${organizationId}, name: ${org.name}, from instance hosted at ${config.BASE_URL}.`,
+                  `Switchboard ${switchboard}, profiles:\n${messagingServiceSids}`
+                ].join("\n\n");
+
+                await sendEmail({
+                  to: "support@spokerewired.com",
+                  subject: "Automated organization shutdown request",
+                  text
+                });
+              }
+              break;
+            default:
+              break;
+          }
+        });
       }
       return true;
     },
@@ -4020,6 +4102,14 @@ const rootResolvers = {
           count: result.count
         };
       });
+    },
+    isValidAttachment: async (_root, { fileUrl }, _context) => {
+      const handler = async (filePath) => {
+        const fileType = await getFileType(filePath);
+
+        return VALID_CONTENT_TYPES.includes(fileType);
+      };
+      return withTempDownload(fileUrl, handler);
     }
   }
 };

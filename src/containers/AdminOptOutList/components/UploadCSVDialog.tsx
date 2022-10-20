@@ -49,6 +49,7 @@ const UploadCSVDialog: React.FC<UploadCSVDialogProps> = ({
 
   const handleSubmit = () => {
     onSubmit({ csvFile: file });
+    setFile(null);
     onClose();
   };
 

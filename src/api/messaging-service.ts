@@ -13,6 +13,7 @@ export interface MessagingService {
   updatedAt: string;
   name: string | null;
   active: boolean;
+  isDefault: boolean | null;
 }
 
 export type MessagingServiceEdge = RelayEdge<MessagingService>;
@@ -33,6 +34,7 @@ export const schema = `
     tcrBrandRegistrationLink: String
     name: String
     active: Boolean!
+    isDefault: Boolean
   }
 
   type MessagingServiceEdge {

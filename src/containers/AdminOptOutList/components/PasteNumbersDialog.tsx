@@ -42,6 +42,7 @@ const PasteNumbersDialog: React.FC<PasteNumbersDialogProps> = ({
 
   const handleSubmit = () => {
     onSubmit({ numbersList: numbers });
+    setNumbers("");
     onClose();
   };
 

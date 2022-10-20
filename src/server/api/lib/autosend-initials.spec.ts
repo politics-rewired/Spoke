@@ -27,7 +27,7 @@ describe("autosend initials mutations", () => {
     if (pool) await pool.end();
   });
 
-  it("creates queue-autosend-initials job on startAutsending", async () => {
+  it("creates queue-autosend-organization-initials job on startAutsending", async () => {
     const testbed = await withClient(pool, async (client) => {
       const { organization, user, cookies } = await createOrgAndSession(
         client,
@@ -83,14 +83,14 @@ describe("autosend initials mutations", () => {
       rows: [job]
     } = await pool.query(
       `select * from graphile_worker.jobs where task_identifier = $1`,
-      ["queue-autosend-initials"]
+      ["queue-autosend-organization-initials"]
     );
 
     expect(job).not.toBeUndefined();
 
     await pool.query(
       `delete from graphile_worker.jobs where task_identifier = $1`,
-      ["queue-autosend-initials"]
+      ["queue-autosend-organization-initials"]
     );
   });
 });

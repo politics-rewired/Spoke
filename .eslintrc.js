@@ -100,18 +100,31 @@ module.exports = {
           {
             name: "material-ui",
             importNames: [
+              "Avatar",
+              "Badge",
               "Chip",
+              "CircularProgress",
+              "LinearProgress",
               "List",
               "ListItem",
               "IconButton",
               "FlatButton",
+              "Popover",
               "RaisedButton",
+              "Step",
+              "StepContent",
+              "StepLabel",
+              "Stepper",
               "Table",
               "TableHeader",
               "TableHeaderColumn",
               "TableBody",
               "TableRow",
-              "TableRowColumn"
+              "TableRowColumn",
+              "Dialog",
+              "Tabs",
+              "Tab",
+              "FloatingActionButton"
             ],
             message: "Please use @material-ui/core instead."
           }
@@ -131,18 +144,31 @@ module.exports = {
           },
           {
             group: [
+              "material-ui/Avatar",
+              "material-ui/Badge",
               "material-ui/Chip",
+              "material-ui/CircularProgress",
+              "material-ui/LinearProgress",
               "material-ui/List",
               "material-ui/ListItem",
               "material-ui/IconButton",
               "material-ui/FlatButton",
+              "material-ui/Popover",
               "material-ui/RaisedButton",
+              "material-ui/Step",
+              "material-ui/StepContent",
+              "material-ui/StepLabel",
+              "material-ui/Stepper",
               "material-ui/Table",
               "material-ui/TableHeader",
               "material-ui/TableHeaderColumn",
               "material-ui/TableBody",
               "material-ui/TableRow",
-              "material-ui/TableRowColumn"
+              "material-ui/TableRowColumn",
+              "material-ui/Dialog",
+              "material-ui/Tabs",
+              "material-ui/Tab",
+              "material-ui/FloatingActionButton"
             ],
             message: "Please use @material-ui/core instead."
           }

@@ -230,6 +230,7 @@ type RootQuery {
   bulkUpdateScriptChanges(organizationId: String!, findAndReplace: BulkUpdateScriptInput!): [ScriptUpdateChange!]!
   superadmins: [User!]
   optOuts(organizationId: String!): [OptOutByCampaign!]!
+  isValidAttachment(fileUrl: String!): Boolean!
 }
 
 input SecondPassInput {
@@ -299,6 +300,7 @@ type RootMutation {
   markForSecondPass(campaignId: String!, input: SecondPassInput!): String!
   startAutosending(campaignId: String!): Campaign!
   pauseAutosending(campaignId: String!): Campaign!
+  updateCampaignAutosendingLimit(campaignId: String!, limit: Int): Campaign!
   unMarkForSecondPass(campaignId: String!): String!
   deleteNeedsMessage(campaignId: String!): String!
   insertLinkDomain(organizationId: String!, domain: String!, maxUsageCount: Int!): LinkDomain!
@@ -346,13 +348,13 @@ type User {
   id: ID
   firstName: String
   lastName: String
-  displayName: String
+  displayName: String!
   email: String
   cell: String
   memberships(organizationId: String, after: Cursor, first: Int): OrganizationMembershipPage
   organizations(active: Boolean, role: String): [Organization]
   todos(organizationId: String): [Assignment]
-  roles(organizationId: String!): [String!]!
+  roles(organizationId: String!): [UserRole!]!
   teams(organizationId: String!): [Team]!
   currentRequest(organizationId: String!): AssignmentRequest
   assignedCell: Phone
@@ -669,6 +671,7 @@ type Campaign {
   deliverabilityStats(filter: CampaignDeliverabilityStatsFilter): CampaignDeliverabilityStats!
   autosendStatus: String!
   messagingServiceSid: String
+  autosendLimit: Int
 }
 
 type CampaignEdge {
@@ -736,6 +739,7 @@ input CampaignInput {
   timezone: String
   repliesStaleAfter: Int
   messagingServiceSid: String
+  autosendLimit: Int
 }
 
 
@@ -823,6 +827,7 @@ type MessagingService {
   tcrBrandRegistrationLink: String
   name: String
   active: Boolean!
+  isDefault: Boolean
 }
 
 type MessagingServiceEdge {

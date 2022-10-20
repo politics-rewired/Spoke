@@ -1,5 +1,7 @@
+import { withApollo } from "@apollo/client/react/hoc";
 import { blue, green, grey, orange, red } from "@material-ui/core/colors";
 import type { CampaignVariable } from "@spoke/spoke-codegen";
+import { IsValidAttachmentDocument } from "@spoke/spoke-codegen";
 import { getCharCount } from "@trt2/gsm-charset-utils";
 import type { ContentBlock } from "draft-js";
 import {
@@ -13,7 +15,7 @@ import escapeRegExp from "lodash/escapeRegExp";
 import React from "react";
 
 import { replaceEasyGsmWins } from "../lib/charset-utils";
-import { delimit, getMessageType, isAttachmentImage } from "../lib/scripts";
+import { delimit, getAttachmentLink, getMessageType } from "../lib/scripts";
 import baseTheme from "../styles/theme";
 import Chip from "./Chip";
 
@@ -119,6 +121,7 @@ interface Props {
   scriptText: string;
   scriptFields: string[];
   campaignVariables: CampaignVariable[];
+  isRootStep: boolean;
   integrationSourced: boolean;
   onChange: (value: string) => Promise<void> | void;
   receiveFocus?: boolean;
@@ -147,7 +150,8 @@ class ScriptEditor extends React.Component<Props, State> {
       const { editorState: oldState } = this.state;
       const editorState = EditorState.moveFocusToEnd(oldState);
       const text = editorState.getCurrentContent().getPlainText();
-      const validAttachment = await isAttachmentImage(text);
+      const attachmentUrl = getAttachmentLink(text);
+      const validAttachment = await this.isAttachmentImage(attachmentUrl);
 
       this.setState({
         editorState,
@@ -177,7 +181,8 @@ class ScriptEditor extends React.Component<Props, State> {
     });
 
     const text = editorState.getCurrentContent().getPlainText();
-    const validAttachment = await isAttachmentImage(text);
+    const attachmentUrl = getAttachmentLink(text);
+    const validAttachment = await this.isAttachmentImage(attachmentUrl);
 
     this.setState({ validAttachment });
   };
@@ -206,6 +211,20 @@ class ScriptEditor extends React.Component<Props, State> {
     const { editorState } = this.state;
     return replaceEasyGsmWins(editorState.getCurrentContent().getPlainText());
   }
+
+  isAttachmentImage = async (fileUrl: string | null) => {
+    // No attachment found, so attachment is "valid".
+    if (fileUrl === null) return true;
+
+    const response = await this.props.client.query({
+      query: IsValidAttachmentDocument,
+      variables: {
+        fileUrl
+      }
+    });
+
+    return response.data.isValidAttachment;
+  };
 
   getCompositeDecorator = (
     scriptFields: string[],
@@ -320,6 +339,38 @@ class ScriptEditor extends React.Component<Props, State> {
     }
   }
 
+  renderOptOutLanguageWarning() {
+    const lowercaseText = this.state.editorState
+      .getCurrentContent()
+      .getPlainText()
+      .toLowerCase();
+
+    // 2022-09-24 - stop as a separate word is best for avoiding spam blocks
+    if (
+      this.props.isRootStep &&
+      lowercaseText.length > 0 &&
+      !lowercaseText.includes("stop ")
+    )
+      return (
+        <div style={{ color: baseTheme.colors.red }}>
+          <br />
+          WARNING! This script does not include opt out language. You must let
+          the recipient know they can opt out of receiving future texts, or your
+          messages are very likely to be blocked as spam. We recommend a phrase
+          with the individual word STOP, such as "Reply STOP to quit." Please
+          see our{" "}
+          <a
+            href="https://docs.spokerewired.com/article/168-spoke-101-tips-for-a-successful-mass-text"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            deliverability checklist
+          </a>{" "}
+          for other best practices for improving deliverability.
+        </div>
+      );
+  }
+
   renderCustomFields() {
     const { scriptFields, campaignVariables } = this.props;
     return (
@@ -376,6 +427,7 @@ class ScriptEditor extends React.Component<Props, State> {
         {this.renderCustomFields()}
         <div>
           {this.renderAttachmentWarning()}
+          {this.renderOptOutLanguageWarning()}
           <br />
           Estimated Segments: {info.msgCount} <br />
           Characters left in current segment:{" "}
@@ -399,4 +451,4 @@ class ScriptEditor extends React.Component<Props, State> {
   }
 }
 
-export default ScriptEditor;
+export default withApollo(ScriptEditor);

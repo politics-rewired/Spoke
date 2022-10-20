@@ -1,6 +1,8 @@
 fragment ActiveMessagingService on MessagingService {
   id
   name
+  serviceType
+  isDefault
 }
 
 query GetCampaignStatus($campaignId: String!) {
@@ -21,6 +23,10 @@ query GetOrganizationMessagingServices($organizationId: String!) {
       }
     }
   }
+}
+
+query IsValidAttachment($fileUrl: String!) {
+  isValidAttachment(fileUrl: $fileUrl)
 }
 
 query GetCampaignMessagingServiceData($campaignId: String!) {

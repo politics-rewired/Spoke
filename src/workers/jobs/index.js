@@ -8,6 +8,7 @@ import { getFormattedPhoneNumber } from "../../lib/phone-format";
 import { isValidTimezone } from "../../lib/tz-helpers";
 import logger from "../../logger";
 import { notifyLargeCampaignEvent } from "../../server/api/lib/alerts";
+import { getContactResultMessage } from "../../server/api/lib/contact-list";
 import {
   assignMissingMessagingServices,
   // eslint-disable-next-line import/named
@@ -222,7 +223,7 @@ export async function uploadContacts(job) {
       const optOutSubQuery = getOptOutSubQuery(
         campaign.organization_id
       ).toString();
-      const { rowCount: deleteOptOutCells } = await trx.raw(
+      const { rowCount: optOutCount } = await trx.raw(
         `with deleted_contacts as (
           delete from campaign_contact
           where
@@ -260,39 +261,12 @@ export async function uploadContacts(job) {
         [campaignId]
       );
 
-      if (deleteOptOutCells) {
-        resultMessages.push(
-          `Number of contacts excluded due to their opt-out status: ${deleteOptOutCells}`
-        );
-      }
-
-      const {
-        dupeCount = 0,
-        missingCellCount = 0,
-        invalidCellCount = 0,
-        zipCount = 0
-      } = validationStats;
-
-      if (dupeCount) {
-        resultMessages.push(
-          `Number of duplicate contacts removed: ${dupeCount}`
-        );
-      }
-      if (missingCellCount) {
-        resultMessages.push(
-          `Number of contacts excluded due to missing cells: ${missingCellCount}`
-        );
-      }
-      if (invalidCellCount) {
-        resultMessages.push(
-          `Number of contacts with excluded due to invalid cells: ${invalidCellCount}`
-        );
-      }
-      if (zipCount) {
-        resultMessages.push(
-          `Number of contacts with valid zip codes: ${zipCount}`
-        );
-      }
+      resultMessages.push(
+        ...getContactResultMessage({
+          ...validationStats,
+          optOutCount
+        })
+      );
     } catch (exc) {
       logger.error("Error deleting opt-outs: ", exc);
       throw exc;

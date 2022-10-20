@@ -2,6 +2,79 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [4.39.1](https://github.com/politics-rewired/spoke/compare/v4.39.1-rc.1...v4.39.1) (2022-10-19)
+
+### [4.39.1-rc.1](https://github.com/politics-rewired/spoke/compare/v4.39.1-rc.0...v4.39.1-rc.1) (2022-10-17)
+
+
+### Bug Fixes
+
+* fix van truncated date alias ([#1472](https://github.com/politics-rewired/spoke/issues/1472)) ([fbe2f1a](https://github.com/politics-rewired/spoke/commit/fbe2f1aab2c809e6fc1f65bc7342ed09434bc67d))
+
+### [4.39.1-rc.0](https://github.com/politics-rewired/spoke/compare/v4.39.0...v4.39.1-rc.0) (2022-10-17)
+
+
+### Bug Fixes
+
+* **queue-autosend-organization-initials:** dont mark other orgs campaigns complete ([#1469](https://github.com/politics-rewired/spoke/issues/1469)) ([a8c8d2a](https://github.com/politics-rewired/spoke/commit/a8c8d2ae292ebf4bbc25f91ab3c7b83c7fb3f2c5))
+* fix UI states for campaign and texter ([#1454](https://github.com/politics-rewired/spoke/issues/1454)) ([fb1b0ef](https://github.com/politics-rewired/spoke/commit/fb1b0efa4ca7ea62adcdf5507c1c1ada43e267ac))
+* support script preview for template campaigns ([#1451](https://github.com/politics-rewired/spoke/issues/1451)) ([78ce3b8](https://github.com/politics-rewired/spoke/commit/78ce3b85d0e4929291487b4be14bf13973a8f953))
+* truncate day based on contact's timezone ([#1449](https://github.com/politics-rewired/spoke/issues/1449)) ([15021da](https://github.com/politics-rewired/spoke/commit/15021daf4924afae63663ac14d30d588f86a0e19))
+
+
+### Backend Changes
+
+* remove pgc-ngp-van package ([#1465](https://github.com/politics-rewired/spoke/issues/1465)) ([9a6697a](https://github.com/politics-rewired/spoke/commit/9a6697a596c937ee54408e2a40d25fb96bc07a5f))
+
+## [4.39.0](https://github.com/politics-rewired/spoke/compare/v4.39.0-rc.2...v4.39.0) (2022-10-12)
+
+
+### Backend Changes
+
+* update schema dump ([#1456](https://github.com/politics-rewired/spoke/issues/1456)) ([482c517](https://github.com/politics-rewired/spoke/commit/482c51729743b9f82dba8ff9e3b34e29a2ae93e4))
+
+## [4.39.0-rc.2](https://github.com/politics-rewired/spoke/compare/v4.39.0-rc.1...v4.39.0-rc.2) (2022-10-06)
+
+
+### Bug Fixes
+
+* fix autosending query parameter type error ([#1452](https://github.com/politics-rewired/spoke/issues/1452)) ([cea89ff](https://github.com/politics-rewired/spoke/commit/cea89ff80f1a661ee33c146246f56414cf3240a3))
+
+## [4.39.0-rc.1](https://github.com/politics-rewired/spoke/compare/v4.39.0-rc.0...v4.39.0-rc.1) (2022-10-06)
+
+
+### Features
+
+* add database backed per organization autosending ([#1446](https://github.com/politics-rewired/spoke/issues/1446)) ([d856ae2](https://github.com/politics-rewired/spoke/commit/d856ae2eeb960f4dccfa35df0bb592adb9cab507))
+* support importing contacts from arbitrary csv url ([#1434](https://github.com/politics-rewired/spoke/issues/1434)) ([1d85657](https://github.com/politics-rewired/spoke/commit/1d8565771c8d5b18de0d5fec56935252eb782488))
+
+
+### Bug Fixes
+
+* **bulk script editor:** grammar and spelling ([#1448](https://github.com/politics-rewired/spoke/issues/1448)) ([ac9aab1](https://github.com/politics-rewired/spoke/commit/ac9aab19ad1065416beab9cbc1ee3a0cbb898608))
+
+## [4.39.0-rc.0](https://github.com/politics-rewired/spoke/compare/v4.38.0...v4.39.0-rc.0) (2022-09-30)
+
+
+### Bug Fixes
+
+* **trollbot:** fix token search ([#1445](https://github.com/politics-rewired/spoke/issues/1445)) ([db985b2](https://github.com/politics-rewired/spoke/commit/db985b2ece66d4358fbf0df4b11eadd3ce4dd042))
+* add messaging service sids to org shutdown email ([#1440](https://github.com/politics-rewired/spoke/issues/1440)) ([3b16274](https://github.com/politics-rewired/spoke/commit/3b162748282ea5e14580e61e07a9652c1ac54bca))
+* fix escalate badge count ([#1439](https://github.com/politics-rewired/spoke/issues/1439)) ([f0b1e7b](https://github.com/politics-rewired/spoke/commit/f0b1e7bce6a2a997fdc06504ce890f5c6f3a81df))
+* reset dialog values when submitting ([#1444](https://github.com/politics-rewired/spoke/issues/1444)) ([c537ea4](https://github.com/politics-rewired/spoke/commit/c537ea4327602668c2484e8c46a8c704f1607b5c))
+
+## [4.38.0](https://github.com/politics-rewired/spoke/compare/v4.38.0-rc.1...v4.38.0) (2022-09-29)
+
+
+### Features
+
+* **script editor:** add opt out language warning ([#1436](https://github.com/politics-rewired/spoke/issues/1436)) ([f2127da](https://github.com/politics-rewired/spoke/commit/f2127daa8d3d2d299045a22fdc0bd3ce7e3fd817))
+
+
+### Bug Fixes
+
+* add additional common stop phrases ([#1435](https://github.com/politics-rewired/spoke/issues/1435)) ([d614427](https://github.com/politics-rewired/spoke/commit/d61442730537698f7b2959a969ee5347991558bb))
+
 ## [4.38.0-rc.1](https://github.com/politics-rewired/spoke/compare/v4.38.0-rc.0...v4.38.0-rc.1) (2022-09-26)
 
 

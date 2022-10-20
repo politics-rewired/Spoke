@@ -9,14 +9,15 @@ import type { AutosendingTargetFragment } from "@spoke/spoke-codegen";
 import React from "react";
 import { Link } from "react-router-dom";
 
+import AutosendingLimitField from "./AutosendingLimitField";
 import useChipStyles from "./chipStyles";
 
 interface AutosendingTargetRowProps {
   target: AutosendingTargetFragment;
   organizationId: string;
   disabled?: boolean;
-  onStart?: () => Promise<unknown> | unknown;
-  onPause?: () => Promise<unknown> | unknown;
+  onStart: () => Promise<unknown> | unknown;
+  onPause: () => Promise<unknown> | unknown;
 }
 
 export const AutosendingTargetRow: React.FC<AutosendingTargetRowProps> = (
@@ -42,6 +43,9 @@ export const AutosendingTargetRow: React.FC<AutosendingTargetRowProps> = (
       </TableCell>
       <TableCell>
         <Chip label={statusChipDisplay} classes={{ root: chipRootClass }} />
+      </TableCell>
+      <TableCell>
+        <AutosendingLimitField campaignId={target.id} />
       </TableCell>
       <TableCell>
         {target.autosendStatus ===

@@ -83,7 +83,7 @@ const AdminTrollAlarms: React.FC<Props> = (props) => {
   ) => {
     let foundToken: string | null = null;
     if (index > -1 && typeof selection !== "string") {
-      foundToken = selection.value.key as string;
+      foundToken = selection.text;
     } else {
       const { trollTokens } = props.trollTokens;
       foundToken =

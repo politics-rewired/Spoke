@@ -1,14 +1,53 @@
 import type { Task } from "graphile-worker";
-import { fromPairs } from "lodash";
 
 import { config } from "../../config";
 
 interface Payload {
-  fireDate: string;
+  organization_id: number;
 }
 
-const queueAutoSendInitials: Task = async (payload: Payload, helpers) => {
-  const contactsToQueueInOneMinute = config.AUTOSEND_MESSAGES_PER_SECOND * 60;
+export const QUEUE_AUTOSEND_INITIALS_TASK_IDENTIFIER =
+  "queue-autosend-initials";
+export const QUEUE_AUTOSEND_ORGANIZATION_INITIALS_TASK_IDENTIFIER =
+  "queue-autosend-organization-initials";
+
+export const queueAutoSendInitials: Task = async (payload, helpers) => {
+  await helpers.query(
+    `
+      select graphile_worker.add_job(
+        $1::text,
+        json_build_object('organization_id', organization.id),
+        job_key := format('%s|%s', $1::text, organization.id)
+      )
+      from organization
+      where autosending_mps is not null
+    `,
+    [QUEUE_AUTOSEND_ORGANIZATION_INITIALS_TASK_IDENTIFIER]
+  );
+};
+
+export const queueAutoSendOrganizationInitials: Task = async (
+  payload: Payload,
+  helpers
+) => {
+  const organizationId = payload.organization_id;
+
+  const {
+    rows: [org]
+  } = await helpers.query<{ autosending_mps: number }>(
+    "select autosending_mps from organization where id = $1",
+    [organizationId]
+  );
+
+  const autosendingMps = org?.autosending_mps;
+
+  if (!autosendingMps) {
+    throw new Error(
+      `queueAutoSendInitials was queued for organization ${organizationId} but autosending_mps is ${autosendingMps}`
+    );
+  }
+
+  const contactsToQueueInOneMinute = autosendingMps * 60;
 
   const restrictTimezone = config.isTest ? "true or" : "";
 
@@ -22,10 +61,16 @@ const queueAutoSendInitials: Task = async (payload: Payload, helpers) => {
         from campaign_contact cc
         join campaign c on cc.campaign_id = c.id 
         where true
+          -- organization requirements
+          and c.organization_id = $3
           -- contact requirements
           and cc.archived = false
           and cc.message_status = 'needsMessage'
           and cc.is_opted_out = false
+          and (
+            c.autosend_limit_max_contact_id is null
+            or cc.id <= c.autosend_limit_max_contact_id
+          )
           -- campaign requirements for autosending
           and c.is_archived = false
           and c.is_started = true
@@ -86,7 +131,7 @@ const queueAutoSendInitials: Task = async (payload: Payload, helpers) => {
             'campaignId', campaign_id,
             'unassignAfterSend', true
           ) as payload,
-          id::text as key,
+          format('%s|%s', 'retry-interaction-step', id) as key,
           null as queue_name,
           1 as max_attempts,
           now() + ((n / $2::float) * interval '1 second') as run_at,
@@ -118,51 +163,66 @@ const queueAutoSendInitials: Task = async (payload: Payload, helpers) => {
           and c.is_archived = false
           and c.is_started = true
           and c.autosend_status = 'sending'
+          and c.organization_id = $3
         order by c.id asc
       )
       select * from campaign_breakdown
     `,
-    [contactsToQueueInOneMinute, config.AUTOSEND_MESSAGES_PER_SECOND]
+    [contactsToQueueInOneMinute, autosendingMps, organizationId]
   );
 
-  const { rows: totalCountToSend } = await helpers.query<{
-    campaign_id: string;
-    total_count_to_send: string;
-  }>(
-    `
-      select cc.campaign_id, count(*) as total_count_to_send
-      from campaign_contact cc
-      join campaign c on cc.campaign_id = c.id
-      where true
-        -- campaign requirements for autosending
-        and c.is_archived = false
-        and c.is_started = true
-        and c.autosend_status = 'sending'
-        and message_status = 'needsMessage'
-        and is_opted_out = false
-      group by 1
-    `
-  );
-
-  const countToSendMap = fromPairs(
-    totalCountToSend.map(({ campaign_id, total_count_to_send }) => [
-      campaign_id,
-      total_count_to_send
-    ])
-  );
-
-  const toMarkAsDoneSending = contactsQueued
-    .filter((campaign) => {
-      const totalCountToSendForCampaign =
-        countToSendMap[campaign.campaign_id] || 0;
-      return totalCountToSendForCampaign === 0;
-    })
-    .map((campaign) => campaign.campaign_id);
+  const campaignIdsQueued = contactsQueued.map((cq) => cq.campaign_id);
 
   await helpers.query(
-    `update campaign set autosend_status = 'complete' where id = ANY($1)`,
-    [toMarkAsDoneSending]
+    `
+      with sendable_contacts as (
+        select id, campaign_id
+        from campaign_contact
+        where true
+          and archived = false
+          and message_status = 'needsMessage'
+          and is_opted_out = false
+      ),
+      campaign_summary_raw as (
+        select
+          c.id as campaign_id,
+          c.autosend_limit_max_contact_id,
+          count(cc.id) as total_count_to_send,
+          min(cc.id) as min_cc_id
+        from campaign c
+        left join sendable_contacts cc on cc.campaign_id = c.id
+        where true
+          -- organization requirements for autosending
+          and c.organization_id = $1
+          -- campaign requirements for autosending
+          and c.id = ANY ($2::integer[])
+          and c.is_archived = false
+          and c.is_started = true
+          and c.autosend_status = 'sending'
+        group by 1, 2
+      ),
+      campaign_summary as (
+        select
+          campaign_id,
+          (case
+            when total_count_to_send = 0 then 'complete'
+            when (
+              autosend_limit_max_contact_id is not null
+              and min_cc_id > autosend_limit_max_contact_id
+            ) then 'paused'
+            else null
+          end) as new_autosend_status
+        from campaign_summary_raw
+      )
+      update campaign
+      set autosend_status = new_autosend_status
+      from campaign_summary
+      where true
+        and organization_id = $1
+        and campaign_summary.campaign_id = campaign.id
+        and new_autosend_status is not null
+        and id = ANY($2::integer[])
+    `,
+    [organizationId, campaignIdsQueued]
   );
 };
-
-export default queueAutoSendInitials;

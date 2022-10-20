@@ -1,6 +1,7 @@
 import { gql } from "@apollo/client";
+import { makeStyles } from "@material-ui/core";
+import Avatar from "@material-ui/core/Avatar";
 import { green, grey } from "@material-ui/core/colors";
-import Avatar from "material-ui/Avatar";
 import { Card, CardHeader, CardText } from "material-ui/Card";
 import DropDownMenu from "material-ui/DropDownMenu";
 import MenuItem from "material-ui/MenuItem";
@@ -9,6 +10,15 @@ import React from "react";
 import type { ExternalSystem } from "../../../../../api/external-system";
 import { DateTime } from "../../../../../lib/datetime";
 import { loadData } from "../../../../hoc/with-operations";
+
+const useStyles = makeStyles({
+  hasLists: {
+    backgroundColor: green[500]
+  },
+  noLists: {
+    backgroundColor: grey[500]
+  }
+});
 
 interface Props {
   systemId: string;
@@ -21,7 +31,9 @@ interface Props {
   };
 }
 
-export const ExternalSystemsSource: React.SFC<Props> = (props) => {
+export const ExternalSystemsSource: React.FC<Props> = (props) => {
+  const styles = useStyles();
+
   const handleSelectList = (
     _event: React.SyntheticEvent<unknown>,
     _index: number,
@@ -36,6 +48,8 @@ export const ExternalSystemsSource: React.SFC<Props> = (props) => {
     externalLists: { externalSystem }
   } = props;
 
+  const listCount = externalSystem.lists.edges.length;
+
   return (
     <Card expandable={false} expanded={false}>
       <CardHeader
@@ -46,14 +60,8 @@ export const ExternalSystemsSource: React.SFC<Props> = (props) => {
             : "never"
         }`}
         avatar={
-          <Avatar
-            backgroundColor={
-              externalSystem.lists.edges.length > 0 ? green[500] : grey[500]
-            }
-          >
-            {externalSystem.lists.edges.length > 9
-              ? "9+"
-              : externalSystem.lists.edges.length}
+          <Avatar className={listCount > 0 ? styles.hasLists : styles.noLists}>
+            {listCount > 9 ? "9+" : listCount}
           </Avatar>
         }
         showExpandableButton={false}
