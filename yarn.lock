@@ -18684,9 +18684,10 @@ memoize-one@^5.0.0, memoize-one@^5.1.1:
   resolved "https://registry.yarnpkg.com/memoize-one/-/memoize-one-5.1.1.tgz#047b6e3199b508eaec03504de71229b8eb1d75c0"
   integrity sha512-HKeeBpWvqiVJD57ZUAsJNm71eHTykffzcLZVYWiVfQeI1rJtuEaS7hQiEpWfVVk18donPwJEcFKIkCmPJNOhHA==
 
-memoredis@politics-rewired/memoredis#feat/modernise-packages:
-  version "1.1.1"
-  resolved "https://codeload.github.com/politics-rewired/memoredis/tar.gz/90820c75ae67dcb9376206db70d69070546cc310"
+memoredis@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/memoredis/-/memoredis-2.0.0.tgz#e27924455bcf87cbc569fa0641a6e4a436cac4e1"
+  integrity sha512-7t+7/TWm8ARkaLYZamyOCfrkHvBmLtDDg8r3XqT8LbFWQb6r6Z1aEN/KEz2Gog4e2z/BfybQ9fZr5rmS3IK33g==
   dependencies:
     json-date-parser "^1.0.1"
     json-stable-stringify "^1.0.1"
