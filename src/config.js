@@ -186,6 +186,20 @@ const validators = {
       "If REDISURL is set, then this will prefix keys CACHE_PREFIX, which might be useful if multiple applications use the same redis server.",
     default: undefined
   }),
+  CACHING_BUCKETS: str({
+    desc:
+      "Comma seperated caching buckets to be used for memoization (other than core)",
+    default: "core"
+  }),
+  // Note: redis url likely doesnt pass envalid url validation
+  CACHING_URL: str({
+    desc: "This enables caching using simple memoization (memoredis)",
+    default: undefined
+  }),
+  CACHING_PREFIX: str({
+    desc: "The key prefix to use for memoredis memoization (memoredis)",
+    default: undefined
+  }),
   CAMPAIGN_ID: num({
     desc:
       "Campaign ID used by dev-tools/export-query.js to identify which campaign should be exported.",
@@ -479,15 +493,6 @@ const validators = {
       "The maximum size for a message that a texter can send. When you send a SMS message over 160 characters the message will be split, so you might want to set this as 160 or less if you have a high SMS-only target demographic.",
     default: 99999,
     isClient: true
-  }),
-  // Note: redis url likely doesnt pass envalid url validation
-  MEMOREDIS_URL: str({
-    desc: "This enables caching using simple memoization",
-    default: undefined
-  }),
-  MEMOREDIS_PREFIX: str({
-    desc: "The key prefix to use for memoredis memoization",
-    default: undefined
   }),
   MODE: str({
     desc: "Server mode",

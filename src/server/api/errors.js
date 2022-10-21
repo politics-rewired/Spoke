@@ -1,7 +1,6 @@
 import { AuthenticationError, ForbiddenError } from "apollo-server-express";
 
 import { UserRoleType } from "../../api/organization-membership";
-import { cacheOpts, memoizer } from "../memoredis";
 import { r } from "../models";
 
 const accessHierarchy = ["TEXTER", "SUPERVOLUNTEER", "ADMIN", "OWNER"];
@@ -14,14 +13,14 @@ export function authRequired(user) {
   }
 }
 
-const getUserRole = memoizer.memoize(async ({ userId, organizationId }) => {
+const getUserRole = async ({ userId, organizationId }) => {
   const user_organization = await r
     .reader("user_organization")
     .where({ user_id: userId, organization_id: organizationId })
     .first("role");
 
   return user_organization.role;
-}, cacheOpts.GetUserOrganization);
+};
 
 export async function accessRequired(
   user,

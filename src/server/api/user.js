@@ -3,7 +3,6 @@ import { GraphQLError } from "graphql/error";
 import groupBy from "lodash/groupBy";
 
 import { UserRoleType } from "../../api/organization-membership";
-import { cacheOpts, memoizer } from "../memoredis";
 import { r } from "../models";
 import { accessRequired } from "./errors";
 import { formatPage } from "./lib/pagination";
@@ -106,7 +105,7 @@ async function doGetUsers({
   return users;
 }
 
-const memoizedGetUsers = memoizer.memoize(doGetUsers, cacheOpts.GetUsers);
+const memoizedGetUsers = doGetUsers;
 
 export const getUsers = async (
   organizationId,
@@ -216,43 +215,38 @@ export const resolvers = {
         return [];
       }
 
-      const getOrganizationsForUserWithRole = memoizer.memoize(
-        async ({ userId, role: userRole }) => {
-          const query = r
-            .reader("organization")
-            .whereExists(function subquery() {
-              const whereClause = { user_id: userId };
-              if (userRole) {
-                whereClause.role = userRole;
-              }
-              this.select(r.reader.raw("1"))
-                .from("user_organization")
-                .whereRaw("user_organization.organization_id = organization.id")
-                .where(whereClause);
-            });
-          if (active) {
-            query.whereNull("deleted_at");
+      const getOrganizationsForUserWithRole = async ({
+        userId,
+        role: userRole
+      }) => {
+        const query = r.reader("organization").whereExists(function subquery() {
+          const whereClause = { user_id: userId };
+          if (userRole) {
+            whereClause.role = userRole;
           }
-          return query;
-        },
-        cacheOpts.UserOrganizations
-      );
+          this.select(r.reader.raw("1"))
+            .from("user_organization")
+            .whereRaw("user_organization.organization_id = organization.id")
+            .where(whereClause);
+        });
+        if (active) {
+          query.whereNull("deleted_at");
+        }
+        return query;
+      };
 
       return getOrganizationsForUserWithRole({ userId: user.id, role });
     },
     roles: async (user, { organizationId }) => {
-      const getRoleForUserInOrganization = await memoizer.memoize(
-        async (params) => {
-          return r
-            .reader("user_organization")
-            .where({
-              organization_id: parseInt(params.organizationId, 10),
-              user_id: params.userId
-            })
-            .pluck("role");
-        },
-        cacheOpts.UserOrganizationRoles
-      );
+      const getRoleForUserInOrganization = async (params) => {
+        return r
+          .reader("user_organization")
+          .where({
+            organization_id: parseInt(params.organizationId, 10),
+            user_id: params.userId
+          })
+          .pluck("role");
+      };
 
       return getRoleForUserInOrganization({
         userId: user.id,

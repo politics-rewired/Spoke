@@ -2,32 +2,20 @@
 import type { Request } from "express";
 import createMemoizer from "memoredis";
 
-import { config } from "../../config";
 import logger from "../../logger";
+import type Memoizer from "../memoredis";
 import { createLoaders, r } from "../models";
-import type { Memoizer } from "../types";
 import type { SpokeContext, SpokeRequestContext } from "./types";
 
-const createHostMemoizer = (_host: string): Memoizer => {
-  const opts = config.MEMOREDIS_URL
-    ? {
-        clientOpts: config.MEMOREDIS_URL,
-        prefix: config.MEMOREDIS_PREFIX,
-        logger
-      }
-    : { emptyMode: true, logger };
-
-  const memoizer = createMemoizer(opts);
-  return memoizer;
-};
-
-const createContext = (host: string): SpokeContext => ({
+const createContext = (_host: string): SpokeContext => ({
   db: {
     schema: "public",
     primary: r.knex,
     reader: r.reader
   },
-  memoizer: createHostMemoizer(host)
+  memoizer: createMemoizer({ emptyMode: true }).then((memoizer: Memoizer) => {
+    return memoizer;
+  })
 });
 
 const contextByHost: Record<string, SpokeContext> = {};

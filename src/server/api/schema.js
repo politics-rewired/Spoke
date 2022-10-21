@@ -36,7 +36,7 @@ import {
 } from "../lib/notices";
 import { change } from "../local-auth-helpers";
 import { sendEmail } from "../mail";
-import { cacheOpts, memoizer } from "../memoredis";
+import { cacheOpts, MemoizeHelper } from "../memoredis";
 import { cacheableData, r } from "../models";
 import { getUserById } from "../models/cacheable_queries";
 import { Notifications, sendUserNotification } from "../notifications";
@@ -432,13 +432,6 @@ const rootMutations = {
         userUpdateQuery
       ]);
 
-      memoizer.invalidate(cacheOpts.UserOrganizations.key, {
-        userId: membership.user_id
-      });
-      memoizer.invalidate(cacheOpts.UserOrganizationRoles.key, {
-        userId: membership.user_id,
-        organizationId: membership.organization_id
-      });
       return orgMembership;
     },
 
@@ -477,6 +470,11 @@ const rootMutations = {
         organizationId,
         input
       );
+
+      const memoizer = await MemoizeHelper.getMemoizer();
+      await memoizer.invalidate(cacheOpts.Organization.key, {
+        organizationId
+      });
       return updatedOrganization;
     },
 
@@ -499,17 +497,12 @@ const rootMutations = {
         return null;
       }
       if (userData) {
-        const userRes = await r.knex("user").where("id", userId).update({
+        await r.knex("user").where("id", userId).update({
           first_name: userData.firstName,
           last_name: userData.lastName,
           email: userData.email,
           cell: userData.cell,
           notification_frequency: userData.notificationFrequency
-        });
-
-        memoizer.invalidate(cacheOpts.GetUser.key, { id: userId });
-        memoizer.invalidate(cacheOpts.GetUser.key, {
-          auth0Id: userRes.auth0_id
         });
 
         userData = {
@@ -584,11 +577,6 @@ const rootMutations = {
         ]);
 
         await trx.raw(`delete from user_session where user_id = ?`, [userId]);
-      });
-
-      memoizer.invalidate(cacheOpts.GetUser.key, { id: userId });
-      memoizer.invalidate(cacheOpts.GetUser.key, {
-        auth0Id: user.auth0_id
       });
 
       const userResult = await getUserById({ id: userId });
@@ -848,10 +836,6 @@ const rootMutations = {
         throw new Error("No active messaging services found");
       }
 
-      await memoizer.invalidate(cacheOpts.CampaignsList.key, {
-        organizationId: campaign.organizationId
-      });
-
       const [origCampaignRecord] = await r
         .knex("campaign")
         .insert({
@@ -867,6 +851,11 @@ const rootMutations = {
           messaging_service_sid: messagingServices[0].messaging_service_sid
         })
         .returning("*");
+
+      const memoizer = await MemoizeHelper.getMemoizer();
+      await memoizer.invalidate(cacheOpts.CampaignsList.key, {
+        organizationId: organization.id
+      });
 
       return editCampaign(
         origCampaignRecord.id,
@@ -900,6 +889,11 @@ const rootMutations = {
         })
         .returning("*");
 
+      const memoizer = await MemoizeHelper.getMemoizer();
+      await memoizer.invalidate(cacheOpts.CampaignsList.key, {
+        organizationId
+      });
+
       cacheableData.campaign.reload(templateCampaign.id);
       return templateCampaign;
     },
@@ -915,8 +909,9 @@ const rootMutations = {
         userId: parseInt(user.id, 10)
       });
 
+      const memoizer = await MemoizeHelper.getMemoizer();
       await memoizer.invalidate(cacheOpts.CampaignsList.key, {
-        organizationId: result.organization_id
+        organizationId: campaign.organization_id
       });
 
       return result;
@@ -938,8 +933,9 @@ const rootMutations = {
         quantity
       });
 
+      const memoizer = await MemoizeHelper.getMemoizer();
       await memoizer.invalidate(cacheOpts.CampaignsList.key, {
-        organizationId: newCampaigns[0].organization_id
+        organizationId: campaign.organization_id
       });
 
       return newCampaigns;
@@ -949,15 +945,16 @@ const rootMutations = {
       const { organization_id } = await loaders.campaign.load(id);
       await accessRequired(user, organization_id, "ADMIN");
 
-      await memoizer.invalidate(cacheOpts.CampaignsList.key, {
-        organizationId: organization_id
-      });
-
       const [campaign] = await r
         .knex("campaign")
         .update({ is_archived: false })
         .where({ id })
         .returning("*");
+
+      const memoizer = await MemoizeHelper.getMemoizer();
+      await memoizer.invalidate(cacheOpts.CampaignsList.key, {
+        organizationId: organization_id
+      });
 
       return campaign;
     },
@@ -966,21 +963,21 @@ const rootMutations = {
       const { organization_id } = await loaders.campaign.load(id);
       await accessRequired(user, organization_id, "ADMIN");
 
-      await memoizer.invalidate(cacheOpts.CampaignsList.key, {
-        organizationId: organization_id
-      });
-
       const [campaign] = await r
         .knex("campaign")
         .update({ is_archived: true })
         .where({ id })
         .returning("*");
 
+      const memoizer = await MemoizeHelper.getMemoizer();
+      await memoizer.invalidate(cacheOpts.CampaignsList.key, {
+        organizationId: organization_id
+      });
+
       return campaign;
     },
 
-    setCampaignApproved: async (_root, { id, approved }, { user, loaders }) => {
-      const { organization_id } = await loaders.campaign.load(id);
+    setCampaignApproved: async (_root, { id, approved }, { user }) => {
       await superAdminRequired(user);
 
       const [campaign] = await r
@@ -989,8 +986,9 @@ const rootMutations = {
         .where({ id })
         .returning("*");
 
+      const memoizer = await MemoizeHelper.getMemoizer();
       await memoizer.invalidate(cacheOpts.CampaignsList.key, {
-        organizationId: organization_id
+        organizationId: campaign.organization_id
       });
 
       return campaign;
@@ -1012,10 +1010,6 @@ const rootMutations = {
 
       await accessRequired(user, organization_id, "ADMIN", true);
 
-      await memoizer.invalidate(cacheOpts.CampaignsList.key, {
-        organizationId: organization_id
-      });
-
       const payload = {
         is_started: true,
         ...(user.is_superadmin ? { is_approved: true } : {})
@@ -1034,6 +1028,11 @@ const rootMutations = {
         }),
         notifyLargeCampaignEvent(id, "start")
       ]);
+
+      const memoizer = await MemoizeHelper.getMemoizer();
+      await memoizer.invalidate(cacheOpts.CampaignsList.key, {
+        organizationId: organization_id
+      });
 
       return campaign;
     },
@@ -1059,14 +1058,6 @@ const rootMutations = {
 
       await accessRequired(user, origCampaign.organization_id, "ADMIN");
 
-      memoizer.invalidate(cacheOpts.CampaignsList.key, {
-        organizationId: campaign.organizationId
-      });
-
-      memoizer.invalidate(cacheOpts.CampaignOne.key, {
-        campaignId: id
-      });
-
       if (
         origCampaign.is_started &&
         Object.prototype.hasOwnProperty.call(campaign, "contacts") &&
@@ -1076,6 +1067,11 @@ const rootMutations = {
           "Not allowed to add contacts after the campaign starts"
         );
       }
+
+      const memoizer = await MemoizeHelper.getMemoizer();
+      await memoizer.invalidate(cacheOpts.CampaignsList.key, {
+        organizationId: origCampaign.organization_id
+      });
 
       return editCampaign(
         id,
@@ -1308,6 +1304,11 @@ const rootMutations = {
           orgId
         ]);
       }
+
+      const memoizer = await MemoizeHelper.getMemoizer();
+      await memoizer.invalidate(cacheOpts.Organization.key, {
+        organizationId: orgId
+      });
 
       const result = await db
         .primary("organization")
@@ -2048,6 +2049,11 @@ const rootMutations = {
                 [limit, id, limit, id]
               )
               .then(({ rows }) => rows[0]);
+
+      const memoizer = await MemoizeHelper.getMemoizer();
+      await memoizer.invalidate(cacheOpts.CampaignsList.key, {
+        organizationId
+      });
 
       return updatedCampaign;
     },
@@ -2820,14 +2826,6 @@ const rootMutations = {
         ]
       );
 
-      memoizer.invalidate(cacheOpts.OrganizationTagList.key, {
-        organizationId
-      });
-
-      memoizer.invalidate(cacheOpts.OrganizationEscalatedTagList.key, {
-        organizationId
-      });
-
       return newTag;
     },
     deleteTag: async (_root, { organizationId, tagId }, { user }) => {
@@ -2842,14 +2840,6 @@ const rootMutations = {
         })
         .del();
       if (deleteCount !== 1) throw new Error("Could not delete the tag.");
-
-      memoizer.invalidate(cacheOpts.OrganizationTagList.key, {
-        organizationId
-      });
-
-      memoizer.invalidate(cacheOpts.OrganizationEscalatedTagList.key, {
-        organizationId
-      });
 
       return true;
     },
@@ -2957,15 +2947,6 @@ const rootMutations = {
           })
         );
       });
-
-      await Promise.all([
-        memoizer.invalidate(cacheOpts.OrganizationSingleTon.key, {
-          organizationId
-        }),
-        memoizer.invalidate(cacheOpts.MyCurrentAssignmentTargets.key, {
-          organizationId
-        })
-      ]);
 
       return updatedTeams;
     },
@@ -3639,9 +3620,11 @@ const rootResolvers = {
     },
     organization: async (_root, { id }, { loaders, user }) => {
       await accessRequired(user, id, "TEXTER", /* allowSuperadmin= */ true);
+
+      const memoizer = await MemoizeHelper.getMemoizer();
       const getOrganization = memoizer.memoize(async ({ organizationId }) => {
         return loaders.organization.load(organizationId);
-      }, cacheOpts.OrganizationSingleTon);
+      }, cacheOpts.Organization);
 
       return getOrganization({ organizationId: id });
     },

@@ -1,30 +1,26 @@
-import { cacheOpts, memoizer } from "../memoredis";
 import { r } from "../models";
 
 export const resolvers = {
   Question: {
     text: async (interactionStep) => interactionStep.question,
     answerOptions: async (interactionStep) => {
-      const getAnswerOptions = memoizer.memoize(
-        async ({ interactionStepId }) => {
-          const answerOptions = await r
-            .reader("interaction_step")
-            .select("*")
-            .where({
-              parent_interaction_id: interactionStepId,
-              is_deleted: false
-            })
-            .orderBy("answer_option");
+      const getAnswerOptions = async ({ interactionStepId }) => {
+        const answerOptions = await r
+          .reader("interaction_step")
+          .select("*")
+          .where({
+            parent_interaction_id: interactionStepId,
+            is_deleted: false
+          })
+          .orderBy("answer_option");
 
-          return answerOptions.map((answerOption) => ({
-            value: answerOption.answer_option,
-            action: answerOption.answer_actions,
-            interaction_step_id: answerOption.id,
-            parent_interaction_step: answerOption.parent_interaction_id
-          }));
-        },
-        cacheOpts.InteractionStepChildren
-      );
+        return answerOptions.map((answerOption) => ({
+          value: answerOption.answer_option,
+          action: answerOption.answer_actions,
+          interaction_step_id: answerOption.id,
+          parent_interaction_step: answerOption.parent_interaction_id
+        }));
+      };
 
       return getAnswerOptions({ interactionStepId: interactionStep.id });
     },
@@ -34,15 +30,12 @@ export const resolvers = {
     value: (answer) => answer.value,
     interactionStepId: (answer) => answer.interaction_step_id,
     nextInteractionStep: async (answer) => {
-      const getInteractionStep = memoizer.memoize(
-        async ({ interactionStepId }) => {
-          return r
-            .reader("interaction_step")
-            .first("*")
-            .where({ id: interactionStepId });
-        },
-        cacheOpts.InteractionStepSingleton
-      );
+      const getInteractionStep = async ({ interactionStepId }) => {
+        return r
+          .reader("interaction_step")
+          .first("*")
+          .where({ id: interactionStepId });
+      };
 
       return getInteractionStep({
         interactionStepId: answer.interaction_step_id

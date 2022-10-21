@@ -1,17 +1,7 @@
+import type { Memoizer, MemoizerOpts } from "memoredis";
 import createMemoizer from "memoredis";
 
 import { config } from "../config";
-import logger from "../logger";
-
-const opts = config.MEMOREDIS_URL
-  ? {
-      clientOpts: config.MEMOREDIS_URL,
-      prefix: config.MEMOREDIS_PREFIX,
-      logger
-    }
-  : { emptyMode: true, logger };
-
-const memoizer = createMemoizer(opts);
 
 const ONE_SECOND = 1000;
 const THIRTY_SECONDS = ONE_SECOND * 30;
@@ -20,59 +10,120 @@ const ONE_HOUR = ONE_MINUTE * 60;
 const ONE_DAY = ONE_HOUR * 24;
 const ONE_WEEK = ONE_DAY * 7;
 
-const cacheOptsPlain: Record<string, [string, number]> = {
-  GetUser: ["get-user", ONE_HOUR],
-  GetUserOrganization: ["get-user-organization", ONE_HOUR],
-  CampaignHasUnassignedContacts: [
-    "campaign-has-unassigned-contacts",
-    THIRTY_SECONDS
-  ],
-  CampaignHasUnsentInitialMessages: [
-    "campaign-has-unsent-initial-messages",
-    THIRTY_SECONDS
-  ],
-  CampaignHasUnhandledMessages: [
-    "campaign-has-unhandled-messages",
-    THIRTY_SECONDS
-  ],
-  CampaignSentMessagesCount: ["campaign-sent-messages-count", ONE_MINUTE],
-  CampaignReceivedMessagesCount: [
-    "campaign-received-messages-count",
-    ONE_MINUTE
-  ],
-  CampaignOptOutsCount: ["campaign-opt-outs-count", ONE_MINUTE],
-  CampaignNeedsMessageOptOutsCount: [
-    "campaign-needs-message-opt-outs-count",
-    ONE_MINUTE
-  ],
-  CampaignTeams: ["campaign-teams", ONE_WEEK],
-  CampaignsList: ["campaigns-list", ONE_WEEK],
-  CampaignsListRelay: ["campaigns-list-relay", ONE_WEEK],
-  CampaignOne: ["campaign-one", ONE_WEEK],
-  CampaignInteractionSteps: ["campaign-interaction-steps", THIRTY_SECONDS],
-  CampaignCannedResponses: ["campaign-canned-responses", THIRTY_SECONDS],
-  InteractionStepChildren: ["interaction-step-children", THIRTY_SECONDS],
-  InteractionStepSingleton: ["interaction-step-singleton", THIRTY_SECONDS],
-  OrganizationTagList: ["organization-tag-list", ONE_WEEK],
-  OrganizationEscalatedTagList: ["organization-escalated-tag-list", ONE_WEEK],
-  OrganizationSingleTon: ["organization-singleton", ONE_HOUR],
-  UserOrganizations: ["user-organizations", ONE_WEEK],
-  UserOrganizationRoles: ["user-organization-roles", ONE_WEEK],
-  CampaignOrganizationId: ["campaign-organiation-id", ONE_WEEK],
-  FullfillAssignmentLock: ["fulfull-assignment-lock", ONE_MINUTE * 2],
-  AssignmentCompleteLock: ["assignment-complete-lock", THIRTY_SECONDS],
-  GetUsers: ["get-users", ONE_MINUTE * 5],
-  MyCurrentAssignmentTargets: ["my-current-assignment-targets", ONE_SECOND * 5],
-  PercentUnhandledReplies: ["percent-unhandled-replies", ONE_SECOND * 5],
-  CountMessagedContacts: ["count-messaged-contacts", ONE_MINUTE],
-  CountNeedsMessageContacts: ["count-needs-message-contacts", ONE_MINUTE]
+type CacheOpt = {
+  key: string;
+  ttl: number;
 };
 
-const cacheOpts = Object.fromEntries(
-  Object.entries(cacheOptsPlain).map(([name, [key, ttl]]) => [
-    name,
-    { key, ttl }
-  ])
-);
+export class MemoizeHelper {
+  private static _instance: MemoizeHelper;
 
-export { memoizer, cacheOpts };
+  private static _memoizer: Memoizer;
+
+  public static async getMemoizer(): Promise<Memoizer> {
+    if (!this._instance || !this._memoizer) {
+      const opts: MemoizerOpts = config.CACHING_URL
+        ? {
+            clientOpts: { url: config.CACHING_URL },
+            prefix: config.CACHING_PREFIX
+          }
+        : { emptyMode: true };
+      this._instance = new this();
+      this._memoizer = await createMemoizer(opts);
+    }
+
+    return this._memoizer;
+  }
+
+  public static hasBucket(bucket: string) {
+    const buckets = config.CACHING_BUCKETS.split(",").map((b: string) =>
+      b.trim()
+    );
+
+    return buckets.includes(bucket);
+  }
+}
+
+export const cacheOpts: Record<string, CacheOpt> = {
+  GetUser: { key: "get-user", ttl: ONE_HOUR },
+  GetUserOrganization: { key: "get-user-organization", ttl: ONE_HOUR },
+  CampaignHasUnassignedContacts: {
+    key: "campaign-has-unassigned-contacts",
+    ttl: THIRTY_SECONDS
+  },
+  CampaignHasUnsentInitialMessages: {
+    key: "campaign-has-unsent-initial-messages",
+    ttl: THIRTY_SECONDS
+  },
+  CampaignHasUnhandledMessages: {
+    key: "campaign-has-unhandled-messages",
+    ttl: THIRTY_SECONDS
+  },
+  CampaignSentMessagesCount: {
+    key: "campaign-sent-messages-count",
+    ttl: ONE_MINUTE
+  },
+  CampaignReceivedMessagesCount: {
+    key: "campaign-received-messages-count",
+    ttl: ONE_MINUTE
+  },
+  CampaignOptOutsCount: { key: "campaign-opt-outs-count", ttl: ONE_MINUTE },
+  CampaignNeedsMessageOptOutsCount: {
+    key: "campaign-needs-message-opt-outs-count",
+    ttl: ONE_MINUTE
+  },
+  CampaignTeams: { key: "campaign-teams", ttl: ONE_WEEK },
+  CampaignsList: { key: "campaigns-list", ttl: ONE_WEEK },
+  CampaignsListRelay: { key: "campaigns-list-relay", ttl: ONE_WEEK },
+  CampaignOne: { key: "campaign-one", ttl: ONE_WEEK },
+  CampaignInteractionSteps: {
+    key: "campaign-interaction-steps",
+    ttl: THIRTY_SECONDS
+  },
+  CampaignCannedResponses: {
+    key: "campaign-canned-responses",
+    ttl: THIRTY_SECONDS
+  },
+  InteractionStepChildren: {
+    key: "interaction-step-children",
+    ttl: THIRTY_SECONDS
+  },
+  InteractionStepSingleton: {
+    key: "interaction-step-singleton",
+    ttl: THIRTY_SECONDS
+  },
+  OrganizationTagList: { key: "organization-tag-list", ttl: ONE_WEEK },
+  OrganizationEscalatedTagList: {
+    key: "organization-escalated-tag-list",
+    ttl: ONE_WEEK
+  },
+  Organization: { key: "organization", ttl: ONE_WEEK },
+  OrganizationSingleTon: { key: "organization-singleton", ttl: ONE_HOUR },
+  UserOrganizations: { key: "user-organizations", ttl: ONE_WEEK },
+  UserOrganizationRoles: { key: "user-organization-roles", ttl: ONE_WEEK },
+  CampaignOrganizationId: { key: "campaign-organiation-id", ttl: ONE_WEEK },
+  FullfillAssignmentLock: {
+    key: "fulfull-assignment-lock",
+    ttl: ONE_MINUTE * 2
+  },
+  AssignmentCompleteLock: {
+    key: "assignment-complete-lock",
+    ttl: THIRTY_SECONDS
+  },
+  GetUsers: { key: "get-users", ttl: ONE_MINUTE * 5 },
+  MyCurrentAssignmentTargets: {
+    key: "my-current-assignment-targets",
+    ttl: ONE_SECOND * 5
+  },
+  PercentUnhandledReplies: {
+    key: "percent-unhandled-replies",
+    ttl: ONE_SECOND * 5
+  },
+  CountMessagedContacts: { key: "count-messaged-contacts", ttl: ONE_MINUTE },
+  CountNeedsMessageContacts: {
+    key: "count-needs-message-contacts",
+    ttl: ONE_MINUTE
+  }
+};
+
+export default MemoizeHelper;

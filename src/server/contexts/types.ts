@@ -1,6 +1,5 @@
 import type { Knex } from "knex";
-
-import type { Memoizer } from "../types";
+import type { Memoizer } from "memoredis";
 
 export interface SpokeDbContext {
   schema: string;
