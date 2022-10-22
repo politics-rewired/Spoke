@@ -721,7 +721,7 @@ export const resolvers = {
 
       const stats = await memoizedDeliverabilityStats({
         campaignId: parseInt(campaign.id, 10),
-        initialMessagesOnly: filter.initialMessagesOnly
+        initialMessagesOnly: filter?.initialMessagesOnly
       });
 
       return stats;
