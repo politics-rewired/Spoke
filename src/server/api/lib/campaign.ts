@@ -93,6 +93,12 @@ export const getDeliverabilityStats = async (
     ? "order by campaign_contact_id, message.id asc"
     : "";
 
+  const isArchived = await r
+    .reader<CampaignRecord>("campaign")
+    .where({ id: campaignId })
+    .first("is_archived")
+    .then((res) => res?.is_archived);
+
   const rows = await r.reader
     .raw(
       `
@@ -104,6 +110,7 @@ export const getDeliverabilityStats = async (
           join campaign_contact on campaign_contact.id = message.campaign_contact_id
           where campaign_contact.campaign_id = ?
             and is_from_contact = false
+            and archived = ${isArchived ?? false}
           ${orderClause}
         )
         select count(*), send_status, error_codes
