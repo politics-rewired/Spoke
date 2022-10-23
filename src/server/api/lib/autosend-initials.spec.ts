@@ -78,6 +78,32 @@ describe("autosend initials mutations", () => {
     if (pool) await pool.end();
   });
 
+  it("does not create queue campaign for organization without allocated mps", async () => {
+    const testbed = await withClient(pool, async (client) => {
+      return createTestBed(client, agent);
+    });
+
+    await queueCampaign(agent, testbed.cookies, testbed.campaign.id);
+
+    const {
+      rows: [campaign]
+    } = await pool.query<CampaignRecord>(
+      `select * from campaign where id = $1`,
+      [testbed.campaign.id]
+    );
+
+    expect(campaign.autosend_status).toBeNull();
+
+    const {
+      rowCount
+    } = await pool.query(
+      `select * from graphile_worker.jobs where task_identifier = $1`,
+      ["queue-autosend-organization-initials"]
+    );
+
+    expect(rowCount).toBe(0);
+  });
+
   it("creates queue-autosend-organization-initials job on startAutsending", async () => {
     const testbed = await withClient(pool, async (client) => {
       return createTestBed(client, agent, { mps: 30 });
