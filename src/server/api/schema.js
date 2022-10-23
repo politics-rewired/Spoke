@@ -1,4 +1,4 @@
-import { ForbiddenError } from "apollo-server-errors";
+import { ForbiddenError, UserInputError } from "apollo-server-errors";
 import camelCaseKeys from "camelcase-keys";
 import GraphQLDate from "graphql-date";
 import GraphQLJSON from "graphql-type-json";
@@ -1921,7 +1921,7 @@ const rootMutations = {
       return `Marked ${updateResult} campaign contacts for a second pass.`;
     },
 
-    startAutosending: async (_ignore, { campaignId }, { user }) => {
+    startAutosending: async (_ignore, { campaignId }, { loaders, user }) => {
       const id = parseInt(campaignId, 10);
 
       const campaign = await r
@@ -1930,6 +1930,12 @@ const rootMutations = {
         .first(["organization_id", "is_archived", "autosend_status"]);
 
       const organizationId = campaign.organization_id;
+      const organization = await loaders.organization.load(organizationId);
+      if ((organization.autosending_mps ?? 0) === 0) {
+        throw new UserInputError(
+          `Organization ${organizationId}: ${organization.name} is not configured to autosend`
+        );
+      }
 
       await accessRequired(user, organizationId, "ADMIN", true);
 
