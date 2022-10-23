@@ -33,7 +33,8 @@ describe("autosend initials mutations", () => {
         client,
         {
           agent,
-          role: UserRoleType.OWNER
+          role: UserRoleType.OWNER,
+          orgOptions: { autosending_mps: 30 }
         }
       );
       const campaign = await createCampaign(client, {
