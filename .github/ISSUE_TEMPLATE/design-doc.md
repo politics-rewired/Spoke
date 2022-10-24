@@ -1,10 +1,9 @@
 ---
 name: Design doc
 about: Describe a solution to a problem to ensure the right work gets done.
-title: ''
-labels: 'feedback: rfc :raising_hand:'
-assignees: ''
-
+title: ""
+labels: "feedback: rfc :raising_hand:"
+assignees: ""
 ---
 
 # Overview
