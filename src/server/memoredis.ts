@@ -123,7 +123,8 @@ export const cacheOpts: Record<string, CacheOpt> = {
   CountNeedsMessageContacts: {
     key: "count-needs-message-contacts",
     ttl: ONE_MINUTE
-  }
+  },
+  DeliverabilityStats: { key: "campaign-deliverability-stats", ttl: ONE_MINUTE }
 };
 
 export default MemoizeHelper;

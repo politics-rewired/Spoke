@@ -704,10 +704,26 @@ export const resolvers = {
       return formatPage(query, { after, first, primaryColumn: "compound_id" });
     },
     deliverabilityStats: async (campaign, { filter }) => {
-      const stats = await getDeliverabilityStats(
-        parseInt(campaign.id, 10),
-        filter
+      // Wrapper to manage memoizer arg format
+      const doGetDeliverabilityStats = async (opts) => {
+        const { campaignId, initialMessagesOnly } = opts;
+        const deliverabilityStats = await getDeliverabilityStats(campaignId, {
+          initialMessagesOnly
+        });
+        return deliverabilityStats;
+      };
+
+      const memoizer = await MemoizeHelper.getMemoizer();
+      const memoizedDeliverabilityStats = memoizer.memoize(
+        doGetDeliverabilityStats,
+        cacheOpts.DeliverabilityStats
       );
+
+      const stats = await memoizedDeliverabilityStats({
+        campaignId: parseInt(campaign.id, 10),
+        initialMessagesOnly: filter?.initialMessagesOnly
+      });
+
       return stats;
     },
     campaignGroups: async (campaign, { after, first }, { user }) => {
