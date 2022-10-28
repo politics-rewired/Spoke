@@ -4,6 +4,7 @@ import type {
 } from "@spoke/spoke-codegen";
 import type { RedisClient } from "redis";
 
+import MemoizeHelper, { cacheOpts } from "../../memoredis";
 import thinky from "../thinky";
 
 const { r } = thinky;
@@ -24,11 +25,18 @@ export async function userLoggedIn(
   val: string | number,
   field: "id" | "auth0_id" = "id"
 ) {
+  const memoizer = await MemoizeHelper.getMemoizer();
+  const memoizedGetUserById = memoizer.memoize(getUserById, cacheOpts.User);
+  const memoizedgetUserByAuth0Id = memoizer.memoize(
+    getUserByAuth0Id,
+    cacheOpts.User
+  );
+
   const result =
     field === "id"
-      ? await getUserById({ id: val })
+      ? await memoizedGetUserById({ id: val })
       : field === "auth0_id"
-      ? await getUserByAuth0Id({ auth0Id: val })
+      ? await memoizedgetUserByAuth0Id({ auth0Id: val })
       : null;
 
   return result?.is_suspended === true ? null : result;

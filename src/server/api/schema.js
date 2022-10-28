@@ -502,6 +502,9 @@ const rootMutations = {
           notification_frequency: userData.notificationFrequency
         });
 
+        const memoizer = await MemoizeHelper.getMemoizer();
+        memoizer.invalidate(cacheOpts.User.key, { id: userId });
+
         userData = {
           id: userId,
           first_name: userData.firstName,
@@ -576,7 +579,12 @@ const rootMutations = {
         await trx.raw(`delete from user_session where user_id = ?`, [userId]);
       });
 
-      const userResult = await getUserById({ id: userId });
+      const memoizer = await MemoizeHelper.getMemoizer();
+      memoizer.invalidate(cacheOpts.User.key, { id: userId });
+
+      const memoizedGetUserById = memoizer.memoize(getUserById, cacheOpts.User);
+
+      const userResult = await memoizedGetUserById({ id: userId });
       return userResult;
     },
 
@@ -587,7 +595,12 @@ const rootMutations = {
         userId
       ]);
 
-      const userResult = await getUserById({ id: userId });
+      const memoizer = await MemoizeHelper.getMemoizer();
+      memoizer.invalidate(cacheOpts.User.key, { id: userId });
+
+      const memoizedGetUserById = memoizer.memoize(getUserById, cacheOpts.User);
+
+      const userResult = await memoizedGetUserById({ id: userId });
       return userResult;
     },
 
@@ -3451,10 +3464,13 @@ const rootMutations = {
     ) => {
       await superAdminRequired(user);
 
-      await r
+      const [updatedUser] = await r
         .knex("user")
         .where({ email: userEmail })
-        .update({ is_superadmin: superAdminStatus });
+        .update({ is_superadmin: superAdminStatus }, ["id"]);
+
+      const memoizer = await MemoizeHelper.getMemoizer();
+      memoizer.invalidate(cacheOpts.User.key, { id: updatedUser.id });
 
       return true;
     },
