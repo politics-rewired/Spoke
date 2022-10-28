@@ -110,10 +110,9 @@ const doGetCampaigns = async ({ organizationId, cursor, campaignsFilter }) => {
 
 export async function getCampaigns(organizationId, cursor, campaignsFilter) {
   const memoizer = await MemoizeHelper.getMemoizer();
-  const memoizedCampaigns = memoizer.memoize(
-    doGetCampaigns,
-    cacheOpts.CampaignsList
-  );
+  const memoizedCampaigns = MemoizeHelper.hasBucketConfigured(Buckets.Advanced)
+    ? memoizer.memoize(doGetCampaigns, cacheOpts.CampaignsList)
+    : doGetCampaigns;
   return memoizedCampaigns({ organizationId, cursor, campaignsFilter });
 }
 

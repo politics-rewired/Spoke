@@ -849,11 +849,6 @@ const rootMutations = {
         })
         .returning("*");
 
-      const memoizer = await MemoizeHelper.getMemoizer();
-      await memoizer.invalidate(cacheOpts.CampaignsList.key, {
-        organizationId: organization.id
-      });
-
       return editCampaign(
         origCampaignRecord.id,
         campaign,
@@ -1064,11 +1059,6 @@ const rootMutations = {
           "Not allowed to add contacts after the campaign starts"
         );
       }
-
-      const memoizer = await MemoizeHelper.getMemoizer();
-      await memoizer.invalidate(cacheOpts.CampaignsList.key, {
-        organizationId: origCampaign.organization_id
-      });
 
       return editCampaign(
         id,

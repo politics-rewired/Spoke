@@ -3,7 +3,7 @@ import isEmpty from "lodash/isEmpty";
 import isEqual from "lodash/isEqual";
 import isNil from "lodash/isNil";
 import type { QueryResult } from "pg";
-import MemoizeHelper, { cacheOpts } from "src/server/memoredis";
+import MemoizeHelper, { Buckets, cacheOpts } from "src/server/memoredis";
 
 import type {
   Campaign,
@@ -79,10 +79,9 @@ export const getCampaigns = async ({
   filter
 }: GetCampaignsOptions) => {
   const memoizer = await MemoizeHelper.getMemoizer();
-  const memoizedCampaigns = memoizer.memoize(
-    doGetCampaigns,
-    cacheOpts.CampaignsList
-  );
+  const memoizedCampaigns = MemoizeHelper.hasBucketConfigured(Buckets.Advanced)
+    ? memoizer.memoize(doGetCampaigns, cacheOpts.CampaignsList)
+    : doGetCampaigns;
 
   return memoizedCampaigns({ after, first, ...filter });
 };
@@ -733,6 +732,12 @@ export const editCampaign = async (
     .where({ id })
     .returning("*");
   cacheableData.campaign.reload(id);
+
+  const memoizer = await MemoizeHelper.getMemoizer();
+  await memoizer.invalidate(cacheOpts.CampaignsList.key, {
+    organizationId: newCampaign.organization_id
+  });
+
   return newCampaign || loaders.campaign.load(id);
 };
 
