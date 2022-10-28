@@ -53,7 +53,7 @@ export class MemoizeHelper {
 
 export const cacheOpts: Record<string, CacheOpt> = {
   User: { key: "user", ttl: ONE_HOUR },
-  GetUserOrganization: { key: "get-user-organization", ttl: ONE_HOUR },
+  UserOrganization: { key: "user-organization", ttl: ONE_HOUR },
   CampaignHasUnassignedContacts: {
     key: "campaign-has-unassigned-contacts",
     ttl: THIRTY_SECONDS

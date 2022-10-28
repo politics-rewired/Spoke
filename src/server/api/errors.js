@@ -1,6 +1,7 @@
 import { AuthenticationError, ForbiddenError } from "apollo-server-express";
 
 import { UserRoleType } from "../../api/organization-membership";
+import MemoizeHelper, { cacheOpts } from "../memoredis";
 import { r } from "../models";
 
 const accessHierarchy = ["TEXTER", "SUPERVOLUNTEER", "ADMIN", "OWNER"];
@@ -36,8 +37,14 @@ export async function accessRequired(
   if (allowSuperadmin && user.is_superadmin) {
     return;
   }
+
+  const memoizer = await MemoizeHelper.getMemoizer();
+  const memoizedGetUserRole = memoizer.memoize(
+    getUserRole,
+    cacheOpts.UserOrganization
+  );
   // require a permission at-or-higher than the permission requested
-  const userRole = await getUserRole({
+  const userRole = await memoizedGetUserRole({
     userId: user.id,
     organizationId: orgId
   });
@@ -104,7 +111,14 @@ export async function assignmentRequiredOrHasOrgRoleForCampaign(
       .where({ id: campaignId })
       .select("organization_id");
 
-    const userRole = await getUserRole({
+    const memoizer = await MemoizeHelper.getMemoizer();
+    const memoizedGetUserRole = memoizer.memoize(
+      getUserRole,
+      cacheOpts.UserOrganization
+    );
+
+    // require a permission at-or-higher than the permission requested
+    const userRole = await memoizedGetUserRole({
       userId: user.id,
       organizationId: campaign.organization_id
     });

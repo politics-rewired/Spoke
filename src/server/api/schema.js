@@ -419,18 +419,26 @@ const rootMutations = {
       if (level) updateQuery.update({ request_status: level.toLowerCase() });
       if (role) {
         // update both tables if role change
-        userUpdateQuery.update({
-          is_superadmin: role === UserRoleType.SUPERADMIN
-        });
+        userUpdateQuery.update(
+          {
+            is_superadmin: role === UserRoleType.SUPERADMIN
+          },
+          ["id", "auth0_id"]
+        );
         updateQuery.update({
           role: role === UserRoleType.SUPERADMIN ? UserRoleType.OWNER : role
         });
       }
 
-      const [[orgMembership], _result] = await Promise.all([
+      const [[orgMembership], [updatedUser]] = await Promise.all([
         updateQuery,
         userUpdateQuery
       ]);
+
+      const memoizer = await MemoizeHelper.getMemoizer();
+      memoizer.invalidate(cacheOpts.UserOrganization.key, {
+        userId: updatedUser.id
+      });
 
       return orgMembership;
     },
@@ -455,6 +463,11 @@ const rootMutations = {
         `,
         [orgId]
       );
+
+      const memoizer = await MemoizeHelper.getMemoizer();
+      memoizer.invalidate(cacheOpts.UserOrganization.key, {
+        organizationId
+      });
       return rowCount;
     },
 
