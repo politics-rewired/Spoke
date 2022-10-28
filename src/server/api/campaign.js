@@ -5,7 +5,7 @@ import { UserRoleType } from "../../api/organization-membership";
 import { emptyRelayPage } from "../../api/pagination";
 import { config } from "../../config";
 import { parseIanaZone } from "../../lib/datetime";
-import MemoizeHelper, { cacheOpts } from "../memoredis";
+import MemoizeHelper, { Buckets, cacheOpts } from "../memoredis";
 import { cacheableData, r } from "../models";
 import { currentEditors } from "../models/cacheable_queries";
 import { accessRequired } from "./errors";
@@ -156,7 +156,17 @@ export const resolvers = {
         );
       };
 
-      return getSentMessagesCount({ campaignId: campaign.id });
+      const memoizer = await MemoizeHelper.getMemoizer();
+      const memoizedSentMessagesCount = MemoizeHelper.hasBucketConfigured(
+        Buckets.Aggregates
+      )
+        ? memoizer.memoize(
+            getSentMessagesCount,
+            cacheOpts.CampaignSentMessagesCount
+          )
+        : getSentMessagesCount;
+
+      return memoizedSentMessagesCount({ campaignId: campaign.id });
     },
     receivedMessagesCount: async (campaign) => {
       const getReceivedMessagesCount = async ({ campaignId }) => {
@@ -175,7 +185,18 @@ export const resolvers = {
             .count()
         );
       };
-      return getReceivedMessagesCount({ campaignId: campaign.id });
+
+      const memoizer = await MemoizeHelper.getMemoizer();
+      const memoizedReceivedMessagesCount = MemoizeHelper.hasBucketConfigured(
+        Buckets.Aggregates
+      )
+        ? memoizer.memoize(
+            getReceivedMessagesCount,
+            cacheOpts.CampaignReceivedMessagesCount
+          )
+        : getReceivedMessagesCount;
+
+      return memoizedReceivedMessagesCount({ campaignId: campaign.id });
     },
     optOutsCount: async (campaign) => {
       const getOptOutsCount = async ({ campaignId, archived }) => {
@@ -190,7 +211,14 @@ export const resolvers = {
         );
       };
 
-      return getOptOutsCount({
+      const memoizer = await MemoizeHelper.getMemoizer();
+      const memoizedOptOutsCount = MemoizeHelper.hasBucketConfigured(
+        Buckets.Aggregates
+      )
+        ? memoizer.memoize(getOptOutsCount, cacheOpts.CampaignOptOutsCount)
+        : getOptOutsCount;
+
+      return memoizedOptOutsCount({
         campaignId: campaign.id,
         archived: campaign.is_archived
       });
@@ -210,7 +238,17 @@ export const resolvers = {
         );
       };
 
-      return getNeedsMessageOptOutsCount({
+      const memoizer = await MemoizeHelper.getMemoizer();
+      const memoizedNeedsMessageOptOutsCount = MemoizeHelper.hasBucketConfigured(
+        Buckets.Aggregates
+      )
+        ? memoizer.memoize(
+            getNeedsMessageOptOutsCount,
+            cacheOpts.CampaignNeedsMessageOptOutsCount
+          )
+        : getNeedsMessageOptOutsCount;
+
+      return memoizedNeedsMessageOptOutsCount({
         campaignId: campaign.id,
         archived: campaign.is_archived
       });
@@ -233,7 +271,17 @@ export const resolvers = {
         return result;
       };
 
-      return getCountMessagedContacts({
+      const memoizer = await MemoizeHelper.getMemoizer();
+      const memoizedCountMessagedContacts = MemoizeHelper.hasBucketConfigured(
+        Buckets.Aggregates
+      )
+        ? memoizer.memoize(
+            getCountMessagedContacts,
+            cacheOpts.CampaignCountMessagedContacts
+          )
+        : getCountMessagedContacts;
+
+      return memoizedCountMessagedContacts({
         campaignId: campaign.id,
         archived: campaign.is_archived
       });
@@ -256,7 +304,17 @@ export const resolvers = {
         return result;
       };
 
-      return getCountNeedsMessageContacts({
+      const memoizer = await MemoizeHelper.getMemoizer();
+      const memoizedCountNeedsMessageContacts = MemoizeHelper.hasBucketConfigured(
+        Buckets.Aggregates
+      )
+        ? memoizer.memoize(
+            getCountNeedsMessageContacts,
+            cacheOpts.CampaignCountNeedsMessageContacts
+          )
+        : getCountNeedsMessageContacts;
+
+      return memoizedCountNeedsMessageContacts({
         campaignId: campaign.id,
         archived: campaign.is_archived
       });
@@ -289,7 +347,17 @@ export const resolvers = {
         return result;
       };
 
-      return getPercentUnhandledReplies({
+      const memoizer = await MemoizeHelper.getMemoizer();
+      const memoizedPercentUnhandledReplies = MemoizeHelper.hasBucketConfigured(
+        Buckets.Aggregates
+      )
+        ? memoizer.memoize(
+            getPercentUnhandledReplies,
+            cacheOpts.CampaignPercentUnhandledReplies
+          )
+        : getPercentUnhandledReplies;
+
+      return memoizedPercentUnhandledReplies({
         campaignId: campaign.id,
         archived: campaign.is_archived
       });

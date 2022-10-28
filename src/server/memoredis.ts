@@ -15,8 +15,16 @@ type CacheOpt = {
   ttl: number;
 };
 
+export enum Buckets {
+  Aggregates = "aggregates",
+  Advanced = "advanced",
+  Conversation = "conversation"
+}
+
 export class MemoizeHelper {
   private static _instance: MemoizeHelper;
+
+  private static _buckets: Partial<Buckets>;
 
   private static _memoizer: Memoizer;
 
@@ -30,17 +38,16 @@ export class MemoizeHelper {
         : { emptyMode: true };
       this._instance = new this();
       this._memoizer = await createMemoizer(opts);
+      this._buckets = config.CACHING_BUCKETS.split(",").map((b: string) =>
+        b.trim()
+      );
     }
 
     return this._memoizer;
   }
 
-  public static hasBucket(bucket: string) {
-    const buckets = config.CACHING_BUCKETS.split(",").map((b: string) =>
-      b.trim()
-    );
-
-    return buckets.includes(bucket);
+  public static hasBucketConfigured(bucket: Buckets) {
+    return this._buckets.includes(bucket);
   }
 }
 
@@ -70,6 +77,18 @@ export const cacheOpts: Record<string, CacheOpt> = {
   CampaignOptOutsCount: { key: "campaign-opt-outs-count", ttl: ONE_MINUTE },
   CampaignNeedsMessageOptOutsCount: {
     key: "campaign-needs-message-opt-outs-count",
+    ttl: ONE_MINUTE
+  },
+  CampaignCountMessagedContacts: {
+    key: "count-messaged-contacts",
+    ttl: ONE_MINUTE
+  },
+  CampaignCountNeedsMessageContacts: {
+    key: "count-needs-message-contacts",
+    ttl: ONE_MINUTE
+  },
+  CampaignPercentUnhandledReplies: {
+    key: "percent-unhandled-replies",
     ttl: ONE_MINUTE
   },
   CampaignTeams: { key: "campaign-teams", ttl: ONE_WEEK },
@@ -114,15 +133,6 @@ export const cacheOpts: Record<string, CacheOpt> = {
   MyCurrentAssignmentTargets: {
     key: "my-current-assignment-targets",
     ttl: ONE_SECOND * 5
-  },
-  PercentUnhandledReplies: {
-    key: "percent-unhandled-replies",
-    ttl: ONE_SECOND * 5
-  },
-  CountMessagedContacts: { key: "count-messaged-contacts", ttl: ONE_MINUTE },
-  CountNeedsMessageContacts: {
-    key: "count-needs-message-contacts",
-    ttl: ONE_MINUTE
   },
   DeliverabilityStats: { key: "campaign-deliverability-stats", ttl: ONE_MINUTE }
 };

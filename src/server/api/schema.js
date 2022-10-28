@@ -36,7 +36,7 @@ import {
 } from "../lib/notices";
 import { change } from "../local-auth-helpers";
 import { sendEmail } from "../mail";
-import { cacheOpts, MemoizeHelper } from "../memoredis";
+import MemoizeHelper, { cacheOpts } from "../memoredis";
 import { cacheableData, r } from "../models";
 import { getUserById } from "../models/cacheable_queries";
 import { Notifications, sendUserNotification } from "../notifications";
@@ -471,10 +471,7 @@ const rootMutations = {
         input
       );
 
-      const memoizer = await MemoizeHelper.getMemoizer();
-      await memoizer.invalidate(cacheOpts.Organization.key, {
-        organizationId
-      });
+      await cacheableData.organization.clear(organizationId);
       return updatedOrganization;
     },
 
@@ -735,7 +732,7 @@ const rootMutations = {
           texting_hours_end: textingHoursEnd
         })
         .where({ id: organizationId });
-      cacheableData.organization.clear(organizationId);
+      await cacheableData.organization.clear(organizationId);
 
       return r.knex("organization").where({ id: organizationId }).first();
     },
@@ -1148,6 +1145,11 @@ const rootMutations = {
         return scriptUpdates;
       });
 
+      const memoizer = await MemoizeHelper.getMemoizer();
+      await memoizer.invalidate(cacheOpts.CampaignsList.key, {
+        organizationId
+      });
+
       return scriptUpdatesResult;
     },
 
@@ -1194,6 +1196,11 @@ const rootMutations = {
         user_id: cannedResponse.userId,
         title: cannedResponse.title,
         text: cannedResponse.text
+      });
+
+      const memoizer = await MemoizeHelper.getMemoizer();
+      await memoizer.invalidate(cacheOpts.CampaignsList.key, {
+        organizationId: organization_id
       });
 
       cacheableData.cannedResponse.clearQuery({
@@ -1305,10 +1312,7 @@ const rootMutations = {
         ]);
       }
 
-      const memoizer = await MemoizeHelper.getMemoizer();
-      await memoizer.invalidate(cacheOpts.Organization.key, {
-        organizationId: orgId
-      });
+      await cacheableData.organization.clear(orgId);
 
       const result = await db
         .primary("organization")
