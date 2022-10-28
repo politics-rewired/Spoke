@@ -494,16 +494,22 @@ const rootMutations = {
         return null;
       }
       if (userData) {
-        await r.knex("user").where("id", userId).update({
-          first_name: userData.firstName,
-          last_name: userData.lastName,
-          email: userData.email,
-          cell: userData.cell,
-          notification_frequency: userData.notificationFrequency
-        });
+        const [updatedUser] = await r.knex("user").where("id", userId).update(
+          {
+            first_name: userData.firstName,
+            last_name: userData.lastName,
+            email: userData.email,
+            cell: userData.cell,
+            notification_frequency: userData.notificationFrequency
+          },
+          ["id", "auth0_id"]
+        );
 
         const memoizer = await MemoizeHelper.getMemoizer();
-        memoizer.invalidate(cacheOpts.User.key, { id: userId });
+        memoizer.invalidate(cacheOpts.User.key, { id: updatedUser.id });
+        memoizer.invalidate(cacheOpts.User.key, {
+          auth0Id: updatedUser.auth0_id
+        });
 
         userData = {
           id: userId,
@@ -570,6 +576,11 @@ const rootMutations = {
     setUserSuspended: async (_root, { userId, isSuspended }, { user, db }) => {
       await superAdminRequired(user);
 
+      const memoizer = await MemoizeHelper.getMemoizer();
+      const memoizedGetUserById = memoizer.memoize(getUserById, cacheOpts.User);
+
+      const fetchUser = await memoizedGetUserById({ id: userId });
+
       await db.primary.transaction(async (trx) => {
         await trx.raw(`update public.user set is_suspended = ? where id = ?`, [
           isSuspended,
@@ -579,10 +590,8 @@ const rootMutations = {
         await trx.raw(`delete from user_session where user_id = ?`, [userId]);
       });
 
-      const memoizer = await MemoizeHelper.getMemoizer();
       memoizer.invalidate(cacheOpts.User.key, { id: userId });
-
-      const memoizedGetUserById = memoizer.memoize(getUserById, cacheOpts.User);
+      memoizer.invalidate(cacheOpts.User.key, { auth0Id: fetchUser.auth0_id });
 
       const userResult = await memoizedGetUserById({ id: userId });
       return userResult;
@@ -591,14 +600,17 @@ const rootMutations = {
     clearUserSessions: async (_root, { userId }, { user, db }) => {
       await superAdminRequired(user);
 
+      const memoizer = await MemoizeHelper.getMemoizer();
+      const memoizedGetUserById = memoizer.memoize(getUserById, cacheOpts.User);
+
+      const fetchUser = await memoizedGetUserById({ id: userId });
+
       await db.primary.raw(`delete from user_session where user_id = ?`, [
         userId
       ]);
 
-      const memoizer = await MemoizeHelper.getMemoizer();
       memoizer.invalidate(cacheOpts.User.key, { id: userId });
-
-      const memoizedGetUserById = memoizer.memoize(getUserById, cacheOpts.User);
+      memoizer.invalidate(cacheOpts.User.key, { auth0Id: fetchUser.auth0_id });
 
       const userResult = await memoizedGetUserById({ id: userId });
       return userResult;
@@ -3467,10 +3479,13 @@ const rootMutations = {
       const [updatedUser] = await r
         .knex("user")
         .where({ email: userEmail })
-        .update({ is_superadmin: superAdminStatus }, ["id"]);
+        .update({ is_superadmin: superAdminStatus }, ["id", "auth0_id"]);
 
       const memoizer = await MemoizeHelper.getMemoizer();
       memoizer.invalidate(cacheOpts.User.key, { id: updatedUser.id });
+      memoizer.invalidate(cacheOpts.User.key, {
+        auth0Id: updatedUser.auth0_id
+      });
 
       return true;
     },
