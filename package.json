@@ -100,7 +100,7 @@
     "camelcase-keys": "^4.1.0",
     "chart.js": "^2.9.4",
     "clsx": "^1.2.1",
-    "connect-datadog-graphql": "^0.0.11",
+    "connect-datadog-graphql": "^0.0.13",
     "connect-pg-simple": "^7.0.0",
     "cors": "^2.8.5",
     "cryptr": "^6.0.3",
