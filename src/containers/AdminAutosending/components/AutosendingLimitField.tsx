@@ -30,23 +30,25 @@ export const AutosendingLimitField: React.FC<AutosendingLimitFieldProps> = ({
     { data: mutationData, loading: mutationLoading, error: mutationError }
   ] = useUpdateCampaignAutosendingLimitMutation();
 
-  const debouncedUpdate = useDebouncedCallback((limit: number | null) => {
-    updateAutosendingLimit({ variables: { campaignId, limit } });
-  }, 300);
-
   const countMessagedContacts = useMemo(
     () => data?.campaign?.stats?.countMessagedContacts,
     [data]
   );
 
+  const debouncedUpdate = useDebouncedCallback((limitStr: string) => {
+    const limitInt = parseInt(limitStr, 10);
+    const limit = Number.isNaN(limitInt)
+      ? null
+      : Math.max(limitInt, countMessagedContacts ?? 0);
+    setInputValue(isNil(limit) ? "" : `${limit}`);
+    updateAutosendingLimit({ variables: { campaignId, limit } });
+  }, 500);
+
   const handleOnChange = useCallback(
     (event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
-      const limitInt = parseInt(event.target.value, 10);
-      const limit = Number.isNaN(limitInt)
-        ? null
-        : Math.max(limitInt, countMessagedContacts ?? 0);
-      setInputValue(isNil(limit) ? "" : `${limit}`);
-      debouncedUpdate(limit);
+      const limitStr = event.target.value;
+      setInputValue(limitStr);
+      debouncedUpdate(limitStr);
     },
     [debouncedUpdate, countMessagedContacts]
   );
