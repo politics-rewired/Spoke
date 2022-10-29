@@ -1394,6 +1394,49 @@ CREATE FUNCTION public.update_van_sync_job_request_status() RETURNS void
 ALTER FUNCTION public.update_van_sync_job_request_status() OWNER TO postgres;
 
 --
+-- Name: action_external_system_sync; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.action_external_system_sync (
+    id integer NOT NULL,
+    action_id integer NOT NULL,
+    action_type text NOT NULL,
+    sync_status text DEFAULT 'CREATED'::text NOT NULL,
+    synced_at timestamp with time zone,
+    sync_error text,
+    extra_data json,
+    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT action_external_system_sync_action_type_check CHECK ((action_type = ANY (ARRAY['question_response'::text, 'opt_out'::text]))),
+    CONSTRAINT action_external_system_sync_sync_status_check CHECK ((sync_status = ANY (ARRAY['CREATED'::text, 'SYNC_QUEUED'::text, 'SYNCED'::text, 'SYNC_FAILED'::text, 'SKIPPED'::text])))
+);
+
+
+ALTER TABLE public.action_external_system_sync OWNER TO postgres;
+
+--
+-- Name: action_external_system_sync_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.action_external_system_sync_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.action_external_system_sync_id_seq OWNER TO postgres;
+
+--
+-- Name: action_external_system_sync_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.action_external_system_sync_id_seq OWNED BY public.action_external_system_sync.id;
+
+
+--
 -- Name: all_external_sync_question_response_configuration; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -3410,6 +3453,13 @@ CREATE TABLE public.zip_code (
 ALTER TABLE public.zip_code OWNER TO postgres;
 
 --
+-- Name: action_external_system_sync id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.action_external_system_sync ALTER COLUMN id SET DEFAULT nextval('public.action_external_system_sync_id_seq'::regclass);
+
+
+--
 -- Name: all_campaign id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -3645,6 +3695,14 @@ ALTER TABLE ONLY public.user_organization ALTER COLUMN id SET DEFAULT nextval('p
 --
 
 ALTER TABLE ONLY public.user_team ALTER COLUMN id SET DEFAULT nextval('public.user_team_id_seq'::regclass);
+
+
+--
+-- Name: action_external_system_sync action_external_system_sync_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.action_external_system_sync
+    ADD CONSTRAINT action_external_system_sync_pkey PRIMARY KEY (id);
 
 
 --
