@@ -282,11 +282,13 @@ class CampaignContactsForm extends React.Component<
             onChangeValidSql={this.handleOnChangeValidSql}
           />
         )}
-        <SelectExcludeCampaigns
-          allOtherCampaigns={allOtherCampaigns}
-          selectedCampaignIds={selectedCampaignIds}
-          onChangeExcludedCamapignIds={this.handleOnChangeExcludedCamapignIds}
-        />
+        {source === ContactSourceType.CSV && (
+          <SelectExcludeCampaigns
+            allOtherCampaigns={allOtherCampaigns}
+            selectedCampaignIds={selectedCampaignIds}
+            onChangeExcludedCamapignIds={this.handleOnChangeExcludedCamapignIds}
+          />
+        )}
         <UploadResults
           contactsCount={contactsCount}
           customFields={customFields}
