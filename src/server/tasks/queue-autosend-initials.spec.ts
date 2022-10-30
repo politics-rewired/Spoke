@@ -255,12 +255,10 @@ describe("queue-autosend-organization-initials", () => {
       await client.query(
         `
           update campaign
-          set
-            autosend_limit = $1,
-            autosend_limit_max_contact_id = $2
-          where id = $3
+          set autosend_limit = $1
+          where id = $2
         `,
-        [limit, unmessagedContactIds[limit - 1], campaign.id]
+        [limit, campaign.id]
       );
 
       await runQueueAutosend({ client, pool, organizationId: organization.id });
@@ -285,7 +283,7 @@ describe("queue-autosend-organization-initials", () => {
     await withClient(pool, async (client) => {
       const messagedCount = 25;
 
-      const { campaign, messagedContacts } = await setUpAutosending(client, {
+      const { campaign } = await setUpAutosending(client, {
         organizationId: organization.id,
         autosendUserId: texter.id,
         autosendStatus: AutosendStatus.Sending,
@@ -293,19 +291,13 @@ describe("queue-autosend-organization-initials", () => {
         unmessagedCount: 0
       });
 
-      const maxMessagedContactId = Math.max(
-        ...messagedContacts.map((cc) => cc.id)
-      );
-
       await client.query(
         `
           update campaign
-          set
-            autosend_limit = $1,
-            autosend_limit_max_contact_id = $2
-          where id = $3
+          set autosend_limit = $1
+          where id = $2
         `,
-        [messagedCount, maxMessagedContactId, campaign.id]
+        [messagedCount, campaign.id]
       );
 
       await runQueueAutosend({ client, pool, organizationId: organization.id });
