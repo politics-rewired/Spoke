@@ -1,6 +1,5 @@
 import { gql } from "@apollo/client";
-
-import { FullListRefreshFragment } from "../../api/external-sync-config";
+import { FullListRefreshFragmentDoc } from "@spoke/spoke-codegen";
 
 export const GET_SYNC_CONFIGS = gql`
   query getCampaignSyncConfigs($campaignId: String!) {
@@ -15,7 +14,7 @@ export const GET_SYNC_CONFIGS = gql`
       }
     }
   }
-  ${FullListRefreshFragment}
+  ${FullListRefreshFragmentDoc}
 `;
 
 export const GET_SYNC_TARGETS = gql`

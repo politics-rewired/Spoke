@@ -1,13 +1,5 @@
-export interface ExternalResultCode {
-  id: string;
-  systemId: string;
-  externalId: string;
-  name: string;
-  mediumName: string;
-  shortName: string;
-  createdAt: string;
-  updatedAt: string;
-}
+/* eslint-disable import/prefer-default-export */
+import type { ExternalResultCode } from "@spoke/spoke-codegen";
 
 export const resultCodeWarning = (
   resultCode: ExternalResultCode
@@ -19,26 +11,3 @@ export const resultCodeWarning = (
       return undefined;
   }
 };
-
-export const schema = `
-  type ExternalResultCode {
-    id: String!
-    systemId: String!
-    externalId: String!
-    name: String!
-    mediumName: String!
-    shortName: String!
-    createdAt: Date!
-    updatedAt: Date!
-  }
-
-  type ExternalResultCodeEdge {
-    cursor: Cursor!
-    node: ExternalResultCode!
-  }
-
-  type ExternalResultCodePage {
-    edges: [ExternalResultCodeEdge!]!
-    pageInfo: RelayPageInfo!
-  }
-`;

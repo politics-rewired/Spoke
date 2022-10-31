@@ -1,18 +1,3 @@
-export interface CannedResponseInput {
-  id: string;
-  title: string;
-  text: string;
-  campaignId: string;
-  userId: string;
-}
-
-export interface CannedResponse {
-  id: string;
-  title: string;
-  text: string;
-  isUserCreated: boolean;
-}
-
 export const schema = `
   input CannedResponseInput {
     id: String
@@ -29,3 +14,4 @@ export const schema = `
     isUserCreated: Boolean
   }
 `;
+export default schema;

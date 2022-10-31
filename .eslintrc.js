@@ -131,6 +131,11 @@ module.exports = {
         ],
         patterns: [
           {
+            group: ["**/gql-schema/*"],
+            message: "Please use @spoke/spoke-codegen instead",
+            allowTypeImports: false
+          },
+          {
             group: ["**/spoke-codegen/src"],
             message: "Please use @spoke/spoke-codegen instead."
           },

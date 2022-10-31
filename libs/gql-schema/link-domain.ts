@@ -1,21 +1,3 @@
-export interface LinkDomain {
-  id: string;
-  domain: string;
-  maxUsageCount: number;
-  currentUsageCount: number;
-  isManuallyDisabled: boolean;
-  isHealthy: boolean;
-  cycledOutAt: string;
-  createdAt: string;
-}
-
-export interface UnhealthyLinkDomain {
-  id: string;
-  domain: string;
-  createdAt: string;
-  healthyAgainAt: string;
-}
-
 export const schema = `
   type LinkDomain {
     id: ID!
@@ -35,3 +17,4 @@ export const schema = `
     healthyAgainAt: Date
   }
 `;
+export default schema;

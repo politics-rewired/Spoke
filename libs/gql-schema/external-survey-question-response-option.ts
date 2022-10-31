@@ -1,14 +1,3 @@
-export interface ExternalSurveyQuestionResponseOption {
-  id: string;
-  externalSurveyQuestionId: string;
-  externalId: string;
-  name: string;
-  mediumName: string;
-  shortName: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
 export const schema = `
   type ExternalSurveyQuestionResponseOption {
     id: String!
@@ -31,3 +20,4 @@ export const schema = `
     pageInfo: RelayPageInfo!
   }
 `;
+export default schema;

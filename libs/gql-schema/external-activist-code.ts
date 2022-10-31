@@ -1,20 +1,3 @@
-import type { ExternalDataCollectionStatus } from "./types";
-
-export interface ExternalActivistCode {
-  id: string;
-  systemId: string;
-  externalId: string;
-  type: string;
-  name: string;
-  mediumName: string;
-  shortName: string;
-  description: string | null;
-  scriptQuestion: string | null;
-  status: ExternalDataCollectionStatus;
-  createdAt: string;
-  updatedAt: string;
-}
-
 export const schema = `
   type ExternalActivistCode {
     id: String!
@@ -41,3 +24,4 @@ export const schema = `
     pageInfo: RelayPageInfo!
   }
 `;
+export default schema;

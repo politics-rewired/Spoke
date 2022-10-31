@@ -7,12 +7,12 @@ import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
+import type { Campaign, JobRequest } from "@spoke/spoke-codegen";
 import type { History } from "history";
 import React from "react";
 import { withRouter } from "react-router-dom";
 import { compose } from "recompose";
 
-import type { Campaign, JobRequest } from "../../api/campaign";
 import { ExternalSyncReadinessState } from "../../api/campaign";
 import SyncConfigurationModal from "../../components/SyncConfigurationModal";
 import type { MutationMap, QueryMap } from "../../network/types";
