@@ -1557,7 +1557,7 @@ CREATE TABLE public.campaign_contact (
     archived boolean DEFAULT false,
     CONSTRAINT campaign_contact_message_status_check CHECK ((message_status = ANY (ARRAY['needsMessage'::text, 'needsResponse'::text, 'convo'::text, 'messaged'::text, 'closed'::text, 'UPDATING'::text])))
 )
-WITH (autovacuum_vacuum_scale_factor='0', autovacuum_vacuum_threshold='20000', fillfactor='50');
+WITH (autovacuum_vacuum_scale_factor='0', autovacuum_vacuum_threshold='20000', fillfactor='85');
 
 
 ALTER TABLE public.campaign_contact OWNER TO postgres;
@@ -2780,7 +2780,7 @@ CREATE TABLE public.message (
     campaign_variable_ids integer[] DEFAULT '{}'::integer[] NOT NULL,
     CONSTRAINT message_send_status_check CHECK ((send_status = ANY (ARRAY['QUEUED'::text, 'SENDING'::text, 'SENT'::text, 'DELIVERED'::text, 'ERROR'::text, 'PAUSED'::text, 'NOT_ATTEMPTED'::text])))
 )
-WITH (autovacuum_vacuum_scale_factor='0', autovacuum_vacuum_threshold='20000', fillfactor='50');
+WITH (autovacuum_vacuum_scale_factor='0', autovacuum_vacuum_threshold='20000', fillfactor='85');
 
 
 ALTER TABLE public.message OWNER TO postgres;
