@@ -1,3 +1,20 @@
+query GetTexterStats($campaignId: String!, $contactsFilter: ContactsFilter!) {
+  campaign(id: $campaignId) {
+    id
+    useDynamicAssignment
+    assignments {
+      id
+      texter {
+        id
+        firstName
+        lastName
+      }
+      unmessagedCount: contactsCount(contactsFilter: $contactsFilter)
+      contactsCount
+    }
+  }
+}
+
 mutation ExportCampaign($options: CampaignExportInput!) {
   exportCampaign(options: $options) {
     id
