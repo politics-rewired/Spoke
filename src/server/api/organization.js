@@ -52,7 +52,10 @@ export const resolvers = {
       await accessRequired(user, organization.id, "SUPERVOLUNTEER");
       const query = r
         .reader("all_campaign")
-        .where({ is_template: true })
+        .where({
+          organization_id: organization.id,
+          is_template: true
+        })
         .select("*");
       const pagerOptions = { first, after };
       return formatPage(query, pagerOptions);
