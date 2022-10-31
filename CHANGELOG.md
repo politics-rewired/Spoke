@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [5.0.0](https://github.com/politics-rewired/spoke/compare/v5.0.0-rc.1...v5.0.0) (2022-10-31)
+
+
+### Backend Changes
+
+* update schema-dump.sql ([9d0b926](https://github.com/politics-rewired/spoke/commit/9d0b9267e3f8abbe01cb6cf784f528427e4b9acc))
+
 ## [5.0.0-rc.1](https://github.com/politics-rewired/spoke/compare/v5.0.0-rc.0...v5.0.0-rc.1) (2022-10-28)
 
 ## [5.0.0-rc.0](https://github.com/politics-rewired/spoke/compare/v4.39.1...v5.0.0-rc.0) (2022-10-20)
