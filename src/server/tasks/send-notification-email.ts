@@ -6,6 +6,7 @@ import {
   getDigestNotificationContent,
   getSingleNotificationContent
 } from "../api/notification";
+import NotificationMissingAssignmentError from "../errors/NotificationMissingAssignmentError";
 import { sendEmail } from "../mail";
 import { r } from "../models";
 import { errToObj } from "../utils";
@@ -30,7 +31,17 @@ const notificationsByOrg = async (userId: number) => {
 
 export const sendNotificationEmail: Task = async (payload, _helpers) => {
   const { email } = payload;
-  const { subject, content } = await getSingleNotificationContent(payload);
+
+  let subject: string;
+  let content: string;
+  try {
+    ({ subject, content } = await getSingleNotificationContent(payload));
+  } catch (err) {
+    if (err instanceof NotificationMissingAssignmentError) {
+      return;
+    }
+    throw err;
+  }
 
   await r.knex.transaction(async (trx) => {
     await trx("notification")

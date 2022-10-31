@@ -1,6 +1,7 @@
 import groupBy from "lodash/groupBy";
 
 import { config } from "../../config";
+import NotificationMissingAssignmentError from "../errors/NotificationMissingAssignmentError";
 import getDigestContent from "../lib/templates/digest";
 import getNotificationContent from "../lib/templates/notification";
 import { r } from "../models";
@@ -50,6 +51,11 @@ export const getSingleNotificationContent = async (
       campaign_id: notification.campaign_id
     })
     .first();
+
+  if (!assignment) {
+    throw new NotificationMissingAssignmentError(notification.id);
+  }
+
   const { count: assignmentCount } = await r
     .knex("campaign_contact")
     .where({ campaign_id: campaign.id, assignment_id: assignment.id })
