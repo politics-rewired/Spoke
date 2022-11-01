@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [5.1.0-rc.1](https://github.com/politics-rewired/spoke/compare/v5.1.0-rc.0...v5.1.0-rc.1) (2022-11-01)
+
+
+### Features
+
+* upgrade connect-datadog-graphql ([#1500](https://github.com/politics-rewired/spoke/issues/1500)) ([7b6af5f](https://github.com/politics-rewired/spoke/commit/7b6af5feaf810117e5888bcb20100131850ba25c))
+
 ## [5.1.0-rc.0](https://github.com/politics-rewired/spoke/compare/v5.0.0...v5.1.0-rc.0) (2022-10-31)
 
 
