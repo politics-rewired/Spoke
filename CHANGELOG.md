@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [5.1.0-rc.2](https://github.com/politics-rewired/spoke/compare/v5.1.0-rc.1...v5.1.0-rc.2) (2022-11-01)
+
+
+### Bug Fixes
+
+* **gql-schema:** import libs in build for gql schema ([#1511](https://github.com/politics-rewired/spoke/issues/1511)) ([5fa2237](https://github.com/politics-rewired/spoke/commit/5fa2237d589e69a54720c8096ef1faced3ba8159))
+
 ## [5.1.0-rc.1](https://github.com/politics-rewired/spoke/compare/v5.1.0-rc.0...v5.1.0-rc.1) (2022-11-01)
 
 
