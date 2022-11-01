@@ -9954,10 +9954,10 @@ confusing-browser-globals@^1.0.10:
   resolved "https://registry.yarnpkg.com/confusing-browser-globals/-/confusing-browser-globals-1.0.10.tgz#30d1e7f3d1b882b25ec4933d1d1adac353d20a59"
   integrity sha512-gNld/3lySHwuhaVluJUKLePYirM3QNCKzVxqAdhJII9/WXKVX5PURzMVJspS1jTslSqjeuG4KMVTSouit5YPHA==
 
-connect-datadog-graphql@^0.0.13:
-  version "0.0.13"
-  resolved "https://registry.yarnpkg.com/connect-datadog-graphql/-/connect-datadog-graphql-0.0.13.tgz#4a32dc5292f13fe6cf122f7188b2ac494c401e8b"
-  integrity sha512-rKFLDmNZglClbSxvmOW6PTrE4cxEzbu240c/7h9B7T3HSy6W52cbnQQf56y343AQrlqFF1ktJ8b5M2N0lFq02w==
+connect-datadog-graphql@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/connect-datadog-graphql/-/connect-datadog-graphql-1.0.0.tgz#5cc98e70c3a9e2a6c32e6daeeb407c3f3299cd2a"
+  integrity sha512-T68x8dxKp06FbbLlYwliNdPoXZTCJTm1rVeTKPe9XUekDq6yVVT2leZw4Qt+lVmfTMOOIM+BYSBWH+pncUIsew==
   dependencies:
     graphql "^15.1.0"
 
