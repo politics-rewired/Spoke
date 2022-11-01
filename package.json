@@ -28,6 +28,7 @@
     "build:codegen": "yarn codegen",
     "build:client": "webpack --mode production",
     "build:server": "babel -d ./build/src --source-maps --copy-files --extensions .ts,.tsx,.js,.jsx ./src",
+    "build:libs": "babel -d ./build/libs --source-maps --copy-files --extensions .ts,.tsx,.js,.jsx ./libs",
     "build:tools": "babel -d ./build/tools ./dev-tools",
     "start": "node ./build/src/server",
     "knex": "knex --knexfile ./knexfile.env.js",
