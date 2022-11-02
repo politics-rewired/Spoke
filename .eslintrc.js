@@ -104,6 +104,7 @@ module.exports = {
               "Badge",
               "Chip",
               "CircularProgress",
+              "Divider",
               "LinearProgress",
               "List",
               "ListItem",
