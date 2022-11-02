@@ -153,6 +153,7 @@ module.exports = {
               "material-ui/Badge",
               "material-ui/Chip",
               "material-ui/CircularProgress",
+              "material-ui/Divider",
               "material-ui/LinearProgress",
               "material-ui/List",
               "material-ui/ListItem",
