@@ -115,6 +115,7 @@ module.exports = {
               "StepContent",
               "StepLabel",
               "Stepper",
+              "Snackbar",
               "Table",
               "TableHeader",
               "TableHeaderColumn",
