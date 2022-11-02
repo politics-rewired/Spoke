@@ -158,6 +158,7 @@ module.exports = {
               "material-ui/ListItem",
               "material-ui/IconButton",
               "material-ui/FlatButton",
+              "material-ui/Paper",
               "material-ui/Popover",
               "material-ui/RaisedButton",
               "material-ui/Step",
