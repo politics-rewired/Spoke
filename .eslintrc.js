@@ -109,6 +109,7 @@ module.exports = {
               "ListItem",
               "IconButton",
               "FlatButton",
+              "Paper",
               "Popover",
               "RaisedButton",
               "Step",
