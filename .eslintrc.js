@@ -164,6 +164,7 @@ module.exports = {
               "material-ui/StepContent",
               "material-ui/StepLabel",
               "material-ui/Stepper",
+              "material-ui/Snackbar",
               "material-ui/Table",
               "material-ui/TableHeader",
               "material-ui/TableHeaderColumn",
