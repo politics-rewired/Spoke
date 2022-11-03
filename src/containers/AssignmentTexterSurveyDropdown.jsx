@@ -1,5 +1,5 @@
 import { gql } from "@apollo/client";
-import Divider from "material-ui/Divider";
+import Divider from "@material-ui/core/Divider";
 import MenuItem from "material-ui/MenuItem";
 import SelectField from "material-ui/SelectField";
 import PropTypes from "prop-types";
