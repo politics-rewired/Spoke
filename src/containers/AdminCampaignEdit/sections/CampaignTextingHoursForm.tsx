@@ -136,7 +136,6 @@ class CampaignTextingHoursForm extends React.Component<
         value: rawValue
       }))}
       filter={Autocomplete.caseInsensitiveFilter}
-      maxSearchResults={4}
       searchText={
         this.state[stateName] !== undefined
           ? this.state[stateName]

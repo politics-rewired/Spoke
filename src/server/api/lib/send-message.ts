@@ -1,4 +1,5 @@
 /* eslint-disable import/prefer-default-export */
+import type { MessageInput } from "@spoke/spoke-codegen";
 import { GraphQLError } from "graphql/error";
 import type { Knex } from "knex";
 import escapeRegExp from "lodash/escapeRegExp";
@@ -9,7 +10,6 @@ import {
 import request from "superagent";
 
 import { UserRoleType } from "../../../api/organization-membership";
-import type { MessageInput } from "../../../api/types";
 import { config } from "../../../config";
 import { replaceCurlyApostrophes } from "../../../lib/charset-utils";
 import { DateTime } from "../../../lib/datetime";

@@ -1,0 +1,45 @@
+fragment FullListRefresh on ExternalSyncQuestionResponseConfig {
+  id
+  campaignId
+  interactionStepId
+  questionResponseValue
+  includesNotActive
+  isMissing
+  isRequired
+  createdAt
+  updatedAt
+  interactionStep {
+    id
+    scriptOptions
+    questionText
+    answerOption
+    parentInteractionId
+  }
+  targets {
+    ... on ExternalResultCodeTarget {
+      id
+      resultCode {
+        id
+        name
+      }
+    }
+    ... on ExternalActivistCodeTarget {
+      id
+      activistCode {
+        id
+        name
+        description
+        scriptQuestion
+        status
+      }
+    }
+    ... on ExternalSurveyQuestionResponseOptionTarget {
+      id
+      responseOption {
+        id
+        name
+        externalSurveyQuestionId
+      }
+    }
+  }
+}

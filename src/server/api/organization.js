@@ -32,7 +32,13 @@ export const getEscalationUserId = async (organizationId) => {
 
 export const resolvers = {
   Organization: {
-    ...sqlResolvers(["id", "name", "defaultTextingTz", "deletedAt"]),
+    ...sqlResolvers([
+      "id",
+      "name",
+      "defaultTextingTz",
+      "deletedAt",
+      "autosendingMps"
+    ]),
     settings: (organization) => organization,
     campaigns: async (organization, { cursor, campaignsFilter }, { user }) => {
       await accessRequired(user, organization.id, "SUPERVOLUNTEER");
@@ -51,7 +57,10 @@ export const resolvers = {
       await accessRequired(user, organization.id, "SUPERVOLUNTEER");
       const query = r
         .reader("all_campaign")
-        .where({ is_template: true })
+        .where({
+          organization_id: organization.id,
+          is_template: true
+        })
         .select("*");
       const pagerOptions = { first, after };
       return formatPage(query, pagerOptions);

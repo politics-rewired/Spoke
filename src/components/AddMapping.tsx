@@ -8,27 +8,27 @@ import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
+import type {
+  ExternalActivistCode,
+  ExternalResultCode,
+  ExternalSurveyQuestion,
+  ExternalSyncConfigTarget,
+  ExternalSyncQuestionResponseConfig,
+  QuestionResponseSyncTargetInput
+} from "@spoke/spoke-codegen";
 import cloneDeep from "lodash/cloneDeep";
 import MenuItem from "material-ui/MenuItem";
 import SelectField from "material-ui/SelectField";
 import React from "react";
 import { compose } from "recompose";
 
-import type { ExternalActivistCode } from "../api/external-activist-code";
-import type { ExternalResultCode } from "../api/external-result-code";
 import { resultCodeWarning } from "../api/external-result-code";
-import type { ExternalSurveyQuestion } from "../api/external-survey-question";
-import type {
-  ExternalSyncConfigTarget,
-  ExternalSyncQuestionResponseConfig
-} from "../api/external-sync-config";
 import {
   isActivistCode,
   isResponseOption,
   isResultCode
 } from "../api/external-sync-config";
 import type { RelayPaginatedResponse } from "../api/pagination";
-import type { QuestionResponseSyncTargetInput } from "../api/types";
 import { ExternalDataCollectionStatus } from "../api/types";
 import { loadData } from "../containers/hoc/with-operations";
 import type { MutationMap } from "../network/types";

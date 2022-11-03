@@ -1,11 +1,11 @@
 import { gql } from "@apollo/client";
 import Button from "@material-ui/core/Button";
 import { red } from "@material-ui/core/colors";
+import Divider from "@material-ui/core/Divider";
 import Grid from "@material-ui/core/Grid";
 import Snackbar from "@material-ui/core/Snackbar";
 import Alert from "@material-ui/lab/Alert";
 import { css, StyleSheet } from "aphrodite";
-import Divider from "material-ui/Divider";
 import PropTypes from "prop-types";
 import React from "react";
 import { Helmet } from "react-helmet";

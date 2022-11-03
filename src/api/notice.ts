@@ -1,12 +1,6 @@
-import type { RelayEdge, RelayPaginatedResponse } from "./pagination";
-import type { GraphQLType } from "./types";
-
-export interface Register10DlcBrandNotice {
-  id: string;
-  tcrBrandRegistrationUrl: string | null;
-}
-
-export type Notice = Register10DlcBrandNotice;
+/* eslint-disable import/prefer-default-export */
+import type { Notice, Register10DlcBrandNotice } from "@spoke/spoke-codegen";
+import type { GraphQLType } from "graphql";
 
 export function isRegister10DlcBrandNotice(
   obj: Notice
@@ -16,28 +10,3 @@ export function isRegister10DlcBrandNotice(
     "Register10DlcBrandNotice"
   );
 }
-
-export type NoticeEdge = RelayEdge<Notice>;
-
-export type NoticePage = RelayPaginatedResponse<Notice>;
-
-export const schema = `
-  type Register10DlcBrandNotice {
-    id: ID!
-    tcrBrandRegistrationUrl: String
-  }
-
-  union Notice = Register10DlcBrandNotice
-
-  type NoticeEdge {
-    cursor: Cursor!
-    node: Notice!
-  }
-
-  type NoticePage {
-    edges: [NoticeEdge!]!
-    pageInfo: RelayPageInfo!
-  }
-`;
-
-export default schema;

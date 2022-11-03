@@ -1,6 +1,6 @@
 {
   "name": "spoke",
-  "version": "5.0.0-rc.0",
+  "version": "5.1.0",
   "description": "Spoke",
   "main": "src/server",
   "engines": {
@@ -28,6 +28,7 @@
     "build:codegen": "yarn codegen",
     "build:client": "webpack --mode production",
     "build:server": "babel -d ./build/src --source-maps --copy-files --extensions .ts,.tsx,.js,.jsx ./src",
+    "build:libs": "babel -d ./build/libs --source-maps --copy-files --extensions .ts,.tsx,.js,.jsx ./libs",
     "build:tools": "babel -d ./build/tools ./dev-tools",
     "start": "node ./build/src/server",
     "knex": "knex --knexfile ./knexfile.env.js",
@@ -100,7 +101,7 @@
     "camelcase-keys": "^4.1.0",
     "chart.js": "^2.9.4",
     "clsx": "^1.2.1",
-    "connect-datadog-graphql": "^0.0.11",
+    "connect-datadog-graphql": "^1.0.0",
     "connect-pg-simple": "^7.0.0",
     "cors": "^2.8.5",
     "cryptr": "^6.0.3",

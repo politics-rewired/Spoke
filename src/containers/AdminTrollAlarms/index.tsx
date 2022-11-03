@@ -5,9 +5,9 @@ import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
+import Paper from "@material-ui/core/Paper";
+import Snackbar from "@material-ui/core/Snackbar";
 import AutoComplete from "material-ui/AutoComplete";
-import Paper from "material-ui/Paper";
-import Snackbar from "material-ui/Snackbar";
 import Toggle from "material-ui/Toggle";
 import React, { useState } from "react";
 import type { RouteChildrenProps } from "react-router-dom";
@@ -244,7 +244,7 @@ const AdminTrollAlarms: React.FC<Props> = (props) => {
         open={copiedAlarmID !== undefined}
         message={`Alarm ${copiedAlarmID || ""} details copied to clipboard`}
         autoHideDuration={4000}
-        onRequestClose={handleDismissCopyAlarm}
+        onClose={handleDismissCopyAlarm}
       />
     </div>
   );
