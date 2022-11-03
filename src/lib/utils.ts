@@ -8,7 +8,7 @@ import os from "os";
 import path from "path";
 import request from "superagent";
 
-export type TempDownloadHandler = <T>(filePath: string) => Promise<T> | T;
+export type TempDownloadHandler = (filePath: string) => Promise<any> | any;
 
 export const VALID_CONTENT_TYPES = [
   "image/jpeg",
