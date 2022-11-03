@@ -6,7 +6,7 @@ import { ApolloError, ApolloServer } from "apollo-server-express";
 import express from "express";
 import { graphqlUploadExpress } from "graphql-upload";
 
-import { schema } from "../../api/schema";
+import { schema } from "../../../libs/gql-schema/schema";
 import { config } from "../../config";
 import logger from "../../logger";
 import mocks from "../api/mocks";

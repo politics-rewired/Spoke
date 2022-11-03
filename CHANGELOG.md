@@ -2,6 +2,49 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [5.1.0](https://github.com/politics-rewired/spoke/compare/v5.1.0-rc.2...v5.1.0) (2022-11-03)
+
+## [5.1.0-rc.2](https://github.com/politics-rewired/spoke/compare/v5.1.0-rc.1...v5.1.0-rc.2) (2022-11-01)
+
+
+### Bug Fixes
+
+* **gql-schema:** import libs in build for gql schema ([#1511](https://github.com/politics-rewired/spoke/issues/1511)) ([5fa2237](https://github.com/politics-rewired/spoke/commit/5fa2237d589e69a54720c8096ef1faced3ba8159))
+
+## [5.1.0-rc.1](https://github.com/politics-rewired/spoke/compare/v5.1.0-rc.0...v5.1.0-rc.1) (2022-11-01)
+
+
+### Features
+
+* upgrade connect-datadog-graphql ([#1500](https://github.com/politics-rewired/spoke/issues/1500)) ([7b6af5f](https://github.com/politics-rewired/spoke/commit/7b6af5feaf810117e5888bcb20100131850ba25c))
+
+## [5.1.0-rc.0](https://github.com/politics-rewired/spoke/compare/v5.0.0...v5.1.0-rc.0) (2022-10-31)
+
+
+### Bug Fixes
+
+* **autosending:** prevent "Queue" user action for orgs without mps ([#1489](https://github.com/politics-rewired/spoke/issues/1489)) ([e41bc51](https://github.com/politics-rewired/spoke/commit/e41bc5137893cd5522e2199c94aa0a37add609af))
+* disable autosending page if no organization mps ([#1479](https://github.com/politics-rewired/spoke/issues/1479)) ([3b5a99b](https://github.com/politics-rewired/spoke/commit/3b5a99b1562e600f7903f5ec1b4cff385980ec16))
+* handle case where underlying assignment no longer exists ([#1488](https://github.com/politics-rewired/spoke/issues/1488)) ([1c611bb](https://github.com/politics-rewired/spoke/commit/1c611bb7a89d8a18c34b8f7e6b3baff41af72574))
+* restrict campaign templates to organization ([#1478](https://github.com/politics-rewired/spoke/issues/1478)) ([19b14de](https://github.com/politics-rewired/spoke/commit/19b14de4035fcf46eb8c67082281752d76aadb80))
+* skip queuing organizations with 0 mps ([#1487](https://github.com/politics-rewired/spoke/issues/1487)) ([b6ba4bd](https://github.com/politics-rewired/spoke/commit/b6ba4bdc4158db3c862c6566dd5855d8393bbe80))
+* use determinate progress bar type ([#1485](https://github.com/politics-rewired/spoke/issues/1485)) ([b040337](https://github.com/politics-rewired/spoke/commit/b040337ce083d011f85a1b181174a6e54d37d296))
+* **offline:** add a link to the status page ([#1480](https://github.com/politics-rewired/spoke/issues/1480)) ([ce6ddfd](https://github.com/politics-rewired/spoke/commit/ce6ddfd8e4b7bb72595b722f53914dc7b899ef93))
+
+
+### Backend Changes
+
+* remove types from gql schema ([#1475](https://github.com/politics-rewired/spoke/issues/1475)) ([afc0d7c](https://github.com/politics-rewired/spoke/commit/afc0d7c63a6b7a92a942a234de0204e08dd98034))
+* update fillfactor to reasonable value ([#1499](https://github.com/politics-rewired/spoke/issues/1499)) ([fb08b3f](https://github.com/politics-rewired/spoke/commit/fb08b3f0b6d9379230b18b47d25698d1746464a1))
+* **changelog:** add refactor and perf commits to backend section ([#1501](https://github.com/politics-rewired/spoke/issues/1501)) ([0bc613a](https://github.com/politics-rewired/spoke/commit/0bc613a0d517041a47bacf885fec7b332b04695c))
+
+## [5.0.0](https://github.com/politics-rewired/spoke/compare/v5.0.0-rc.1...v5.0.0) (2022-10-31)
+
+
+### Backend Changes
+
+* update schema-dump.sql ([9d0b926](https://github.com/politics-rewired/spoke/commit/9d0b9267e3f8abbe01cb6cf784f528427e4b9acc))
+
 ## [5.0.0-rc.1](https://github.com/politics-rewired/spoke/compare/v5.0.0-rc.0...v5.0.0-rc.1) (2022-10-28)
 
 ## [5.0.0-rc.0](https://github.com/politics-rewired/spoke/compare/v4.39.1...v5.0.0-rc.0) (2022-10-20)

@@ -1,7 +1,7 @@
 import { makeStyles } from "@material-ui/core";
 import CardActions from "@material-ui/core/CardActions";
+import Divider from "@material-ui/core/Divider";
 import { Card, CardTitle } from "material-ui/Card";
-import Divider from "material-ui/Divider";
 import React from "react";
 import { useHistory } from "react-router-dom";
 

@@ -46,6 +46,7 @@ query CampaignsEligibleForAutosending(
 ) {
   organization(id: $organizationId) {
     id
+    autosendingMps
     campaigns(
       campaignsFilter: { isArchived: false, isStarted: $isStarted }
       cursor: { offset: 0, limit: 5000 }

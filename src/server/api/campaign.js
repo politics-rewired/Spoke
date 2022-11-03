@@ -259,7 +259,9 @@ export const resolvers = {
             `
               select count(*) as count_needs_message_contacts
               from campaign_contact
-              where message_status = 'needsMessage'
+              where true
+                and message_status = 'needsMessage'
+                and is_opted_out = false
                 and archived = ${archived}
                 and campaign_id = ?
             `,

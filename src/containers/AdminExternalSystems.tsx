@@ -8,6 +8,7 @@ import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import Fab from "@material-ui/core/Fab";
 import Paper from "@material-ui/core/Paper";
+import Snackbar from "@material-ui/core/Snackbar";
 import Table from "@material-ui/core/Table";
 import TableBody from "@material-ui/core/TableBody";
 import TableCell from "@material-ui/core/TableCell";
@@ -18,21 +19,16 @@ import AddIcon from "@material-ui/icons/Add";
 import CloudDownloadIcon from "@material-ui/icons/CloudDownload";
 import CreateIcon from "@material-ui/icons/Create";
 import RefreshIcon from "@material-ui/icons/Refresh";
+import type { ExternalSystem, ExternalSystemInput } from "@spoke/spoke-codegen";
 import type { History } from "history";
 import MenuItem from "material-ui/MenuItem";
 import SelectField from "material-ui/SelectField";
-import Snackbar from "material-ui/Snackbar";
 import TextField from "material-ui/TextField";
 import React, { Component } from "react";
 import { Link, withRouter } from "react-router-dom";
 import { compose } from "recompose";
 
-import type {
-  ExternalSystem,
-  ExternalSystemInput
-} from "../api/external-system";
 import { ExternalSystemType, VanOperationMode } from "../api/external-system";
-import type { RelayPaginatedResponse } from "../api/pagination";
 import { DateTime } from "../lib/datetime";
 import type { MutationMap, QueryMap } from "../network/types";
 import theme from "../styles/theme";
@@ -347,7 +343,7 @@ class AdminExternalSystems extends Component<Props, State> {
               : ""
           }
           autoHideDuration={4000}
-          onRequestClose={
+          onClose={
             syncingSystem
               ? this.handleDismissSyncSnackbar(syncingSystem.id)
               : undefined

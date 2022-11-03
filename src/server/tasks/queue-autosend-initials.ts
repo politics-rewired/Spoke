@@ -20,7 +20,9 @@ export const queueAutoSendInitials: Task = async (payload, helpers) => {
         job_key := format('%s|%s', $1::text, organization.id)
       )
       from organization
-      where autosending_mps is not null
+      where true
+        and autosending_mps is not null
+        and autosending_mps > 0
     `,
     [QUEUE_AUTOSEND_ORGANIZATION_INITIALS_TASK_IDENTIFIER]
   );

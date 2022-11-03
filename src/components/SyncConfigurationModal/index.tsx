@@ -6,13 +6,15 @@ import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
+import type {
+  ExternalSyncQuestionResponseConfig,
+  ExternalSystem
+} from "@spoke/spoke-codegen";
+import { FullListRefreshFragmentDoc } from "@spoke/spoke-codegen";
 import cloneDeep from "lodash/cloneDeep";
 import React from "react";
 import { compose } from "recompose";
 
-import type { ExternalSyncQuestionResponseConfig } from "../../api/external-sync-config";
-import { FullListRefreshFragment } from "../../api/external-sync-config";
-import type { ExternalSystem } from "../../api/external-system";
 import type { RelayPaginatedResponse } from "../../api/pagination";
 import { loadData } from "../../containers/hoc/with-operations";
 import type { MutationMap, QueryMap } from "../../network/types";
@@ -152,7 +154,7 @@ const mutations: MutationMap<OuterProps> = {
           ...FullListRefresh
         }
       }
-      ${FullListRefreshFragment}
+      ${FullListRefreshFragmentDoc}
     `,
     variables: {
       input: {
@@ -194,7 +196,7 @@ const mutations: MutationMap<OuterProps> = {
           ...FullListRefresh
         }
       }
-      ${FullListRefreshFragment}
+      ${FullListRefreshFragmentDoc}
     `,
     variables: {
       input: {
