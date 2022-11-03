@@ -1,4 +1,5 @@
 import { config } from "../../../config";
+import MemoizeHelper, { cacheOpts } from "../../memoredis";
 import thinky from "../thinky";
 
 const { r } = thinky;
@@ -10,6 +11,11 @@ export const organizationCache = {
     if (r.redis) {
       await r.redis.delAsync(cacheKey(id));
     }
+
+    const memoizer = await MemoizeHelper.getMemoizer();
+    await memoizer.invalidate(cacheOpts.Organization.key, {
+      organizationId: id
+    });
   },
   load: async (id) => {
     if (r.redis) {

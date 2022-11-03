@@ -1,6 +1,5 @@
 import { config } from "../../config";
 import logger from "../../logger";
-import { cacheOpts, memoizer } from "../memoredis";
 import { r } from "../models";
 import { errToObj } from "../utils";
 import {
@@ -401,26 +400,23 @@ export const resolvers = {
       return rawResult.rows;
     },
     tagList: async (organization) => {
-      const getTags = await memoizer.memoize(async ({ organizationId }) => {
+      const getTags = async ({ organizationId }) => {
         return r
           .reader("tag")
           .where({ organization_id: organizationId })
           .orderBy(["is_system", "title"]);
-      }, cacheOpts.OrganizationTagList);
+      };
 
       return getTags({ organizationId: organization.id });
     },
     escalationTagList: async (organization) => {
-      const getEscalationTags = await memoizer.memoize(
-        async ({ organizationId }) => {
-          return r
-            .reader("tag")
-            .where({ organization_id: organizationId, is_assignable: false })
-            .orderBy("is_system", "desc")
-            .orderBy("title", "asc");
-        },
-        cacheOpts.OrganizationEscalatedTagList
-      );
+      const getEscalationTags = async ({ organizationId }) => {
+        return r
+          .reader("tag")
+          .where({ organization_id: organizationId, is_assignable: false })
+          .orderBy("is_system", "desc")
+          .orderBy("title", "asc");
+      };
 
       return getEscalationTags({ organizationId: organization.id });
     },

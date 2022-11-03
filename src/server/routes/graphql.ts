@@ -39,6 +39,7 @@ export const createRouter = async () => {
       err.originalError,
       "schema"
     );
+
     if (hasSchema && config.isProduction) {
       logger.error("Postgres error: ", err);
       return new Error("Internal server error");
@@ -58,7 +59,7 @@ export const createRouter = async () => {
     debug: !config.isProduction,
     introspection: !config.isProduction,
     plugins,
-    context: ({ req, res: _res }) => contextForRequest(req)
+    context: async ({ req }) => contextForRequest(req)
   });
 
   await server.start();

@@ -3,6 +3,7 @@ import isEmpty from "lodash/isEmpty";
 import isEqual from "lodash/isEqual";
 import isNil from "lodash/isNil";
 import type { QueryResult } from "pg";
+import MemoizeHelper, { Buckets, cacheOpts } from "src/server/memoredis";
 
 import type {
   Campaign,
@@ -19,7 +20,6 @@ import {
   uploadContacts
 } from "../../../workers/jobs";
 import type { SpokeDbContext } from "../../contexts/types";
-import { cacheOpts, memoizer } from "../../memoredis";
 import { cacheableData, datawarehouse, r } from "../../models";
 import { addAssignTexters } from "../../tasks/assign-texters";
 import { accessRequired } from "../errors";
@@ -34,6 +34,11 @@ import { formatPage } from "./pagination";
 
 const { JOBS_SAME_PROCESS } = config;
 
+interface DoGetCampaignsOptions extends CampaignsFilter {
+  first?: number;
+  after?: string;
+}
+
 interface GetCampaignsOptions {
   first?: number;
   after?: string;
@@ -41,34 +46,45 @@ interface GetCampaignsOptions {
 }
 
 type DoGetCampaigns = (
-  options: GetCampaignsOptions
+  options: DoGetCampaignsOptions
 ) => Promise<RelayPaginatedResponse<Campaign>>;
 
-export const getCampaigns: DoGetCampaigns = memoizer.memoize(
-  async (options: GetCampaignsOptions) => {
-    const { after, first, filter = {} } = options;
-    const { organizationId, campaignId, isArchived } = filter || {};
+export const doGetCampaigns: DoGetCampaigns = async (
+  options: DoGetCampaignsOptions
+) => {
+  const { after, first, organizationId, campaignId, isArchived } = options;
 
-    const query = r.reader("campaign").select("*");
+  const query = r.reader("campaign").select("*");
 
-    // Filter options
-    if (organizationId) {
-      query.where({ organization_id: organizationId });
-    }
+  // Filter options
+  if (organizationId) {
+    query.where({ organization_id: organizationId });
+  }
 
-    if (campaignId) {
-      query.where({ id: campaignId });
-    }
+  if (campaignId) {
+    query.where({ id: campaignId });
+  }
 
-    if (!isNil(isArchived)) {
-      query.where({ is_archived: isArchived });
-    }
+  if (!isNil(isArchived)) {
+    query.where({ is_archived: isArchived });
+  }
 
-    const pagerOptions = { first, after };
-    return formatPage(query, pagerOptions);
-  },
-  cacheOpts.CampaignsListRelay
-);
+  const pagerOptions = { first, after };
+  return formatPage(query, pagerOptions);
+};
+
+export const getCampaigns = async ({
+  after,
+  first,
+  filter
+}: GetCampaignsOptions) => {
+  const memoizer = await MemoizeHelper.getMemoizer();
+  const memoizedCampaigns = MemoizeHelper.hasBucketConfigured(Buckets.Advanced)
+    ? memoizer.memoize(doGetCampaigns, cacheOpts.CampaignsList)
+    : doGetCampaigns;
+
+  return memoizedCampaigns({ after, first, ...filter });
+};
 
 interface DeliverabilityStatRow {
   count: string;
@@ -553,7 +569,6 @@ export const editCampaign = async (
         }))
       );
     });
-    memoizer.invalidate(cacheOpts.CampaignTeams.key, { campaignId: id });
   }
   if (Object.prototype.hasOwnProperty.call(campaign, "campaignGroupIds")) {
     const campaignGroupIds = campaign.campaignGroupIds ?? [];
@@ -676,9 +691,7 @@ export const editCampaign = async (
 
   if (Object.prototype.hasOwnProperty.call(campaign, "interactionSteps")) {
     await unstartIfNecessary();
-    memoizer.invalidate(cacheOpts.CampaignInteractionSteps.key, {
-      campaignId: id
-    });
+
     // TODO: debug why { script: '' } is even being sent from the client in the first place
     if (!isEqual(campaign.interactionSteps, { scriptOptions: [""] })) {
       await accessRequired(
@@ -697,9 +710,6 @@ export const editCampaign = async (
 
   if (Object.prototype.hasOwnProperty.call(campaign, "cannedResponses")) {
     await unstartIfNecessary();
-    memoizer.invalidate(cacheOpts.CampaignCannedResponses.key, {
-      campaignId: id
-    });
 
     // Ignore the mocked `id` automatically created on the input by GraphQL
     const convertedResponses = campaign.cannedResponses.map(
@@ -729,6 +739,12 @@ export const editCampaign = async (
     .where({ id })
     .returning("*");
   cacheableData.campaign.reload(id);
+
+  const memoizer = await MemoizeHelper.getMemoizer();
+  await memoizer.invalidate(cacheOpts.CampaignsList.key, {
+    organizationId: newCampaign.organization_id
+  });
+
   return newCampaign || loaders.campaign.load(id);
 };
 

@@ -9,7 +9,6 @@ import { sleep } from "../../lib/utils";
 import logger from "../../logger";
 import { eventBus, EventType } from "../event-bus";
 import { selectionsByType } from "../lib/graphql";
-import { cacheOpts, memoizer } from "../memoredis";
 import { cacheableData, r } from "../models";
 import { sqlResolvers } from "./lib/utils";
 
@@ -361,26 +360,25 @@ export async function allCurrentAssignmentTargets(organizationId) {
   return teamToCampaigns;
 }
 
-const memoizedMyCurrentAssignmentTargets = memoizer.memoize(
-  async ({
-    myTeamIds,
-    myEscalationTags,
-    generalEnabledBit,
-    campaignView,
-    orgMaxRequestCount,
-    assignmentType,
-    organizationId
-  }) => {
-    const { rows: teamToCampaigns } = await r.reader.raw(
-      /**
-       * This query is the same as allCurrentAssignmentTargets, except
-       *  - it restricts teams to those with is_assignment_enabled = true via the where clause in team_assignment_options
-       *  - it adds all_possible_team_assignments to set up my_possible_team_assignments
-       *
-       * @> is the Postgresql array includes operator
-       * ARRAY[1,2,3] @> ARRAY[1,2] is true
-       */
-      `
+const memoizedMyCurrentAssignmentTargets = async ({
+  myTeamIds,
+  myEscalationTags,
+  generalEnabledBit,
+  campaignView,
+  orgMaxRequestCount,
+  assignmentType,
+  organizationId
+}) => {
+  const { rows: teamToCampaigns } = await r.reader.raw(
+    /**
+     * This query is the same as allCurrentAssignmentTargets, except
+     *  - it restricts teams to those with is_assignment_enabled = true via the where clause in team_assignment_options
+     *  - it adds all_possible_team_assignments to set up my_possible_team_assignments
+     *
+     * @> is the Postgresql array includes operator
+     * ARRAY[1,2,3] @> ARRAY[1,2] is true
+     */
+    `
       with needs_message_teams as (
         select * from team
         where assignment_type = 'UNSENT'
@@ -494,21 +492,19 @@ const memoizedMyCurrentAssignmentTargets = memoizer.memoize(
       select * from all_possible_team_assignments
       where enabled = true
       order by priority, id asc`,
-      [myTeamIds, myTeamIds, myEscalationTags, organizationId]
-    );
+    [myTeamIds, myTeamIds, myEscalationTags, organizationId]
+  );
 
-    const results = teamToCampaigns.map((ttc) =>
-      Object.assign(ttc, {
-        type: ttc.assignment_type,
-        campaign: { id: ttc.id, title: ttc.title },
-        count_left: 0
-      })
-    );
+  const results = teamToCampaigns.map((ttc) =>
+    Object.assign(ttc, {
+      type: ttc.assignment_type,
+      campaign: { id: ttc.id, title: ttc.title },
+      count_left: 0
+    })
+  );
 
-    return results;
-  },
-  cacheOpts.MyCurrentAssignmentTargets
-);
+  return results;
+};
 
 export async function cachedMyCurrentAssignmentTargets(userId, organizationId) {
   const {
@@ -755,14 +751,11 @@ export async function myCurrentAssignmentTarget(
 }
 
 async function notifyIfAllAssigned(organizationId, teamsAssignedTo) {
-  const doNotification = memoizer.memoize(
-    async ({ team }) =>
-      request
-        .post(config.ASSIGNMENT_COMPLETE_NOTIFICATION_URL)
-        .timeout(30000)
-        .send({ team }),
-    cacheOpts.AssignmentCompleteLock
-  );
+  const doNotification = async ({ team }) =>
+    request
+      .post(config.ASSIGNMENT_COMPLETE_NOTIFICATION_URL)
+      .timeout(30000)
+      .send({ team });
 
   if (config.ASSIGNMENT_COMPLETE_NOTIFICATION_URL) {
     const assignmentTargets = await allCurrentAssignmentTargets(organizationId);
@@ -1031,48 +1024,45 @@ export async function fulfillPendingRequestFor(auth0Id) {
     throw new AutoassignError(`No pending request exists for ${auth0Id}`);
   }
 
-  const doAssignment = memoizer.memoize(
-    async ({ pendingAssignmentRequestId: _ignore }) => {
-      const numberAssigned = await r.knex.transaction(async (trx) => {
-        try {
-          const result = await giveUserMoreTexts(
-            pendingAssignmentRequest.user_id,
-            pendingAssignmentRequest.amount,
-            pendingAssignmentRequest.organization_id,
-            pendingAssignmentRequest.preferred_team_id,
-            trx
-          );
+  const doAssignment = async ({ pendingAssignmentRequestId: _ignore }) => {
+    const numberAssigned = await r.knex.transaction(async (trx) => {
+      try {
+        const result = await giveUserMoreTexts(
+          pendingAssignmentRequest.user_id,
+          pendingAssignmentRequest.amount,
+          pendingAssignmentRequest.organization_id,
+          pendingAssignmentRequest.preferred_team_id,
+          trx
+        );
 
-          await trx("assignment_request")
-            .update({
-              status: "approved"
-            })
-            .where({ id: pendingAssignmentRequest.id });
+        await trx("assignment_request")
+          .update({
+            status: "approved"
+          })
+          .where({ id: pendingAssignmentRequest.id });
 
-          return result;
-        } catch (err) {
-          logger.info(
-            `Failed to give user ${auth0Id} more texts. Marking their request as rejected. `,
-            err
-          );
+        return result;
+      } catch (err) {
+        logger.info(
+          `Failed to give user ${auth0Id} more texts. Marking their request as rejected. `,
+          err
+        );
 
-          // Mark as rejected outside the transaction so it is unaffected by the rollback
-          await r
-            .knex("assignment_request")
-            .update({
-              status: "rejected"
-            })
-            .where({ id: pendingAssignmentRequest.id });
+        // Mark as rejected outside the transaction so it is unaffected by the rollback
+        await r
+          .knex("assignment_request")
+          .update({
+            status: "rejected"
+          })
+          .where({ id: pendingAssignmentRequest.id });
 
-          const isFatal = err.isFatal !== undefined ? err.isFatal : true;
-          throw new AutoassignError(err.message, isFatal);
-        }
-      });
+        const isFatal = err.isFatal !== undefined ? err.isFatal : true;
+        throw new AutoassignError(err.message, isFatal);
+      }
+    });
 
-      return numberAssigned;
-    },
-    cacheOpts.FullfillAssignmentLock
-  );
+    return numberAssigned;
+  };
 
   return doAssignment({
     pendingAssignmentRequestId: pendingAssignmentRequest.id
@@ -1182,9 +1172,9 @@ export const resolvers = {
         ? assignment.texter
         : loaders.user.load(assignment.user_id),
     campaign: async (assignment) => {
-      const getCampaign = memoizer.memoize(async ({ campaignId }) => {
+      const getCampaign = async ({ campaignId }) => {
         return r.reader("campaign").where({ id: campaignId }).first("*");
-      }, cacheOpts.CampaignOne);
+      };
 
       return getCampaign({ campaignId: assignment.campaign_id });
     },
@@ -1248,15 +1238,12 @@ export const resolvers = {
       return contactsQuery;
     },
     campaignCannedResponses: async (assignment) => {
-      const getCannedResponses = memoizer.memoize(
-        async ({ campaignId, userId }) => {
-          return cacheableData.cannedResponse.query({
-            userId: userId || "",
-            campaignId
-          });
-        },
-        cacheOpts.CampaignCannedResponses
-      );
+      const getCannedResponses = async ({ campaignId, userId }) => {
+        return cacheableData.cannedResponse.query({
+          userId: userId || "",
+          campaignId
+        });
+      };
 
       return getCannedResponses({ campaignId: assignment.campaign_id });
     },

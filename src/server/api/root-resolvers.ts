@@ -7,7 +7,7 @@ import {
   getInstanceNotifications,
   getOrgLevelNotifications
 } from "../lib/notices";
-import { cacheOpts, memoizer } from "../memoredis";
+import MemoizeHelper, { cacheOpts } from "../memoredis";
 import { r } from "../models";
 import { getCampaigns } from "./campaign";
 import { queryCampaignOverlaps } from "./campaign-overlap";
@@ -59,9 +59,11 @@ const rootResolvers = {
     },
     organization: async (_root, { id }, { loaders, user }) => {
       await accessRequired(user, id, "TEXTER", /* allowSuperadmin= */ true);
+
+      const memoizer = await MemoizeHelper.getMemoizer();
       const getOrganization = memoizer.memoize(async ({ organizationId }) => {
         return loaders.organization.load(organizationId);
-      }, cacheOpts.OrganizationSingleTon);
+      }, cacheOpts.Organization);
 
       return getOrganization({ organizationId: id });
     },
@@ -524,7 +526,7 @@ const rootResolvers = {
       });
     },
     isValidAttachment: async (_root, { fileUrl }, _context) => {
-      const handler = async (filePath: string) => {
+      const handler = async (filePath) => {
         const fileType = await getFileType(filePath);
 
         return VALID_CONTENT_TYPES.includes(fileType);

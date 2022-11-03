@@ -4,41 +4,39 @@ import type {
 } from "@spoke/spoke-codegen";
 import type { RedisClient } from "redis";
 
-import { cacheOpts, memoizer } from "../../memoredis";
+import MemoizeHelper, { cacheOpts } from "../../memoredis";
 import thinky from "../thinky";
 
 const { r } = thinky;
 
-const getUserByAuth0Id = memoizer.memoize(
-  async ({ auth0Id }: { auth0Id: string | number }) => {
-    const userAuth = await r
-      .reader("user")
-      .where("auth0_id", auth0Id)
-      .first("*");
+const getUserByAuth0Id = async ({ auth0Id }: { auth0Id: string | number }) => {
+  const userAuth = await r.reader("user").where("auth0_id", auth0Id).first("*");
 
-    return userAuth;
-  },
-  cacheOpts.GetUser
-);
+  return userAuth;
+};
 
-export const getUserById = memoizer.memoize(
-  async ({ id }: { id: string | number }) => {
-    const userAuth = await r.reader("user").where({ id }).first("*");
+export const getUserById = async ({ id }: { id: string | number }) => {
+  const userAuth = await r.reader("user").where({ id }).first("*");
 
-    return userAuth;
-  },
-  cacheOpts.GetUser
-);
+  return userAuth;
+};
 
 export async function userLoggedIn(
   val: string | number,
   field: "id" | "auth0_id" = "id"
 ) {
+  const memoizer = await MemoizeHelper.getMemoizer();
+  const memoizedGetUserById = memoizer.memoize(getUserById, cacheOpts.User);
+  const memoizedgetUserByAuth0Id = memoizer.memoize(
+    getUserByAuth0Id,
+    cacheOpts.User
+  );
+
   const result =
     field === "id"
-      ? await getUserById({ id: val })
+      ? await memoizedGetUserById({ id: val })
       : field === "auth0_id"
-      ? await getUserByAuth0Id({ auth0Id: val })
+      ? await memoizedgetUserByAuth0Id({ auth0Id: val })
       : null;
 
   return result?.is_suspended === true ? null : result;

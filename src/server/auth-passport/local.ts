@@ -28,7 +28,7 @@ export function setupLocalAuthPassport() {
       password: string,
       done: PassportCallback
     ) => {
-      const { db } = contextForRequest(req);
+      const { db } = await contextForRequest(req);
       const {
         nextUrl = "",
         authType

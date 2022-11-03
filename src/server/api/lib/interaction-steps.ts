@@ -2,7 +2,6 @@
 import type { Knex } from "knex";
 
 import type { InteractionStepWithChildren } from "../../../api/interaction-step";
-import { cacheOpts, memoizer } from "../../memoredis";
 import { r } from "../../models";
 import type { CampaignRecord } from "../types";
 
@@ -43,12 +42,6 @@ export const persistInteractionStepNode = async (
       })
       .returning("id");
 
-    if (rootInteractionStep.parentInteractionId) {
-      memoizer.invalidate(cacheOpts.InteractionStepChildren.key, {
-        interactionStepId: rootInteractionStep.parentInteractionId
-      });
-    }
-
     // Update the mapping of temporary IDs
     temporaryIdMap[rootInteractionStep.id] = newId;
 
@@ -59,10 +52,6 @@ export const persistInteractionStepNode = async (
       .where({ id: rootInteractionStep.id })
       .update(payload)
       .returning("id");
-
-    memoizer.invalidate(cacheOpts.InteractionStepSingleton.key, {
-      interactionStepId: rootInteractionStep.id
-    });
   }
 
   // Persist child interaction steps

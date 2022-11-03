@@ -80,7 +80,7 @@ export function setupSlackPassport() {
         }
       }
 
-      const { db } = contextForRequest(req);
+      const { db } = await contextForRequest(req);
 
       try {
         const spokeUser = await db
