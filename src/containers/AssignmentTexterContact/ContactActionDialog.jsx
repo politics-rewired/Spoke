@@ -1,7 +1,7 @@
 import Button from "@material-ui/core/Button";
+import Divider from "@material-ui/core/Divider";
 import { css, StyleSheet } from "aphrodite";
 import { Card, CardActions, CardTitle } from "material-ui/Card";
-import Divider from "material-ui/Divider";
 import PropTypes from "prop-types";
 import React, { Component } from "react";
 import Form from "react-formal";

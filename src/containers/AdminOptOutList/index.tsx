@@ -5,13 +5,9 @@ import ButtonGroup from "@material-ui/core/ButtonGroup";
 import Card from "@material-ui/core/Card";
 import CardContent from "@material-ui/core/CardContent";
 import CardHeader from "@material-ui/core/CardHeader";
-import Collapse from "@material-ui/core/Collapse";
 import Grid from "@material-ui/core/Grid";
-import IconButton from "@material-ui/core/IconButton";
 import Paper from "@material-ui/core/Paper";
 import Snackbar from "@material-ui/core/Snackbar";
-import ExpandLess from "@material-ui/icons/ExpandLess";
-import ExpandMore from "@material-ui/icons/ExpandMore";
 import Alert from "@material-ui/lab/Alert";
 import type { GridColDef, GridSelectionModel } from "@mui/x-data-grid-pro";
 import { DataGridPro } from "@mui/x-data-grid-pro";
@@ -43,7 +39,6 @@ const AdminOptOutList: React.FC = (props) => {
   const [dialogOpen, setDialogOpen] = useState<boolean>(false);
   const [dialogMode, setDialogMode] = useState<DialogMode>(DialogMode.None);
   const [snackbarOpen, setSnackbarOpen] = useState<boolean>(false);
-  const [showSection, setShowSection] = useState<boolean>(true);
   const [exportingOptOuts, setExportingOptOuts] = useState<boolean>(false);
   const [searchText, setSearchText] = React.useState("");
   const [selectedCampaignIds, setSelectedCampaignIds] = useState<Array<string>>(
@@ -70,8 +65,6 @@ const AdminOptOutList: React.FC = (props) => {
     setExportingOptOuts(false);
     setDialogMode(DialogMode.None);
   };
-
-  const handleExpandChange = () => setShowSection(!showSection);
 
   const handleSubmit = async ({ csvFile, numbersList }: BulkOptParams) => {
     const variables = {
@@ -183,29 +176,18 @@ const AdminOptOutList: React.FC = (props) => {
         </Grid>
       </Grid>
       <Card style={{ marginTop: 15, marginBottom: 15 }}>
-        <CardHeader
-          title="Export Opt Outs"
-          action={
-            <IconButton>
-              {showSection ? <ExpandLess /> : <ExpandMore />}
-            </IconButton>
-          }
-          style={{ cursor: "pointer" }}
-          onClick={handleExpandChange}
-        />
-        <Collapse in={showSection}>
-          <CardContent>
-            <ButtonGroup fullWidth variant="contained" color="primary">
-              <Button onClick={handleExportAll}>Export All</Button>
-              <Button
-                onClick={handleExportSelected}
-                disabled={selectedCampaignIds.length === 0}
-              >
-                Export Selected ({selectedCampaignIds.length} Selected)
-              </Button>
-            </ButtonGroup>
-          </CardContent>
-        </Collapse>
+        <CardHeader title="Export Opt Outs" />
+        <CardContent>
+          <ButtonGroup fullWidth variant="contained" color="primary">
+            <Button onClick={handleExportAll}>Export All</Button>
+            <Button
+              onClick={handleExportSelected}
+              disabled={selectedCampaignIds.length === 0}
+            >
+              Export Selected ({selectedCampaignIds.length} Selected)
+            </Button>
+          </ButtonGroup>
+        </CardContent>
       </Card>
       <Paper>
         <DataGridPro

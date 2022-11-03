@@ -6,6 +6,7 @@ import type { AutosendingTargetFragment } from "@spoke/spoke-codegen";
 import React from "react";
 import { Link } from "react-router-dom";
 
+import AutosendingLimitField from "./AutosendingLimitField";
 import useChipStyles from "./chipStyles";
 
 interface AutosendingUnstartedTargetRowProps {
@@ -30,7 +31,10 @@ export const AutosendingUnstartedTargetRow: React.FC<AutosendingUnstartedTargetR
           classes={{ root: chipClasses.unstarted }}
         />
       </TableCell>
-      <TableCell />
+      <TableCell>
+        <AutosendingLimitField campaignId={target.id} />
+      </TableCell>
+      <TableCell /> {/* Actions */}
       <TableCell>{target.contactsCount}</TableCell>
       <TableCell>&mdash;</TableCell>
       <TableCell>&mdash;</TableCell>
