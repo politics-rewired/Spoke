@@ -2,10 +2,11 @@ import type { ApolloQueryResult } from "@apollo/client";
 import { gql } from "@apollo/client";
 import Button from "@material-ui/core/Button";
 import Fab from "@material-ui/core/Fab";
+import Snackbar from "@material-ui/core/Snackbar";
 import AddIcon from "@material-ui/icons/Add";
 import { css, StyleSheet } from "aphrodite";
 import isString from "lodash/fp/isString";
-import { DropDownMenu, MenuItem, Snackbar } from "material-ui";
+import { DropDownMenu, MenuItem } from "material-ui";
 import queryString from "query-string";
 import React from "react";
 import { withRouter } from "react-router-dom";
@@ -464,9 +465,7 @@ class AdminPeople extends React.Component<
           open={this.state.error.message.length > 0 && !this.state.error.seen}
           message={this.state.error.message}
           autoHideDuration={4000}
-          onRequestClose={() =>
-            this.setState({ error: { seen: true, message: "" } })
-          }
+          onClose={() => this.setState({ error: { seen: true, message: "" } })}
         />
       </div>
     );
