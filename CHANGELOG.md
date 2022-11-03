@@ -2,6 +2,33 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [6.0.0-rc.0](https://github.com/politics-rewired/spoke/compare/v5.1.0...v6.0.0-rc.0) (2022-11-03)
+
+
+### Features
+
+* add redis caching layer, implement core, aggregates ([#1483](https://github.com/politics-rewired/spoke/issues/1483)) ([ef49b65](https://github.com/politics-rewired/spoke/commit/ef49b6544f742ee33207a2eb82e9c49016682d03))
+
+
+### Bug Fixes
+
+* add missing space and period ([#1507](https://github.com/politics-rewired/spoke/issues/1507)) ([86d6a9b](https://github.com/politics-rewired/spoke/commit/86d6a9b1cfe436816e180a2c902cf913657d6b4f))
+* debounce min value check ([#1502](https://github.com/politics-rewired/spoke/issues/1502)) ([6ffba4a](https://github.com/politics-rewired/spoke/commit/6ffba4a781326c0937bfc9e4777099ea497eedc2))
+* disable campaign overlap deletion for van source ([#1504](https://github.com/politics-rewired/spoke/issues/1504)) ([2d90d71](https://github.com/politics-rewired/spoke/commit/2d90d716eea2cc844efc9ef35d8c33406f5998c9))
+* exclude opt outs from initials to send count ([#1505](https://github.com/politics-rewired/spoke/issues/1505)) ([d73a429](https://github.com/politics-rewired/spoke/commit/d73a4292c9f2bc8b2c74bda926dedb3ff15f41c7))
+* remove opt-out collapse/expand behavior ([#1509](https://github.com/politics-rewired/spoke/issues/1509)) ([8dd2a13](https://github.com/politics-rewired/spoke/commit/8dd2a136cc453a06e0e2c532dd61dcfda7cb98a8))
+* show all timezone options in dropdown ([#1508](https://github.com/politics-rewired/spoke/issues/1508)) ([301e25d](https://github.com/politics-rewired/spoke/commit/301e25ded651434ab193d7480b2b2c3eda7e5c32))
+* **autosend:** add autosend limit field to unstarted rows ([#1506](https://github.com/politics-rewired/spoke/issues/1506)) ([0d7ff3f](https://github.com/politics-rewired/spoke/commit/0d7ff3f82d8d1eeb7764a5e3143479da302b3cb2))
+
+
+### Backend Changes
+
+* **autosending:** calculate limit at execution time ([#1503](https://github.com/politics-rewired/spoke/issues/1503)) ([c9f9ae9](https://github.com/politics-rewired/spoke/commit/c9f9ae938a8354b42c6ddf320a2b2d43bafa630f))
+* **mui v4:** update divider to mui v4 ([#1515](https://github.com/politics-rewired/spoke/issues/1515)) ([082cdd8](https://github.com/politics-rewired/spoke/commit/082cdd8742bdc11309c5ea6ed8cf1f8d76625b6d))
+* **mui v4:** update snackbar to v4 ([#1513](https://github.com/politics-rewired/spoke/issues/1513)) ([97b16f2](https://github.com/politics-rewired/spoke/commit/97b16f20495076b8034adda88a49b5d1ac19426d))
+* **mui v4:** upgrade paper to mui v4 ([#1514](https://github.com/politics-rewired/spoke/issues/1514)) ([47fa4b4](https://github.com/politics-rewired/spoke/commit/47fa4b401bd1bfb126b61dd943e38276ac0a52a9))
+* schema.js into resolvers and mutations file ([#1510](https://github.com/politics-rewired/spoke/issues/1510)) ([5bb6113](https://github.com/politics-rewired/spoke/commit/5bb61136a5bb70db8b4c67633be42ceafca77b7c))
+
 ## [5.1.0](https://github.com/politics-rewired/spoke/compare/v5.1.0-rc.2...v5.1.0) (2022-11-03)
 
 ## [5.1.0-rc.2](https://github.com/politics-rewired/spoke/compare/v5.1.0-rc.1...v5.1.0-rc.2) (2022-11-01)
