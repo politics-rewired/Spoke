@@ -34,7 +34,7 @@ export function setupAuth0Passport() {
         return done(new Error("Null user in Auth0 login callback"));
       }
 
-      const { db } = contextForRequest(req);
+      const { db } = await contextForRequest(req);
 
       // Attempt login
       try {
