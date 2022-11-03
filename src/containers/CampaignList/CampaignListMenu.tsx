@@ -1,11 +1,12 @@
 import IconButton from "@material-ui/core/IconButton";
+import ListItemIcon from "@material-ui/core/ListItemIcon";
+import Menu from "@material-ui/core/Menu";
+import MenuItem from "@material-ui/core/MenuItem";
 import ArchiveIcon from "@material-ui/icons/Archive";
 import MoreVertIcon from "@material-ui/icons/MoreVert";
 import UnarchiveIcon from "@material-ui/icons/Unarchive";
 import type { CampaignListEntryFragment } from "@spoke/spoke-codegen";
-import IconMenu from "material-ui/IconMenu";
-import MenuItem from "material-ui/MenuItem";
-import React from "react";
+import React, { useCallback, useState } from "react";
 
 type ClickHandler = () => void | Promise<void>;
 
@@ -24,6 +25,8 @@ interface Props extends CampaignOperations {
 }
 
 export const CampaignListMenu: React.FC<Props> = (props) => {
+  const [menuAnchor, setMenuAnchor] = useState<HTMLButtonElement | null>(null);
+
   const {
     startOperation,
     archiveCampaign,
@@ -31,70 +34,83 @@ export const CampaignListMenu: React.FC<Props> = (props) => {
     campaign
   } = props;
 
-  return (
-    <IconMenu
-      iconButtonElement={
-        <IconButton>
-          <MoreVertIcon />
-        </IconButton>
-      }
-    >
-      <MenuItem
-        primaryText="Release Unsent Messages"
-        onClick={startOperation("releaseUnsentMessages", campaign)}
-      />
-      <MenuItem
-        primaryText="Mark for a Second Pass"
-        onClick={startOperation("markForSecondPass", campaign, {
-          excludeNewer: true,
-          excludeRecentlyTexted: true,
-          days: 3,
-          hours: 0
-        })}
-      />
-      <MenuItem
-        primaryText="Release Unreplied Conversations"
-        onClick={startOperation("releaseUnrepliedMessages", campaign, {
-          ageInHours: 1
-        })}
-      />
-      {!campaign.isArchived && (
-        <MenuItem
-          primaryText="Archive Campaign"
-          leftIcon={<ArchiveIcon />}
-          onClick={() => archiveCampaign(campaign.id)}
-        />
-      )}
-      {campaign.isArchived && (
-        <MenuItem
-          primaryText="Unarchive Campaign"
-          leftIcon={<UnarchiveIcon />}
-          onClick={() => unarchiveCampaign(campaign.id)}
-        />
-      )}
-      <MenuItem
-        primaryText="Delete Unmessaged Contacts"
-        onClick={startOperation("deleteNeedsMessage", campaign)}
-      />
+  const handleClickMenu = useCallback(
+    (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) =>
+      setMenuAnchor(event.currentTarget),
+    [setMenuAnchor]
+  );
 
-      <MenuItem
-        primaryText="Un-Mark for Second Pass"
-        onClick={startOperation("unMarkForSecondPass", campaign)}
-      />
-      <MenuItem
-        primaryText={
-          campaign.isAutoassignEnabled
-            ? "Turn auto-assign OFF"
-            : "Turn auto-assign ON"
-        }
-        onClick={startOperation(
-          campaign.isAutoassignEnabled
-            ? "turnAutoAssignOff"
-            : "turnAutoAssignOn",
-          campaign
+  const handleCloseMenu = useCallback(() => setMenuAnchor(null), [
+    setMenuAnchor
+  ]);
+
+  return (
+    <div>
+      <IconButton aria-label="people-row-menu" onClick={handleClickMenu}>
+        <MoreVertIcon />
+      </IconButton>
+      <Menu
+        anchorEl={menuAnchor}
+        onClose={handleCloseMenu}
+        open={menuAnchor !== null}
+      >
+        <MenuItem onClick={startOperation("releaseUnsentMessages", campaign)}>
+          Release Unsent Messages
+        </MenuItem>
+        <MenuItem
+          onClick={startOperation("markForSecondPass", campaign, {
+            excludeNewer: true,
+            excludeRecentlyTexted: true,
+            days: 3,
+            hours: 0
+          })}
+        >
+          Mark for a Second Pass
+        </MenuItem>
+        <MenuItem
+          onClick={startOperation("releaseUnrepliedMessages", campaign, {
+            ageInHours: 1
+          })}
+        >
+          Release Unreplied Conversations
+        </MenuItem>
+        {!campaign.isArchived && (
+          <MenuItem onClick={() => archiveCampaign(campaign.id)}>
+            <ListItemIcon>
+              <ArchiveIcon />
+            </ListItemIcon>
+            Archive Campaign
+          </MenuItem>
         )}
-      />
-    </IconMenu>
+        {campaign.isArchived && (
+          <MenuItem onClick={() => unarchiveCampaign(campaign.id)}>
+            <ListItemIcon>
+              <UnarchiveIcon />
+            </ListItemIcon>
+            Unarchive Campaign
+          </MenuItem>
+        )}
+        <MenuItem onClick={startOperation("deleteNeedsMessage", campaign)}>
+          Delete Unmessaged Contacts
+        </MenuItem>
+
+        <MenuItem onClick={startOperation("unMarkForSecondPass", campaign)}>
+          Un-Mark for Second Pass
+        </MenuItem>
+        <MenuItem
+          onClick={startOperation(
+            campaign.isAutoassignEnabled
+              ? "turnAutoAssignOff"
+              : "turnAutoAssignOn",
+            campaign
+          )}
+        >
+          {campaign.isAutoassignEnabled
+            ? "Turn auto-assign OFF"
+            : "Turn auto-assign ON"}
+        </MenuItem>
+      </Menu>
+    </div>
   );
 };
 

@@ -4,6 +4,9 @@ import Button from "@material-ui/core/Button";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import { blueGrey, deepOrange, grey } from "@material-ui/core/colors";
 import IconButton from "@material-ui/core/IconButton";
+import ListItemIcon from "@material-ui/core/ListItemIcon";
+import Menu from "@material-ui/core/Menu";
+import MenuItem from "@material-ui/core/MenuItem";
 import Snackbar from "@material-ui/core/Snackbar";
 import { withTheme } from "@material-ui/core/styles";
 import Tooltip from "@material-ui/core/Tooltip";
@@ -16,8 +19,6 @@ import ReplyIcon from "@material-ui/icons/Reply";
 import { css, StyleSheet } from "aphrodite";
 import sample from "lodash/sample";
 import sortBy from "lodash/sortBy";
-import IconMenu from "material-ui/IconMenu";
-import MenuItem from "material-ui/MenuItem";
 import { Toolbar, ToolbarGroup } from "material-ui/Toolbar";
 import md5 from "md5";
 import PropTypes from "prop-types";
@@ -181,7 +182,8 @@ export class AssignmentTexterContact extends React.Component {
         availableSteps.length > 0
           ? availableSteps[availableSteps.length - 1]
           : null,
-      isTagEditorOpen: false
+      isTagEditorOpen: false,
+      menuAnchor: null
     };
   }
 
@@ -555,6 +557,11 @@ export class AssignmentTexterContact extends React.Component {
     }
   };
 
+  handleClickMenu = (event) =>
+    this.setState({ menuAnchor: event.currentTarget });
+
+  handleCloseMenu = () => this.setState({ menuAnchor: null });
+
   skipContact = () => {
     this.props.onFinishContact();
   };
@@ -625,22 +632,42 @@ export class AssignmentTexterContact extends React.Component {
     const { messageStatus } = contact;
     if (messageStatus === "closed") {
       return (
-        <MenuItem
-          leftIcon={<MarkunreadIcon />}
-          primaryText="Reopen"
-          onClick={() => this.handleEditMessageStatus("needsResponse")}
-        />
+        <MenuItem onClick={() => this.handleEditMessageStatus("needsResponse")}>
+          <ListItemIcon>
+            <MarkunreadIcon />
+          </ListItemIcon>
+          Reopen
+        </MenuItem>
       );
     }
     if (messageStatus === "needsResponse") {
       return (
-        <MenuItem
-          leftIcon={<MailIcon />}
-          primaryText="Close"
-          onClick={this.handleClickCloseContactButton}
-        />
+        <MenuItem onClick={this.handleClickCloseContactButton}>
+          <ListItemIcon>
+            <MailIcon />
+          </ListItemIcon>
+          Close
+        </MenuItem>
       );
     }
+  }
+
+  renderIconMenu(menuItems) {
+    const { menuAnchor } = this.state;
+    return (
+      <div>
+        <IconButton aria-label="people-row-menu" onClick={this.handleClickMenu}>
+          <MoreVertIcon />
+        </IconButton>
+        <Menu
+          anchorEl={menuAnchor}
+          onClose={this.handleCloseMenu}
+          open={menuAnchor !== null}
+        >
+          {menuItems}
+        </Menu>
+      </div>
+    );
   }
 
   renderActionToolbar() {
@@ -659,6 +686,8 @@ export class AssignmentTexterContact extends React.Component {
     const { justSentNew, alreadySent } = this.state;
     const { messageStatus } = contact;
     const size = document.documentElement.clientWidth;
+
+    const menuItems = [];
 
     if (messageStatus === "needsMessage" || justSentNew) {
       return (
@@ -694,6 +723,44 @@ export class AssignmentTexterContact extends React.Component {
     }
     if (size < 768) {
       // for needsResponse or messaged or convo
+      menuItems.push(
+        <MenuItem
+          disabled={tags.length === 0}
+          onClick={() => this.setState({ isTagEditorOpen: true })}
+        >
+          <ListItemIcon>
+            <LocalOfferIcon />
+          </ListItemIcon>
+          Manage Tags
+        </MenuItem>
+      );
+
+      if (size <= 400) {
+        menuItems.push(this.renderNeedsResponseToggleMenuItem(contact));
+        menuItems.push(
+          <MenuItem onClick={this.handleOpenOptOutDialog}>
+            <ListItemIcon>
+              <NotInterestedIcon />
+            </ListItemIcon>
+            Opt Out
+          </MenuItem>
+        );
+      }
+
+      if (size <= 500) {
+        menuItems.push(
+          <MenuItem
+            disabled={!isCannedResponseEnabled}
+            onClick={this.handleOpenPopover}
+          >
+            <ListItemIcon>
+              <ReplyIcon />
+            </ListItemIcon>
+            Canned Responses
+          </MenuItem>
+        );
+      }
+
       return (
         <div
           style={{
@@ -736,44 +803,40 @@ export class AssignmentTexterContact extends React.Component {
           <div style={{ flexGrow: 1, textAlign: "center" }}>
             {navigationToolbarChildren}
           </div>
-          <IconMenu
-            iconButtonElement={
-              <IconButton>
-                <MoreVertIcon />
-              </IconButton>
-            }
-            anchorOrigin={{ horizontal: "right", vertical: "top" }}
-            targetOrigin={{ horizontal: "right", vertical: "bottom" }}
-          >
-            {size <= 400 && this.renderNeedsResponseToggleMenuItem(contact)}
-            {size <= 400 && (
-              <MenuItem
-                primaryText="Opt Out"
-                onClick={this.handleOpenOptOutDialog}
-                leftIcon={<NotInterestedIcon />}
-              />
-            )}
-            {size <= 500 && (
-              <MenuItem
-                primaryText="Canned Responses"
-                disabled={!isCannedResponseEnabled}
-                onClick={this.handleOpenPopover}
-                leftIcon={<ReplyIcon />}
-              />
-            )}
-            <MenuItem
-              primaryText="Manage Tags"
-              leftIcon={<LocalOfferIcon />}
-              disabled={tags.length === 0}
-              onClick={() => this.setState({ isTagEditorOpen: true })}
-            />
-          </IconMenu>
+          {this.renderIconMenu(menuItems)}
         </div>
       );
     }
     if (size < 1080) {
       // for needsResponse or messaged
       // size < 1080, and > 768
+
+      menuItems.push(
+        <MenuItem
+          disabled={tags.length === 0}
+          onClick={() => this.setState({ isTagEditorOpen: true })}
+        >
+          <ListItemIcon>
+            <LocalOfferIcon />
+          </ListItemIcon>
+          Manage Tags
+        </MenuItem>
+      );
+
+      if (size <= 840) {
+        menuItems.push(
+          <MenuItem
+            disabled={!isCannedResponseEnabled}
+            onClick={this.handleOpenPopover}
+          >
+            <ListItemIcon>
+              <ReplyIcon />
+            </ListItemIcon>
+            Canned Responses
+          </MenuItem>
+        );
+      }
+
       return (
         <div
           style={{
@@ -820,30 +883,7 @@ export class AssignmentTexterContact extends React.Component {
           <div style={{ flexGrow: 1, textAlign: "center" }}>
             {navigationToolbarChildren}
           </div>
-          <IconMenu
-            iconButtonElement={
-              <IconButton style={{ backgroundColor: blueGrey[100] }}>
-                <MoreVertIcon />
-              </IconButton>
-            }
-            anchorOrigin={{ horizontal: "right", vertical: "top" }}
-            targetOrigin={{ horizontal: "right", vertical: "bottom" }}
-          >
-            {size <= 840 && (
-              <MenuItem
-                primaryText="Canned Responses"
-                disabled={!isCannedResponseEnabled}
-                onClick={this.handleOpenPopover}
-                leftIcon={<ReplyIcon />}
-              />
-            )}
-            <MenuItem
-              primaryText="Manage Tags"
-              leftIcon={<LocalOfferIcon />}
-              disabled={tags.length === 0}
-              onClick={() => this.setState({ isTagEditorOpen: true })}
-            />
-          </IconMenu>
+          {this.renderIconMenu(menuItems)}
         </div>
       );
     }
