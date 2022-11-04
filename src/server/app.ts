@@ -7,7 +7,6 @@ import cors from "cors";
 import express from "express";
 import basicAuth from "express-basic-auth";
 import expressSession from "express-session";
-import StatsD from "hot-shots";
 
 import { config } from "../config";
 import requestLogging from "../lib/request-logging";
@@ -26,6 +25,7 @@ import {
   twilioRouter,
   utilsRouter
 } from "./routes";
+import statsd from "./statsd";
 import { errToObj } from "./utils";
 
 const {
@@ -101,12 +101,7 @@ export const createApp = async () => {
 
   if (config.DD_AGENT_HOST && config.DD_DOGSTATSD_PORT) {
     const datadogOptions = {
-      dogstatsd: new StatsD({
-        host: config.DD_AGENT_HOST,
-        port: config.DD_DOGSTATSD_PORT,
-        errorHandler: (err: Error) =>
-          logger.error("connect-datadog encountered error: ", errToObj(err))
-      }),
+      dogstatsd: statsd,
       path: true,
       method: false,
       response_code: true,
