@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [5.1.1-rc.0](https://github.com/politics-rewired/spoke/compare/v5.1.0...v5.1.1-rc.0) (2022-11-04)
+
+
+### Features
+
+* **assemble-numbers:** add counter to sendMessage ([#1518](https://github.com/politics-rewired/spoke/issues/1518)) ([7804931](https://github.com/politics-rewired/spoke/commit/7804931ccee97c36fccd66ee0f94e4162dba5d84))
+
 ## [5.1.0](https://github.com/politics-rewired/spoke/compare/v5.1.0-rc.2...v5.1.0) (2022-11-03)
 
 ## [5.1.0-rc.2](https://github.com/politics-rewired/spoke/compare/v5.1.0-rc.1...v5.1.0-rc.2) (2022-11-01)
