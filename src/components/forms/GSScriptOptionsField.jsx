@@ -14,9 +14,12 @@ import { allScriptFields } from "../../lib/scripts";
 import ScriptEditor from "../ScriptEditor";
 import ScriptLinkWarningDialog from "../ScriptLinkWarningDialog";
 import ScriptOptionBlock from "../ScriptOptionBlock";
+import ScriptOptOutLanguageWarningDialog from "../ScriptOptOutLanguageWarningDialog";
 import GSFormField from "./GSFormField";
 import { getWarningContextForScript } from "./utils";
 
+// dialogs stack on top of each other when all are open as:
+// opt out language warning > link warning > script editor
 const styles = {
   dialog: {
     zIndex: 10001
@@ -27,7 +30,8 @@ class GSScriptOptionsField extends GSFormField {
   state = {
     scriptTarget: undefined,
     scriptDraft: "",
-    scriptWarningOpen: false
+    scriptLinkWarningOpen: false,
+    optOutLanguageWarningOpen: false
   };
 
   createDialogHandler = (scriptVersion) => (event) => {
@@ -74,34 +78,61 @@ class GSScriptOptionsField extends GSFormField {
       this.props.orgSettings.confirmationClickForScriptLinks &&
       getWarningContextForScript(scriptDraft);
 
-    if (warningContext) {
-      this.setState({ scriptWarningOpen: true });
-    } else {
-      this.handleSaveScript();
+    // 2022-09-24 - stop as a separate word is best for avoiding spam blocks
+    const warnForOptOutLanguage =
+      this.props.isRootStep &&
+      scriptDraft.length > 0 &&
+      !scriptDraft.toLowerCase().includes("stop ");
+
+    if (!warningContext && !warnForOptOutLanguage) this.handleSaveScript();
+    else {
+      if (warningContext) this.setState({ scriptLinkWarningOpen: true });
+      if (warnForOptOutLanguage)
+        this.setState({ optOutLanguageWarningOpen: true });
     }
   };
 
   // confirm draft with links, save script and close editor
   handleConfirmLinkWarning = () => {
-    this.setState({ scriptWarningOpen: false }, () => this.handleSaveScript());
+    this.setState({ scriptLinkWarningOpen: false }, () =>
+      this.handleSaveScript()
+    );
   };
 
   // cancel draft with links, reset script draft
   handleCloseLinkWarning = () => {
-    this.setState({ scriptWarningOpen: false });
+    this.setState({ scriptLinkWarningOpen: false });
   };
 
-  renderDialog() {
+  // opt out warning will appear on top of link warning
+  // so defer saving to the link warning if it's open
+  handleConfirmOptOutLanguageWarning = () => {
+    this.setState({ optOutLanguageWarningOpen: false }, () => {
+      if (!this.state.scriptLinkWarningOpen) this.handleSaveScript();
+    });
+  };
+
+  // cancel draft with no opt out language, reset script draft
+  handleCloseOptOutLanguageWarning = () => {
+    this.setState({ optOutLanguageWarningOpen: false });
+  };
+
+  // TODO: refactor dialog types into a ts enum
+  renderDialog(dialogType) {
     const {
       name,
       customFields,
       campaignVariables,
-      isRootStep,
       value: scriptVersions,
       integrationSourced,
       orgSettings
     } = this.props;
-    const { scriptTarget, scriptDraft, scriptWarningOpen } = this.state;
+    const {
+      scriptTarget,
+      scriptDraft,
+      scriptLinkWarningOpen,
+      optOutLanguageWarningOpen
+    } = this.state;
     const scriptFields = allScriptFields(customFields);
 
     const draftVersionOccurences = scriptVersions.filter(
@@ -155,7 +186,6 @@ class GSScriptOptionsField extends GSFormField {
             scriptFields={scriptFields}
             campaignVariables={campaignVariables}
             integrationSourced={integrationSourced}
-            isRootStep={isRootStep}
             receiveFocus
             expandable
             onChange={(val) => this.setState({ scriptDraft: val.trim() })}
@@ -163,12 +193,20 @@ class GSScriptOptionsField extends GSFormField {
           {isDuplicate && (
             <p>A script version with this text already exists!</p>
           )}
-          <ScriptLinkWarningDialog
-            open={scriptWarningOpen}
-            warningContext={warningContext}
-            handleConfirm={this.handleConfirmLinkWarning}
-            handleClose={this.handleCloseLinkWarning}
-          />
+          {dialogType === "script-link" ? (
+            <ScriptLinkWarningDialog
+              open={scriptLinkWarningOpen}
+              warningContext={warningContext}
+              handleConfirm={this.handleConfirmLinkWarning}
+              handleClose={this.handleCloseLinkWarning}
+            />
+          ) : (
+            <ScriptOptOutLanguageWarningDialog
+              open={optOutLanguageWarningOpen}
+              handleConfirm={this.handleConfirmOptOutLanguageWarning}
+              handleClose={this.handleCloseOptOutLanguageWarning}
+            />
+          )}
         </DialogContent>
         <DialogActions>{actions}</DialogActions>
       </Dialog>
@@ -216,7 +254,8 @@ class GSScriptOptionsField extends GSFormField {
         >
           Add script version
         </Button>
-        {this.renderDialog()}
+        {this.renderDialog("script-link")}
+        {this.renderDialog("opt-out-language")}
       </div>
     );
   }

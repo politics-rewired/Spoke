@@ -5,6 +5,8 @@ import DialogContent from "@material-ui/core/DialogContent";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import React from "react";
 
+// dialogs stack on top of each other when all are open as:
+// opt out language warning > link warning > script editor
 const styles = {
   dialog: {
     zIndex: 10002
