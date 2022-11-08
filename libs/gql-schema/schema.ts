@@ -275,6 +275,8 @@ const rootSchema = `
     createInvite(invite:InviteInput!): Invite
     createCampaign(campaign:CampaignInput!): Campaign
     createTemplateCampaign(organizationId: String!): Campaign!
+    deleteTemplateCampaign(organizationId: String!, campaignId: String!): Boolean!
+    cloneTemplateCampaign(organizationId: String!, campaignId: String!): Campaign!
     editCampaign(id:String!, campaign:CampaignInput!): Campaign
     saveCampaignGroups(organizationId: String!, campaignGroups: [CampaignGroupInput!]!): [CampaignGroup!]!
     deleteCampaignGroup(organizationId: String!, campaignGroupId: String!): Boolean!

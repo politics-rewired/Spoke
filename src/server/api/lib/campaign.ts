@@ -169,10 +169,11 @@ export interface CopyCampaignOptions {
   campaignId: number;
   userId: number;
   quantity?: number;
+  template?: boolean;
 }
 
 export const copyCampaign = async (options: CopyCampaignOptions) => {
-  const { db, campaignId, userId, quantity = 1 } = options;
+  const { db, campaignId, userId, quantity = 1, template } = options;
 
   const result = await db.primary.transaction(async (trx) => {
     const cloneSingle = async (count: number) => {
@@ -230,24 +231,32 @@ export const copyCampaign = async (options: CopyCampaignOptions) => {
         [count, userId, campaignId]
       );
 
-      // Copy Messaging Service OR use active one
-      const messagingServices = await r
-        .knex("messaging_service")
-        .where({
-          organization_id: newCampaign.organization_id,
-          active: true
-        })
-        .orderByRaw(`is_default desc nulls last`);
-
-      if (messagingServices.length === 0) {
-        throw new Error("No active messaging services found");
+      if (template) {
+        await trx("all_campaign")
+          .update({ is_template: true })
+          .where({ id: newCampaign.id });
       }
 
-      await trx("campaign")
-        .update({
-          messaging_service_sid: messagingServices[0].messaging_service_sid
-        })
-        .where({ id: newCampaign.id });
+      if (!template) {
+        // Copy Messaging Service OR use active one
+        const messagingServices = await r
+          .knex("messaging_service")
+          .where({
+            organization_id: newCampaign.organization_id,
+            active: true
+          })
+          .orderByRaw(`is_default desc nulls last`);
+
+        if (messagingServices.length === 0) {
+          throw new Error("No active messaging services found");
+        }
+
+        await trx("campaign")
+          .update({
+            messaging_service_sid: messagingServices[0].messaging_service_sid
+          })
+          .where({ id: newCampaign.id });
+      }
 
       // Copy interactions
       const interactions = await trx<InteractionStepRecord>("interaction_step")
@@ -308,9 +317,10 @@ export const copyCampaign = async (options: CopyCampaignOptions) => {
         [newCampaign.id, campaignId]
       );
 
-      // Copy Campaign Groups
-      await trx.raw(
-        `
+      if (!template) {
+        // Copy Campaign Groups
+        await trx.raw(
+          `
           insert into campaign_group_campaign (campaign_id, campaign_group_id)
           select
             ? as campaign_id,
@@ -318,8 +328,9 @@ export const copyCampaign = async (options: CopyCampaignOptions) => {
           from campaign_group_campaign
           where campaign_id = ?
         `,
-        [newCampaign.id, campaignId]
-      );
+          [newCampaign.id, campaignId]
+        );
+      }
 
       // Copy Campaign Variables
       await trx.raw(
@@ -781,4 +792,13 @@ WHERE campaign_id = ?`,
   );
 
   return invalidFields;
+};
+
+export const deleteCampaign = async (campaignId: string) => {
+  // In reverse order of copy campaign
+  await r.knex("campaign_variable").where({ campaign_id: campaignId }).delete();
+  await r.knex("campaign_team").where({ campaign_id: campaignId }).delete();
+  await r.knex("canned_response").where({ campaign_id: campaignId }).delete();
+  await r.knex("interaction_step").where({ campaign_id: campaignId }).delete();
+  await r.knex("all_campaign").where({ id: campaignId }).delete();
 };
