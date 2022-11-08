@@ -78,16 +78,19 @@ const DialogContentWrapper = (props: ContentProps) => {
   }
 };
 
-interface WarningProps {
+export interface WarningProps {
   open: boolean;
   warningContext: ScriptWarningContext;
   handleConfirm: () => void;
   handleClose: () => void;
 }
 
-const ScriptLinkWarningDialog = (props: WarningProps) => {
-  const { warningContext, handleClose, handleConfirm, open } = props;
-
+const ScriptLinkWarningDialog = ({
+  warningContext,
+  handleClose,
+  handleConfirm,
+  open
+}: WarningProps) => {
   const title =
     (warningContext === ScriptWarningContext.GenericLink && "Confirm Script") ||
     (warningContext === ScriptWarningContext.ShortLink && "Short Link Warning");

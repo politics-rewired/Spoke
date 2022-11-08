@@ -33,17 +33,17 @@ const DialogContentWrapper = () => {
   );
 };
 
-interface WarningProps {
+export interface WarningProps {
   open: boolean;
   handleConfirm: () => void;
   handleClose: () => void;
 }
 
-const ScriptOptOutLanguageWarningDialog = (props: WarningProps) => {
-  const { handleClose, handleConfirm, open } = props;
-
-  const title = "Opt Out Language Warning";
-
+const ScriptOptOutLanguageWarningDialog = ({
+  handleClose,
+  handleConfirm,
+  open
+}: WarningProps) => {
   const actions = [
     <Button key="close" onClick={handleClose}>
       Close
@@ -55,7 +55,7 @@ const ScriptOptOutLanguageWarningDialog = (props: WarningProps) => {
 
   return (
     <Dialog open={open} style={styles.dialog}>
-      <DialogTitle>{title}</DialogTitle>
+      <DialogTitle>Opt Out Language Warning</DialogTitle>
       <DialogContent>
         <DialogContentWrapper />
       </DialogContent>
