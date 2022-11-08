@@ -56,7 +56,12 @@ import {
   notifyOnTagConversation
 } from "./lib/alerts";
 import { getStepsToUpdate } from "./lib/bulk-script-editor";
-import { copyCampaign, editCampaign } from "./lib/campaign";
+import {
+  copyCampaign,
+  editCampaign,
+  markAutosendingPaused,
+  unqueueAutosending
+} from "./lib/campaign";
 import { saveNewIncomingMessage } from "./lib/message-sending";
 import { processNumbers } from "./lib/opt-out";
 import { sendMessage } from "./lib/send-message";
@@ -1945,7 +1950,11 @@ const rootMutations = {
       return result;
     },
 
-    pauseAutosending: async (_ignore, { campaignId }, { user }) => {
+    pauseAutosending: async (
+      _ignore: any,
+      { campaignId }: Record<string, any>,
+      { user }: any
+    ) => {
       const id = parseInt(campaignId, 10);
 
       const campaign = await r
@@ -1957,33 +1966,8 @@ const rootMutations = {
 
       await accessRequired(user, organizationId, "ADMIN", true);
 
-      let updatedCampaign;
-
-      if (campaign.autosend_status === "sending") {
-        const [updatedCampaignResult] = await r
-          .knex("campaign")
-          .update({ autosend_status: "paused" })
-          .where({ id })
-          .returning("*");
-
-        updatedCampaign = updatedCampaignResult;
-
-        await r.knex.raw(
-          `
-            select count(*)
-            from (
-              select graphile_worker.remove_job(key)
-              from graphile_worker.jobs
-              where task_identifier = 'retry-interaction-step'
-                and payload->>'campaignId' = ?
-            ) deleted_jobs
-          `,
-          [id]
-        );
-      }
-
-      const result = updatedCampaign || campaign;
-      return result;
+      await unqueueAutosending(campaign);
+      return markAutosendingPaused(campaign);
     },
 
     updateCampaignAutosendingLimit: async (

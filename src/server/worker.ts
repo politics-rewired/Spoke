@@ -37,6 +37,12 @@ import {
   schedules as ngpVanSchedules,
   taskList as ngpVanTaskList
 } from "./tasks/ngp-van";
+import {
+  PAUSE_AUTOSENDING_CAMPAIGNS_TASK_IDENTIFIER,
+  pauseAutosendingCampaigns,
+  UNQUEUE_AUTOSENDING_MESSAGES_TASK_IDENTIFIER,
+  unqueueAutosendingMessages
+} from "./tasks/pause-autosending";
 import queueActionExternalSync from "./tasks/queue-action-external-sync";
 import {
   QUEUE_AUTOSEND_INITIALS_TASK_IDENTIFIER,
@@ -96,6 +102,8 @@ export const getWorker = async (attempt = 0): Promise<Runner> => {
     // prettier and eslint are fighting here
     // eslint-disable-next-line max-len
     [QUEUE_AUTOSEND_ORGANIZATION_INITIALS_TASK_IDENTIFIER]: queueAutoSendOrganizationInitials,
+    [UNQUEUE_AUTOSENDING_MESSAGES_TASK_IDENTIFIER]: unqueueAutosendingMessages,
+    [PAUSE_AUTOSENDING_CAMPAIGNS_TASK_IDENTIFIER]: pauseAutosendingCampaigns,
     [exportCampaignIdentifier]: wrapProgressTask(exportCampaign, {
       removeOnComplete: true
     }),
@@ -174,12 +182,26 @@ export const getScheduler = async (attempt = 0): Promise<Scheduler> => {
   ];
 
   if (config.ENABLE_AUTOSENDING) {
-    schedules.push({
-      name: QUEUE_AUTOSEND_INITIALS_TASK_IDENTIFIER,
-      taskIdentifier: QUEUE_AUTOSEND_INITIALS_TASK_IDENTIFIER,
-      pattern: "*/1 * * * *",
-      timeZone: config.TZ
-    });
+    schedules.push(
+      {
+        name: QUEUE_AUTOSEND_INITIALS_TASK_IDENTIFIER,
+        taskIdentifier: QUEUE_AUTOSEND_INITIALS_TASK_IDENTIFIER,
+        pattern: "*/1 * * * *",
+        timeZone: config.TZ
+      },
+      {
+        name: PAUSE_AUTOSENDING_CAMPAIGNS_TASK_IDENTIFIER,
+        taskIdentifier: PAUSE_AUTOSENDING_CAMPAIGNS_TASK_IDENTIFIER,
+        pattern: "10 * * * *",
+        timeZone: config.TZ
+      },
+      {
+        name: UNQUEUE_AUTOSENDING_MESSAGES_TASK_IDENTIFIER,
+        taskIdentifier: UNQUEUE_AUTOSENDING_MESSAGES_TASK_IDENTIFIER,
+        pattern: "50 * * * *",
+        timeZone: config.TZ
+      }
+    );
   }
 
   if (config.ENABLE_MONTHLY_ORG_MESSAGE_LIMITS) {
