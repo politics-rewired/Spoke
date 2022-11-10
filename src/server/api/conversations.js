@@ -339,8 +339,6 @@ export async function getConversations(
     ).query
   );
 
-  console.log(query.toSQL());
-
   const pageInfo = {
     limit: cursor.limit,
     offset: cursor.offset,
