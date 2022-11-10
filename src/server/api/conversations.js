@@ -98,10 +98,14 @@ async function getConversationsJoinsAndWhereClause(
   );
 
   if (contactsFilter && "isOptedOut" in contactsFilter) {
+    let subQueryFilter = "opt_out.cell=campaign_contact.cell";
+    if (!config.OPTOUTS_SHARE_ALL_ORGS)
+      subQueryFilter += ` and organization_id = ${organizationId}`;
+
     const subQuery = r.reader
       .select("cell")
       .from("opt_out")
-      .whereRaw("opt_out.cell=campaign_contact.cell");
+      .whereRaw(subQueryFilter);
     if (contactsFilter.isOptedOut) {
       query = query.whereExists(subQuery);
     } else {
@@ -334,6 +338,8 @@ export async function getConversations(
       )
     ).query
   );
+
+  console.log(query.toSQL());
 
   const pageInfo = {
     limit: cursor.limit,
