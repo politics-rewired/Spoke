@@ -34,35 +34,49 @@ const ChangesDialog: React.FC<ChangesDialogProps> = ({
     // so we update the span of the split part with the color
     const expression = new RegExp(`(${searchString})`, "g");
     const scriptParts = script.split(expression);
-    return (
-      <span>
-        {scriptParts.map((part) =>
-          part.match(expression) ? (
-            <span style={{ color: theme.palette.warning.main }}>{part}</span>
-          ) : (
-            part
-          )
-        )}
-      </span>
-    );
+    const scriptSpan =
+      scriptParts.length > 1 ? (
+        <span>
+          {scriptParts.map((part) =>
+            part.match(expression) ? (
+              <span style={{ color: theme.palette.warning.main }}>{part}</span>
+            ) : (
+              part
+            )
+          )}
+        </span>
+      ) : (
+        <span>
+          <span style={{ color: theme.palette.warning.main }}>{script}</span>
+        </span>
+      );
+    return scriptSpan;
   };
 
   const colorReplacement = (script: string) => {
     const expression = new RegExp(`(${searchString})`, "g");
     const scriptParts = script.split(expression);
-    return (
-      <span>
-        {scriptParts.map((part) =>
-          part.match(expression) ? (
-            <span style={{ color: theme.palette.primary.main }}>
-              {replaceString}
-            </span>
-          ) : (
-            part
-          )
-        )}
-      </span>
-    );
+    const scriptSpan =
+      scriptParts.length > 1 ? (
+        <span>
+          {scriptParts.map((part) =>
+            part.match(expression) ? (
+              <span style={{ color: theme.palette.success.main }}>
+                {replaceString}
+              </span>
+            ) : (
+              part
+            )
+          )}
+        </span>
+      ) : (
+        <span>
+          <span style={{ color: theme.palette.success.main }}>
+            {replaceString}
+          </span>
+        </span>
+      );
+    return scriptSpan;
   };
 
   return (
