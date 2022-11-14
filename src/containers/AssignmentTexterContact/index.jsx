@@ -504,8 +504,8 @@ export class AssignmentTexterContact extends React.Component {
   tagContact = (addedTags, removedTags) => {
     const { contact } = this.props;
     const tag = {
-      addedTagIds: addedTags.map(({ id }) => id),
-      removedTagIds: removedTags.map(({ id }) => id)
+      addedTagIds: addedTags.map((t) => t.tag.id),
+      removedTagIds: removedTags.map((t) => t.tag.id)
     };
 
     this.props.addTagToContact(contact.id, tag);
@@ -972,7 +972,7 @@ export class AssignmentTexterContact extends React.Component {
             {this.renderActionToolbar()}
             <ApplyTagDialog
               open={isTagEditorOpen}
-              contactTags={contact.contactTags}
+              contactTags={contact.tags}
               pendingNewTags={pendingNewTags}
               allTags={tags}
               onRequestClose={() => this.setState({ isTagEditorOpen: false })}

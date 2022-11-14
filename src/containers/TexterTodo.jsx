@@ -36,14 +36,16 @@ const contactDataFragment = `
           text
           isFromContact
         }
-        contactTags {
-          id
-          title
-          description
-          confirmationSteps
-          isAssignable
-          isSystem
-          createdAt
+        tags {
+          tag {
+            id
+            title
+            description
+            confirmationSteps
+            isAssignable
+            isSystem
+            createdAt
+          }
         }
 `;
 

@@ -8,6 +8,7 @@ import React, { useCallback, useState } from "react";
 import ScriptPreviewButton from "../../../../../components/ScriptPreviewButton";
 import ManageSurveyResponses from "./ManageSurveyResponses";
 import ManageTags from "./ManageTags";
+import ShowTags from "./ShowTags";
 
 const styles: { [key: string]: React.CSSProperties } = {
   container: {
@@ -56,6 +57,7 @@ const SurveyColumn: React.FC<Props> = (props) => {
 
   return (
     <div style={styles.container}>
+      <ShowTags contact={contact} />
       <ManageSurveyResponses contact={contact} campaign={campaign} />
       <div style={styles.spacer} />
       <div style={{ display: "flex" }}>

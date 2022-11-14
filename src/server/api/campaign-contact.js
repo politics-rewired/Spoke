@@ -223,33 +223,23 @@ export const resolvers = {
       }
       return null;
     },
-    contactTags: async (campaignContact, _, { user }) => {
-      if ("contactTags" in campaignContact) {
-        return campaignContact.contactTags;
-      }
+    tags: async (campaignContact, _, { user }) => {
+      // conversations reader pulls this as campaign_id
+      // grab both, and pick the one available
 
-      const { campaign_id } = campaignContact;
+      const { cmp_id, campaign_id } = campaignContact;
+
+      const campaignId = cmp_id ?? campaign_id;
+
       const { organization_id } = await r
         .reader("campaign")
-        .where({ id: campaign_id })
+        .where({ id: campaignId })
         .first("organization_id");
 
       await accessRequired(user, organization_id, "TEXTER");
-
       return r
-        .reader("tag")
-        .select("tag.*")
-        .join(
-          "campaign_contact_tag",
-          "campaign_contact_tag.tag_id",
-          "=",
-          "tag.id"
-        )
-        .where(
-          "campaign_contact_tag.campaign_contact_id",
-          "=",
-          campaignContact.id
-        );
+        .reader("campaign_contact_tag")
+        .where({ campaign_contact_id: campaignContact.id });
     },
     timezone: (campaignContact) =>
       campaignContact.timezone ? parseIanaZone(campaignContact.timezone) : null

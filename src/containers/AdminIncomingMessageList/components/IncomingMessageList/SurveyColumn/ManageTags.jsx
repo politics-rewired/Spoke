@@ -42,13 +42,15 @@ class ManageTags extends Component {
   handleSaveTags = async () => {
     const { tags } = this.props.contactTags.contact;
     const { selectedTags } = this.state;
-    const contactTagIds = new Set(tags.map((tag) => tag.id));
-    const selectedTagIds = new Set(selectedTags.map((tag) => tag.id));
-    const addedTags = selectedTags.filter((tag) => !contactTagIds.has(tag.id));
-    const removedTags = tags.filter((tag) => !selectedTagIds.has(tag.id));
+    const contactTagIds = new Set(tags.map((tag) => tag.tag.id));
+    const selectedTagIds = new Set(selectedTags.map((tag) => tag.tag.id));
+    const addedTags = selectedTags.filter(
+      (tag) => !contactTagIds.has(tag.tag.id)
+    );
+    const removedTags = tags.filter((tag) => !selectedTagIds.has(tag.tag.id));
     const tagPayload = {
-      addedTagIds: addedTags.map((tag) => tag.id),
-      removedTagIds: removedTags.map((tag) => tag.id)
+      addedTagIds: addedTags.map((tag) => tag.tag.id),
+      removedTagIds: removedTags.map((tag) => tag.tag.id)
     };
 
     this.setState({ isWorking: true });
@@ -67,7 +69,7 @@ class ManageTags extends Component {
 
   render() {
     const { tagList } = this.props.organizationTags.organization;
-    const { tags: contactTags } = this.props.contactTags.contact;
+    const { tags } = this.props.contactTags.contact;
     const { isTagEditorOpen, selectedTags, isWorking, error } = this.state;
 
     const actions = [
@@ -103,7 +105,7 @@ class ManageTags extends Component {
           variant="contained"
           disabled={isWorking}
           onClick={this.handleOnClickEditTags}
-        >{`Edit Tags (${contactTags.length})`}</Button>
+        >{`Edit Tags (${tags.length})`}</Button>
         <Dialog open={isTagEditorOpen} onClose={this.handleCloseTagManager}>
           <DialogTitle>Manage Tags</DialogTitle>
           <DialogContent>
@@ -172,14 +174,17 @@ const queries = {
       query getContactTags($contactId: String!) {
         contact(id: $contactId) {
           id
-          tags: contactTags {
-            id
-            title
-            description
-            confirmationSteps
-            onApplyScript
-            isSystem
-            isAssignable
+          tags {
+            tag {
+              id
+              title
+              description
+              confirmationSteps
+              onApplyScript
+              isSystem
+              isAssignable
+              createdAt
+            }
             createdAt
           }
         }

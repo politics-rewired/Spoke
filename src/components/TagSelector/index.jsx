@@ -31,7 +31,7 @@ class TagSelector extends Component {
     const selectedTags = [];
     tagsArray.forEach((tag) => {
       const newTag = dataSource.find((t) => t.id === tag.value);
-      selectedTags.push(newTag);
+      if (newTag) selectedTags.push({ tag: newTag });
     });
     onChange(selectedTags);
   };
@@ -45,10 +45,10 @@ class TagSelector extends Component {
       backgroundColor: tag.backgroundColor
     }));
     const menuValues = value.map((tag) => ({
-      value: tag.id,
-      label: tag.title,
-      textColor: tag.textColor,
-      backgroundColor: tag.backgroundColor
+      value: tag.tag.id,
+      label: tag.tag.title,
+      textColor: tag.tag.textColor,
+      backgroundColor: tag.tag.backgroundColor
     }));
 
     return (
