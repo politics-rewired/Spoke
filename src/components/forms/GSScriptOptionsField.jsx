@@ -119,6 +119,7 @@ class GSScriptOptionsField extends GSFormField {
   };
 
   // TODO: refactor dialog types into a ts enum
+  // https://github.com/politics-rewired/Spoke/issues/1529
   renderDialog(dialogType) {
     const {
       name,
