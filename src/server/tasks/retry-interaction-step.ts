@@ -22,6 +22,7 @@ export const TASK_IDENTIFIER = "retry-interaction-step";
 export interface RetryInteractionStepPayload {
   campaignContactId: number;
   unassignAfterSend?: boolean;
+  interactionStepId?: number;
 }
 
 interface RetryInteractionStepRecord {
@@ -35,7 +36,7 @@ export const retryInteractionStep: Task = async (
   payload: RetryInteractionStepPayload,
   helpers
 ) => {
-  const { campaignContactId } = payload;
+  const { campaignContactId, interactionStepId } = payload;
 
   const {
     rows: [record]
@@ -52,9 +53,12 @@ export const retryInteractionStep: Task = async (
       join public.user u on u.id = a.user_id
       where
         cc.id = $1
-        and istep.parent_interaction_id is null
+        and (
+          ($2::integer is null and istep.parent_interaction_id is null)
+          or istep.id = $2::integer
+        )
     `,
-    [campaignContactId]
+    [campaignContactId, interactionStepId]
   );
 
   if (!record)
