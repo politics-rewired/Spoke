@@ -37,6 +37,7 @@ const contactDataFragment = `
           isFromContact
         }
         tags {
+          id
           tag {
             id
             title

@@ -175,6 +175,7 @@ const queries = {
         contact(id: $contactId) {
           id
           tags {
+            id
             tag {
               id
               title
@@ -185,7 +186,6 @@ const queries = {
               isAssignable
               createdAt
             }
-            createdAt
           }
         }
       }

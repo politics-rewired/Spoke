@@ -13,7 +13,9 @@ export const resolvers = {
     tag: async (cct: CampaignContactTagRecord) =>
       r.reader("tag").where({ id: cct.tag_id }).first(),
     tagger: async (cct: CampaignContactTagRecord) =>
-      r.reader("user").where({ id: cct.tagger_id }).first()
+      r.reader("user").where({ id: cct.tagger_id }).first(),
+    id: async (cct: CampaignContactTagRecord) =>
+      `${cct.campaign_contact_id}-${cct.tag_id}`
   }
 };
 

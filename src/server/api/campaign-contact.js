@@ -224,7 +224,8 @@ export const resolvers = {
       return null;
     },
     tags: async (campaignContact, _, { user }) => {
-      // conversations reader pulls this as campaign_id
+      // conversations reader pulls this as cmp_id
+      // other loaders resolve it as campaign_id
       // grab both, and pick the one available
 
       const { cmp_id, campaign_id } = campaignContact;

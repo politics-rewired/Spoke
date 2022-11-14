@@ -28,15 +28,16 @@ fragment ConversationInfo on Conversation {
     }
     updatedAt
     tags {
+      id
       tag {
         title
-          textColor
-          backgroundColor
+        textColor
+        backgroundColor
       }
       tagger {
         firstName
-          lastName
-          email
+        lastName
+        email
       }
     }
   }

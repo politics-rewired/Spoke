@@ -2,8 +2,9 @@ import Button from "@material-ui/core/Button";
 import IconButton from "@material-ui/core/IconButton";
 import Snackbar from "@material-ui/core/Snackbar";
 import CloseIcon from "@material-ui/icons/Close";
+import type { CampaignContactTag } from "@spoke/spoke-codegen";
 import { useCloseConversationMutation } from "@spoke/spoke-codegen";
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 
 import ScriptPreviewButton from "../../../../../components/ScriptPreviewButton";
 import ManageSurveyResponses from "./ManageSurveyResponses";
@@ -55,9 +56,17 @@ const SurveyColumn: React.FC<Props> = (props) => {
     setErrorMessage
   ]);
 
+  const formattedTags = useMemo(() => {
+    const { tags } = contact;
+    return tags.map((tag: CampaignContactTag) => ({
+      tagLabel: `${tag.tag.title} (${tag.tagger.firstName} ${tag.tagger.lastName}, ${tag.tagger.email})`,
+      ...tag
+    }));
+  }, [contact]);
+
   return (
     <div style={styles.container}>
-      <ShowTags contact={contact} />
+      <ShowTags tags={formattedTags} />
       <ManageSurveyResponses contact={contact} campaign={campaign} />
       <div style={styles.spacer} />
       <div style={{ display: "flex" }}>
