@@ -23,8 +23,8 @@ import type { TemplateCampaignFragment } from "@spoke/spoke-codegen";
 import isEmpty from "lodash/isEmpty";
 import type { ReactNode } from "react";
 import React, { useCallback, useState } from "react";
-import CreateCampaignFromTemplateDialog from "src/components/CreateCampaignFromTemplateDialog";
 
+import CreateCampaignFromTemplateDialog from "../../../components/CreateCampaignFromTemplateDialog";
 import { DateTime } from "../../../lib/datetime";
 
 const useStyles = makeStyles((theme) => ({
@@ -189,7 +189,7 @@ export const TemplateCampaignRow: React.FC<TemplateCampaignRowProps> = ({
         <DialogTitle>Delete this template?</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Are you sture you want to delete this template?
+            Are you sure you want to delete this template?
           </DialogContentText>
         </DialogContent>
         <DialogActions>
@@ -207,7 +207,7 @@ export const TemplateCampaignRow: React.FC<TemplateCampaignRowProps> = ({
       <CreateCampaignFromTemplateDialog
         organizationId={organizationId}
         open={createFromTemplateOpen}
-        preselectedTemplate={templateCampaign}
+        defaultTemplate={templateCampaign}
         onClose={() => setCreateFromTemplateOpen(false)}
       />
     </Card>

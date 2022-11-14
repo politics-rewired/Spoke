@@ -18,7 +18,7 @@ export interface CreateCampaignFromTemplateDialogProps {
   organizationId: string;
   open: boolean;
   onClose?: () => Promise<void> | void;
-  preselectedTemplate?: TemplateCampaignFragment;
+  defaultTemplate?: TemplateCampaignFragment;
 }
 
 export const CreateCampaignFromTemplateDialog: React.FC<CreateCampaignFromTemplateDialogProps> = (
@@ -27,9 +27,7 @@ export const CreateCampaignFromTemplateDialog: React.FC<CreateCampaignFromTempla
   const [
     selectedTemplate,
     setSelectedTemplate
-  ] = useState<TemplateCampaignFragment | null>(
-    props.preselectedTemplate ?? null
-  );
+  ] = useState<TemplateCampaignFragment | null>(props.defaultTemplate ?? null);
   const [quantity, setQuantity] = useState<number | null>(1);
   const { data, error } = useGetTemplateCampaignsQuery({
     variables: { organizationId: props.organizationId }

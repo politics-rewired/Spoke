@@ -321,12 +321,12 @@ export const copyCampaign = async (options: CopyCampaignOptions) => {
         // Copy Campaign Groups
         await trx.raw(
           `
-          insert into campaign_group_campaign (campaign_id, campaign_group_id)
-          select
-            ? as campaign_id,
-            campaign_group_id
-          from campaign_group_campaign
-          where campaign_id = ?
+            insert into campaign_group_campaign (campaign_id, campaign_group_id)
+            select
+              ? as campaign_id,
+              campaign_group_id
+            from campaign_group_campaign
+            where campaign_id = ?
         `,
           [newCampaign.id, campaignId]
         );
@@ -795,10 +795,27 @@ WHERE campaign_id = ?`,
 };
 
 export const deleteCampaign = async (campaignId: string) => {
-  // In reverse order of copy campaign
-  await r.knex("campaign_variable").where({ campaign_id: campaignId }).delete();
-  await r.knex("campaign_team").where({ campaign_id: campaignId }).delete();
-  await r.knex("canned_response").where({ campaign_id: campaignId }).delete();
-  await r.knex("interaction_step").where({ campaign_id: campaignId }).delete();
-  await r.knex("all_campaign").where({ id: campaignId }).delete();
+  const campaign = await r
+    .reader("all_campaign")
+    .where({ id: campaignId })
+    .first();
+
+  if (campaign.is_template) {
+    // In reverse order of copy campaign
+    await r
+      .knex("campaign_variable")
+      .where({ campaign_id: campaignId })
+      .delete();
+
+    await r.knex("campaign_team").where({ campaign_id: campaignId }).delete();
+
+    await r.knex("canned_response").where({ campaign_id: campaignId }).delete();
+
+    await r
+      .knex("interaction_step")
+      .where({ campaign_id: campaignId })
+      .delete();
+
+    await r.knex("all_campaign").where({ id: campaignId }).delete();
+  }
 };
