@@ -84,8 +84,9 @@ class GSScriptOptionsField extends GSFormField {
       scriptDraft.length > 0 &&
       !scriptDraft.toLowerCase().includes("stop ");
 
-    if (!warningContext && !warnForOptOutLanguage) this.handleSaveScript();
-    else {
+    if (!warningContext && !warnForOptOutLanguage) {
+      this.handleSaveScript();
+    } else {
       if (warningContext) this.setState({ scriptLinkWarningOpen: true });
       if (warnForOptOutLanguage)
         this.setState({ optOutLanguageWarningOpen: true });

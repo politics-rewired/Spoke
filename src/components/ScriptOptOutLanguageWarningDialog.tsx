@@ -13,26 +13,6 @@ const styles = {
   }
 };
 
-const DialogContentWrapper = () => {
-  return (
-    <div>
-      WARNING! This script does not include opt out language. You must let the
-      recipient know they can opt out of receiving future texts, or your
-      messages are very likely to be blocked as spam. <br /> <br /> We recommend
-      a phrase with the individual word STOP, such as "Reply STOP to quit"
-      Please see our{" "}
-      <a
-        href="https://docs.spokerewired.com/article/168-spoke-101-tips-for-a-successful-mass-text"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        deliverability checklist
-      </a>{" "}
-      for other best practices for improving deliverability.
-    </div>
-  );
-};
-
 export interface WarningProps {
   open: boolean;
   handleConfirm: () => void;
@@ -57,7 +37,21 @@ const ScriptOptOutLanguageWarningDialog = ({
     <Dialog open={open} style={styles.dialog}>
       <DialogTitle>Opt Out Language Warning</DialogTitle>
       <DialogContent>
-        <DialogContentWrapper />
+        <div>
+          WARNING! This script does not include opt out language. You must let
+          the recipient know they can opt out of receiving future texts, or your
+          messages are very likely to be blocked as spam. <br /> <br /> We
+          recommend a phrase with the individual word STOP, such as "Reply STOP
+          to quit" Please see our{" "}
+          <a
+            href="https://docs.spokerewired.com/article/168-spoke-101-tips-for-a-successful-mass-text"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            deliverability checklist
+          </a>{" "}
+          for other best practices for improving deliverability.
+        </div>{" "}
       </DialogContent>
       <DialogActions>{actions}</DialogActions>
     </Dialog>
