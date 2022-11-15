@@ -240,7 +240,14 @@ export const resolvers = {
       await accessRequired(user, organization_id, "TEXTER");
       return r
         .reader("campaign_contact_tag")
-        .where({ campaign_contact_id: campaignContact.id });
+        .where({ campaign_contact_id: campaignContact.id })
+        .join("tag", "tag.id", "campaign_contact_tag.tag_id")
+        .join("user", "user.id", "campaign_contact_tag.tagger_id")
+        .select([
+          "campaign_contact_tag.*",
+          r.knex.raw("row_to_json(tag.*) as tag"),
+          r.knex.raw("row_to_json(public.user.*) as tagger")
+        ]);
     },
     timezone: (campaignContact) =>
       campaignContact.timezone ? parseIanaZone(campaignContact.timezone) : null
