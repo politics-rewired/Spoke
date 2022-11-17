@@ -392,8 +392,6 @@ export async function saveNewIncomingMessage(messageInstance) {
   let updateQuery = r.knex("campaign_contact").limit(1);
 
   if (OPT_OUT_TRIGGERS.includes(cleanedUpText)) {
-    updateQuery = updateQuery.update({ message_status: "closed" });
-
     const { id: organizationId } = await r
       .knex("organization")
       .first("organization.id")
@@ -401,14 +399,25 @@ export async function saveNewIncomingMessage(messageInstance) {
       .join("assignment", "campaign_id", "=", "campaign.id")
       .where({ "assignment.id": assignment_id });
 
-    const optOutId = await cacheableData.optOut.save(r.knex, {
-      cell: contact_number,
-      reason: "Automatic OptOut",
-      assignmentId: assignment_id,
-      organizationId
-    });
+    const optOutQuery = r
+      .knex("opt_out")
+      .first("id")
+      .where({ cell: contact_number });
 
-    await queueExternalSyncForAction(ActionType.OptOut, optOutId);
+    const existingOptOut = await optOutQuery;
+
+    if (existingOptOut === undefined) {
+      updateQuery = updateQuery.update({ message_status: "closed" });
+
+      const optOutId = await cacheableData.optOut.save(r.knex, {
+        cell: contact_number,
+        reason: "Automatic OptOut",
+        assignmentId: assignment_id,
+        organizationId
+      });
+
+      await queueExternalSyncForAction(ActionType.OptOut, optOutId);
+    }
   } else {
     updateQuery = updateQuery.update({ message_status: "needsResponse" });
   }
