@@ -71,6 +71,7 @@
     "@apollo/client": "^3.4.16",
     "@babel/runtime": "^7.9.2",
     "@babel/runtime-corejs3": "^7.9.2",
+    "@escape.tech/graphql-armor": "^1.4.0",
     "@google-cloud/storage": "^5.7.4",
     "@graphql-tools/mock": "^8.4.0",
     "@graphql-tools/schema": "^8.2.0",
