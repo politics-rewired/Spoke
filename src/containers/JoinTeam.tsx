@@ -1,5 +1,6 @@
 import type { ApolloQueryResult } from "@apollo/client";
 import { gql } from "@apollo/client";
+import type { Organization } from "@spoke/spoke-codegen";
 import { css, StyleSheet } from "aphrodite/no-important";
 import muiThemeable from "material-ui/styles/muiThemeable";
 import React from "react";
@@ -7,7 +8,6 @@ import type { RouteChildrenProps } from "react-router-dom";
 import { withRouter } from "react-router-dom";
 import { compose } from "recompose";
 
-import type { Organization } from "../api/organization";
 import type { MutationMap } from "../network/types";
 import theme from "../styles/theme";
 import type { MuiThemeProviderProps } from "../styles/types";

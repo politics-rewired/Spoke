@@ -19,7 +19,7 @@ import {
   PrettyErrors,
   withOperations
 } from "../hoc/with-operations";
-import TeamEditorList from "./TeamEditorList";
+import TeamEditorList from "./components/TeamEditorList";
 
 class AdminTeamEditor extends Component {
   state = {

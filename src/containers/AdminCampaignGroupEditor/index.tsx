@@ -10,18 +10,18 @@ import Fab from "@material-ui/core/Fab";
 import { makeStyles } from "@material-ui/core/styles";
 import TextField from "@material-ui/core/TextField";
 import AddIcon from "@material-ui/icons/Add";
+import type {
+  CampaignGroupInput,
+  CampaignGroupPage
+} from "@spoke/spoke-codegen";
 import type { History } from "history";
 import React, { useState } from "react";
 import { withRouter } from "react-router-dom";
 import { compose } from "recompose";
 
-import type {
-  CampaignGroupInput,
-  CampaignGroupPage
-} from "../../api/campaign-group";
 import type { MutationMap, QueryMap } from "../../network/types";
 import { formatErrorMessage, loadData } from "../hoc/with-operations";
-import AdminCampaignGroupList from "./AdminCampaignGroupList";
+import AdminCampaignGroupList from "./components/AdminCampaignGroupList";
 
 const useStyles = makeStyles((theme) => ({
   fab: {

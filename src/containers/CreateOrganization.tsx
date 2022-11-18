@@ -6,6 +6,7 @@ import CardContent from "@material-ui/core/CardContent";
 import CardHeader from "@material-ui/core/CardHeader";
 import Container from "@material-ui/core/Container";
 import Typography from "@material-ui/core/Typography";
+import type { Invite, Organization, User } from "@spoke/spoke-codegen";
 import React from "react";
 import Form from "react-formal";
 import type { RouteComponentProps } from "react-router-dom";
@@ -13,9 +14,6 @@ import { Link, withRouter } from "react-router-dom";
 import { compose } from "recompose";
 import * as yup from "yup";
 
-import type { Invite } from "../api/invite";
-import type { Organization } from "../api/organization";
-import type { User } from "../api/user";
 import GSForm from "../components/forms/GSForm";
 import SpokeFormField from "../components/forms/SpokeFormField";
 import { dataTest } from "../lib/attributes";

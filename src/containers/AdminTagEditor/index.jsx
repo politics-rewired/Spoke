@@ -22,8 +22,8 @@ import {
   PrettyErrors,
   withOperations
 } from "../hoc/with-operations";
-import ConfirmationStepsEditor from "./ConfirmationStepsEditor";
-import TagEditorList from "./TagEditorList";
+import ConfirmationStepsEditor from "./components/ConfirmationStepsEditor";
+import TagEditorList from "./components/TagEditorList";
 
 class AdminTagEditor extends Component {
   state = {

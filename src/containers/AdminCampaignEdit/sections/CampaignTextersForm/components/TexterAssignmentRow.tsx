@@ -5,12 +5,12 @@ import { css } from "aphrodite";
 import React from "react";
 
 import { UserRoleType } from "../../../../../api/organization-membership";
-import Slider from "../../../../../components/Slider";
 import { dataTest } from "../../../../../lib/attributes";
 import theme from "../../../../../styles/theme";
 import { useDebouncedValue } from "../hooks";
 import type { Texter } from "../types";
 import rowStyles from "./rowStyles";
+import Slider from "./Slider";
 
 interface Props {
   texter: Texter;
