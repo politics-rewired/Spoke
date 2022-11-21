@@ -22,7 +22,7 @@ import AdminReplySender from "./containers/AdminReplySender";
 import AdminShortLinkDomains from "./containers/AdminShortLinkDomains";
 import AdminTagEditor from "./containers/AdminTagEditor";
 import AdminTeamEditor from "./containers/AdminTeamEditor";
-import TeamEditorDetail from "./containers/AdminTeamEditor/TeamEditorDetail";
+import TeamEditorDetail from "./containers/AdminTeamEditor/components/TeamEditorDetail";
 import AdminTemplateCampaigns from "./containers/AdminTemplateCampaigns";
 import AdminTrollAlarms from "./containers/AdminTrollAlarms";
 import { AuthzProvider } from "./containers/AuthzProvider";
