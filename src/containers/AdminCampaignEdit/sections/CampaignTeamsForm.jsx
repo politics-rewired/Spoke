@@ -1,7 +1,7 @@
 import Button from "@material-ui/core/Button";
+import TextField from "@material-ui/core/TextField";
 import Tooltip from "@material-ui/core/Tooltip";
-import differenceBy from "lodash/differenceBy";
-import ChipInput from "material-ui-chip-input";
+import Autocomplete from "@material-ui/lab/Autocomplete";
 import Toggle from "material-ui/Toggle";
 import PropTypes from "prop-types";
 import React from "react";
@@ -30,30 +30,8 @@ class CampaignTeamsForm extends React.Component {
     this.props.onChange({ isAssignmentLimitedToTeams });
   };
 
-  // Prevent user-defined teams
-  handleBeforeRequestAdd = ({ id: tagId, title }) =>
-    !Number.isNaN(tagId) && tagId !== title;
-
-  handleAddTeam = ({ id: selectedTeamId }) => {
-    const { orgTeams } = this.props;
-    const { teams: currentTeams } = this.props.formValues;
-    const addableTeams = differenceBy(orgTeams, currentTeams, "id");
-    this.props.onChange({
-      teams: currentTeams.concat(
-        addableTeams.filter((team) => team.id === selectedTeamId)
-      )
-    });
-  };
-
-  handleRemoveTeam = (deleteTeamId) => {
-    const teams = this.props.formValues.teams.filter(
-      (team) => team.id !== deleteTeamId
-    );
-    if (teams.length === 0) {
-      this.props.onChange({ teams, isAssignmentLimitedToTeams: false });
-    } else {
-      this.props.onChange({ teams });
-    }
+  handleChange = (_event, value) => {
+    this.props.onChange({ teams: value });
   };
 
   render() {
@@ -75,18 +53,24 @@ class CampaignTeamsForm extends React.Component {
             subtitle="Optionally prioritize assigning texters from specific teams for this campaign by selecting them below. Restrict assignment solely to members of selected teams by using the toggle below."
           />
 
-          <ChipInput
+          <Autocomplete
+            multiple
+            options={orgTeams}
+            getOptionLabel={(team) => team.title}
             value={formValues.teams}
-            dataSourceConfig={{ text: "title", value: "id" }}
-            dataSource={orgTeams}
-            placeholder="Select teams"
-            fullWidth
-            openOnFocus
-            onBeforeRequestAdd={this.handleBeforeRequestAdd}
-            onRequestAdd={this.handleAddTeam}
-            onRequestDelete={this.handleRemoveTeam}
+            filterSelectedOptions
+            onChange={this.handleChange}
+            getOptionSelected={(option, value) => option.id === value.id}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                variant="standard"
+                label="Select Teams"
+                placeholder="Select Teams"
+                name="select-teams-autocomplete"
+              />
+            )}
           />
-
           <br />
 
           <Tooltip

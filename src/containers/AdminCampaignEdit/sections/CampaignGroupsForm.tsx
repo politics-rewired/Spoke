@@ -1,13 +1,16 @@
 import type { ApolloQueryResult } from "@apollo/client";
 import { gql } from "@apollo/client";
 import Button from "@material-ui/core/Button";
-import ChipInput from "material-ui-chip-input";
+import TextField from "@material-ui/core/TextField";
+import Autocomplete from "@material-ui/lab/Autocomplete";
+import type {
+  Campaign,
+  CampaignGroup,
+  Organization
+} from "@spoke/spoke-codegen";
 import React, { useState } from "react";
 import { compose } from "recompose";
 
-import type { Campaign } from "../../../api/campaign";
-import type { CampaignGroup } from "../../../api/campaign-group";
-import type { Organization } from "../../../api/organization";
 import type { MutationMap, QueryMap } from "../../../network/types";
 import { loadData } from "../../hoc/with-operations";
 import CampaignFormSectionHeading from "../components/CampaignFormSectionHeading";
@@ -51,20 +54,10 @@ const CampaignGroupsForm: React.FC<InnerProps> = (props) => {
   }));
   const selectedGroups = pendingGroups ?? campaignGroups;
 
-  // Prevent user-defined teams
-  const handleBeforeRequestAdd = ({
-    id: groupId,
-    name
-  }: {
-    id: string;
-    name: string;
-  }) => !Number.isNaN(groupId) && groupId !== name;
-
-  const handleAddGroup = (group: GroupSelect) =>
-    setPendingGroups([...selectedGroups, group]);
-
-  const handleRemoveGroup = (deleteGroupId: string) =>
-    setPendingGroups(selectedGroups.filter(({ id }) => id !== deleteGroupId));
+  const handleChangeGroups = (
+    _event: React.ChangeEvent<any>,
+    value: Array<GroupSelect>
+  ) => setPendingGroups(value);
 
   const handleSave = async () => {
     if (pendingGroups === undefined) return;
@@ -88,16 +81,25 @@ const CampaignGroupsForm: React.FC<InnerProps> = (props) => {
         title="Campaign Groups"
         subtitle="Associate groups of campaigns together."
       />
-      <ChipInput
+      <Autocomplete
+        style={{ marginBottom: 10 }}
+        multiple
+        options={orgCampaignGroups}
         value={selectedGroups}
-        dataSourceConfig={{ text: "name", value: "id" }}
-        dataSource={orgCampaignGroups}
-        placeholder="Select campaign groups"
+        getOptionLabel={(group) => group.name}
+        filterSelectedOptions
         fullWidth
-        openOnFocus
-        onBeforeRequestAdd={handleBeforeRequestAdd}
-        onRequestAdd={handleAddGroup}
-        onRequestDelete={handleRemoveGroup}
+        onChange={handleChangeGroups}
+        getOptionSelected={(option, value) => option.id === value.id}
+        renderInput={(params) => (
+          <TextField
+            {...params}
+            variant="standard"
+            label="Select Campaign Groups"
+            placeholder="Select Campaign Groups"
+            name="select-campaign-groups-autcomplete"
+          />
+        )}
       />
       <Button
         variant="contained"
