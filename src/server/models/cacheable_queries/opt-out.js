@@ -151,7 +151,10 @@ export const optOutCache = {
         reason_code: reason
       }));
 
-      await trx("opt_out").insert(optOuts);
+      // workaround for rethink knex adapter using knex 0.17
+      const knexInsert = trx("opt_out").insert(optOuts);
+      const onConflictInsert = `${knexInsert.toString()} on conflict(organization_id, cell) do update set updated_at = now()`;
+      await trx.raw(onConflictInsert);
 
       const contactIdsQuery = r
         .reader("campaign_contact")

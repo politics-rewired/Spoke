@@ -399,12 +399,12 @@ export async function saveNewIncomingMessage(messageInstance) {
       .join("assignment", "campaign_id", "=", "campaign.id")
       .where({ "assignment.id": assignment_id });
 
-    const optOutQuery = r
+    const existingOptOutQuery = r
       .knex("opt_out")
       .first("id")
       .where({ cell: contact_number });
 
-    const existingOptOut = await optOutQuery;
+    const existingOptOut = await existingOptOutQuery;
 
     if (existingOptOut === undefined) {
       updateQuery = updateQuery.update({ message_status: "closed" });
