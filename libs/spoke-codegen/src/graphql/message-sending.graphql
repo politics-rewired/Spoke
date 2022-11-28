@@ -1,0 +1,14 @@
+mutation SendMessage($message: MessageInput!, $campaignContactId: String!) {
+  sendMessage(message: $message, campaignContactId: $campaignContactId) {
+    id
+    messageStatus
+    messages {
+      id
+      createdAt
+      userId
+      text
+      isFromContact
+      errorCodes
+    }
+  }
+}
