@@ -33,7 +33,7 @@ export const persistInteractionStepNode = async (
 
   if (rootInteractionStep.id.indexOf("new") !== -1) {
     // Insert new interaction steps
-    const [newId] = await knexTrx("interaction_step")
+    const [{ id: newId }] = await knexTrx("interaction_step")
       .insert({
         ...payload,
         parent_interaction_id: rootInteractionStep.parentInteractionId || null,
