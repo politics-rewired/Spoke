@@ -32,7 +32,11 @@ const sanitizeRawContact = (rawContact) => {
   return { ...contact, customFields };
 };
 
-export const processContactsFile = async (file, onlyCell = false) => {
+export const processContactsFile = async ({
+  file,
+  columnMapping,
+  onlyCell = false
+}) => {
   const { createReadStream } = await file;
   const stream = createReadStream()
     .pipe(new AutoDetectDecoderStream())
@@ -47,9 +51,14 @@ export const processContactsFile = async (file, onlyCell = false) => {
       header: true,
       transformHeader: (header) => {
         const trimmedHeader = header.trim();
-        for (const [field, aliases] of Object.entries(fieldAliases)) {
-          if (aliases.includes(trimmedHeader)) {
-            return field;
+        if (columnMapping) {
+          const field = columnMapping.find((cM) => cM.column === header);
+          if (field) return field.remap;
+        } else {
+          for (const [field, aliases] of Object.entries(fieldAliases)) {
+            if (aliases.includes(trimmedHeader)) {
+              return field;
+            }
           }
         }
         return trimmedHeader;

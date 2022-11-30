@@ -118,6 +118,7 @@ export const schema = `
     autosendStatus: String!
     messagingServiceSid: String
     autosendLimit: Int
+    columnMapping: String
   }
 
   type CampaignEdge {
@@ -186,6 +187,7 @@ export const schema = `
     repliesStaleAfter: Int
     messagingServiceSid: String
     autosendLimit: Int
+    columnMapping: String
   }
 `;
 export default schema;

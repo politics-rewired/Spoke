@@ -675,6 +675,7 @@ type Campaign {
   autosendStatus: String!
   messagingServiceSid: String
   autosendLimit: Int
+  columnMapping: String
 }
 
 type CampaignEdge {
@@ -743,6 +744,7 @@ input CampaignInput {
   repliesStaleAfter: Int
   messagingServiceSid: String
   autosendLimit: Int
+  columnMapping: String
 }
 
 

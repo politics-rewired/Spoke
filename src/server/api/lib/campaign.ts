@@ -420,7 +420,8 @@ export const editCampaign = async (
     repliesStaleAfter,
     timezone,
     externalSystemId,
-    messagingServiceSid
+    messagingServiceSid,
+    columnMapping
   } = campaign;
 
   const organizationId = origCampaignRecord.organization_id;
@@ -441,7 +442,8 @@ export const editCampaign = async (
     replies_stale_after_minutes: repliesStaleAfter, // this is null to unset it - it must be null, not undefined
     timezone: timezone ? parseIanaZone(timezone) : undefined,
     external_system_id: externalSystemId,
-    messaging_service_sid: messagingServiceSid ?? undefined
+    messaging_service_sid: messagingServiceSid ?? undefined,
+    column_mapping: columnMapping ?? undefined
   };
 
   Object.keys(campaignUpdates).forEach((key) => {
@@ -471,7 +473,10 @@ export const editCampaign = async (
     Object.prototype.hasOwnProperty.call(campaign, "contactsFile") &&
     campaign.contactsFile
   ) {
-    const processedContacts = await processContactsFile(campaign.contactsFile);
+    const processedContacts = await processContactsFile({
+      file: campaign.contactsFile,
+      columnMapping: JSON.parse(columnMapping)
+    });
     campaign.contacts = processedContacts.contacts;
     validationStats = processedContacts.validationStats;
   }
