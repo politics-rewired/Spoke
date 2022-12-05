@@ -23,7 +23,19 @@ interface MessageResponseProps {
   messagesChanged(messages: Message[]): Promise<void> | void;
 }
 
-const MessageResponse: React.FC<MessageResponseProps> = (props) => {
+const messageSchema = yup.object({
+  messageText: yup
+    .string()
+    .required("Can't send empty message")
+    .max(window.MAX_MESSAGE_LENGTH)
+});
+
+const MessageResponse: React.FC<MessageResponseProps> = ({
+  conversation,
+  value,
+  onChange,
+  messagesChanged
+}: MessageResponseProps) => {
   const [isSending, setIsSending] = useState<boolean>(false);
   const [sendError, setSendError] = useState<string>("");
   const [messageForm, setMessageForm] = useState<HTMLFormElement | null>(null);
@@ -31,7 +43,7 @@ const MessageResponse: React.FC<MessageResponseProps> = (props) => {
   const [sendMessage] = useSendMessageMutation();
 
   const createMessageToContact = (text: string) => {
-    const { contact, texter } = props.conversation;
+    const { contact, texter } = conversation;
 
     return {
       assignmentId: contact.assignmentId,
@@ -42,10 +54,10 @@ const MessageResponse: React.FC<MessageResponseProps> = (props) => {
   };
 
   const handleMessageFormChange = ({ messageText }: MessageFormValue) =>
-    props.onChange?.(messageText);
+    onChange?.(messageText);
 
   const handleMessageFormSubmit = async ({ messageText }: MessageFormValue) => {
-    const { contact } = props.conversation;
+    const { contact } = conversation;
     const message: MessageInput = createMessageToContact(messageText);
     if (isSending) {
       return; // stops from multi-send
@@ -53,14 +65,19 @@ const MessageResponse: React.FC<MessageResponseProps> = (props) => {
     setIsSending(true);
 
     try {
-      const { data } = await sendMessage({
+      const { data, errors } = await sendMessage({
         variables: { message, campaignContactId: contact.id as string }
       });
       const messages = data?.sendMessage?.messages;
 
+      if (errors) {
+        const errorMsgs = errors.map((error) => error.message).join("\n");
+        setSendError(errorMsgs);
+      }
+
       if (messages) {
-        props.messagesChanged(messages);
-        props.onChange?.("");
+        messagesChanged(messages);
+        onChange?.("");
       }
     } catch (e: any) {
       setSendError(e.message);
@@ -77,14 +94,7 @@ const MessageResponse: React.FC<MessageResponseProps> = (props) => {
     }
   };
 
-  const messageSchema = yup.object({
-    messageText: yup
-      .string()
-      .required("Can't send empty message")
-      .max(window.MAX_MESSAGE_LENGTH)
-  });
-
-  const isSendDisabled = isSending || props.value?.trim() === "";
+  const isSendDisabled = isSending || value?.trim() === "";
 
   const errorActions = [
     <Button key="ok" color="primary" onClick={handleCloseErrorDialog}>
@@ -99,7 +109,7 @@ const MessageResponse: React.FC<MessageResponseProps> = (props) => {
           setMessageForm(ref);
         }}
         schema={messageSchema}
-        value={{ messageText: props.value ?? "" }}
+        value={{ messageText: value ?? "" }}
         onSubmit={handleMessageFormSubmit}
         onChange={handleMessageFormChange}
       >
@@ -114,7 +124,7 @@ const MessageResponse: React.FC<MessageResponseProps> = (props) => {
               rowsMax={6}
               style={{ flexGrow: "1" }}
             />
-            <MessageLengthInfo messageText={props.value ?? ""} />
+            <MessageLengthInfo messageText={value ?? ""} />
           </div>
           <SendButton
             threeClickEnabled={false}
