@@ -38,11 +38,11 @@ export interface ConfigureColumnMappingDialogProps {
   contactsFile: File | null;
   open: boolean;
   onClose(): void;
-  onSave(columnMapping: Array<ColumnMapping>): void;
+  onSave(columnMappings: Array<ColumnMapping>): void;
 }
 
 type FormValues = {
-  columnMapping: Array<ColumnMapping>;
+  columnMappings: Array<ColumnMapping>;
 };
 
 const ConfigureColumnMappingDialog: React.FC<ConfigureColumnMappingDialogProps> = ({
@@ -56,14 +56,14 @@ const ConfigureColumnMappingDialog: React.FC<ConfigureColumnMappingDialogProps> 
   const theme = useTheme();
 
   const { handleSubmit, watch, control, reset } = useForm<FormValues>({
-    defaultValues: { columnMapping: [] }
+    defaultValues: { columnMappings: [] }
   });
 
   const { fields } = useFieldArray({
     control,
-    name: "columnMapping"
+    name: "columnMappings"
   });
-  const watchFieldArray = watch("columnMapping");
+  const watchFieldArray = watch("columnMappings");
   const controlledFields = fields.map((field, index) => ({
     ...field,
     ...watchFieldArray[index]
@@ -75,14 +75,14 @@ const ConfigureColumnMappingDialog: React.FC<ConfigureColumnMappingDialogProps> 
         header: true,
         preview: 2,
         complete: (results: ParseResult<any>) => {
-          const columnMapping = results?.meta?.fields?.map(
+          const columnMappings = results?.meta?.fields?.map(
             (header: string) => ({
               column: header,
               remap: namedFields[header] ?? null
             })
           );
 
-          reset({ columnMapping });
+          reset({ columnMappings });
           setParseComplete(true);
         }
       });
@@ -90,21 +90,21 @@ const ConfigureColumnMappingDialog: React.FC<ConfigureColumnMappingDialogProps> 
   }, [open]);
 
   const handleSave = (formValues: FormValues) => {
-    const columnMapping = formValues.columnMapping.filter((cR) =>
-      Boolean(cR.remap)
+    const mappedColumns = formValues.columnMappings.filter((column) =>
+      Boolean(column.remap)
     );
 
-    const remappedFields = columnMapping.map((cr) => cr.remap);
+    const remappedFields = mappedColumns.map((column) => column.remap);
 
     const missingFields = requiredUploadFields.filter(
-      (rUF) => !remappedFields.includes(rUF)
+      (requiredUploadField) => !remappedFields.includes(requiredUploadField)
     );
 
     if (missingFields.length > 0) {
       setError(`Required Fields Missing!!! ${missingFields.join(", ")}`);
     } else {
       setError(null);
-      onSave(columnMapping);
+      onSave(mappedColumns);
     }
   };
 
@@ -134,7 +134,7 @@ const ConfigureColumnMappingDialog: React.FC<ConfigureColumnMappingDialogProps> 
                 >
                   <Grid item>
                     <Controller
-                      name={`columnMapping.${index}.column`}
+                      name={`columnMappings.${index}.column`}
                       control={control}
                       render={({
                         field,
@@ -155,7 +155,7 @@ const ConfigureColumnMappingDialog: React.FC<ConfigureColumnMappingDialogProps> 
                   </Grid>
                   <Grid item>
                     <Controller
-                      name={`columnMapping.${index}.remap`}
+                      name={`columnMappings.${index}.remap`}
                       control={control}
                       render={({
                         field,

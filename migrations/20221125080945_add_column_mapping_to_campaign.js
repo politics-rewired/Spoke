@@ -36,8 +36,8 @@ exports.up = function up(knex) {
           is_approved,
           autosend_status,
           autosend_user_id,
-          autosend_limit,
           messaging_service_sid,
+          autosend_limit,
           column_mapping
         from all_campaign
         where is_template = false;
@@ -81,8 +81,8 @@ exports.down = function down(knex) {
           is_approved,
           autosend_status,
           autosend_user_id,
-          autosend_limit,
-          messaging_service_sid
+          messaging_service_sid,
+          autosend_limit
         from all_campaign
         where is_template = false;
 
