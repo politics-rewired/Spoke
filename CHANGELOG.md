@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [6.0.0-rc.1](https://github.com/politics-rewired/spoke/compare/v6.0.0-rc.0...v6.0.0-rc.1) (2022-12-06)
+
+
+### Features
+
+* **assemble-numbers:** add counter to sendMessage ([#1518](https://github.com/politics-rewired/spoke/issues/1518)) ([73aea18](https://github.com/politics-rewired/spoke/commit/73aea180c00b28bb181be3b68c91d2dc6b8a8fa7))
+
+
+### Bug Fixes
+
+* **autosending:** change how initials are picked ([#1542](https://github.com/politics-rewired/spoke/issues/1542)) ([60922fc](https://github.com/politics-rewired/spoke/commit/60922fcf711313eb25d46060f03514b0a454cd4d))
+
 ## [6.0.0-rc.0](https://github.com/politics-rewired/spoke/compare/v5.1.0...v6.0.0-rc.0) (2022-11-03)
 
 
