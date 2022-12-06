@@ -4,7 +4,6 @@ import partition from "lodash/partition";
 import Papa from "papaparse";
 
 import {
-  fieldAliases,
   requiredUploadFields,
   topLevelUploadFields,
   validateCsv
@@ -54,12 +53,6 @@ export const processContactsFile = async ({
         if (columnMapping) {
           const field = columnMapping.find((cM) => cM.column === header);
           if (field) return field.remap;
-        } else {
-          for (const [field, aliases] of Object.entries(fieldAliases)) {
-            if (aliases.includes(trimmedHeader)) {
-              return field;
-            }
-          }
         }
         return trimmedHeader;
       },
