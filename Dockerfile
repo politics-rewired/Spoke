@@ -1,6 +1,6 @@
 ### Dependency Cacher
 ### -------------------------
-FROM --platform=linux/amd64 endeveit/docker-jq:latest as deps
+FROM endeveit/docker-jq:latest as deps
 
 # To prevent cache invalidation from changes in fields other than dependencies
 # https://stackoverflow.com/a/59606373
@@ -10,7 +10,7 @@ RUN jq '{ dependencies, devDependencies, resolutions }' < /tmp/package.json > /t
 
 ### Fat Build
 ### -------------------------
-FROM --platform=linux/amd64 node:16.14.0 AS builder
+FROM node:16.14.0 AS builder
 
 WORKDIR /usr/Spoke
 
@@ -36,7 +36,7 @@ RUN yarn run build
 
 ### Slim Deploy
 ### -------------------------
-FROM --platform=linux/amd64 node:16.14.0
+FROM node:16.14.0
 
 WORKDIR /usr/Spoke
 
