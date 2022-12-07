@@ -6,9 +6,6 @@ import type { CampaignRecord } from "../api/types";
 import { r } from "../models";
 import { TASK_IDENTIFIER as retryInteractionStepIdentifier } from "./retry-interaction-step";
 
-export const UNQUEUE_AUTOSENDING_MESSAGES_TASK_IDENTIFIER =
-  "unqueue-autosending-messages";
-
 export const PAUSE_AUTOSENDING_CAMPAIGNS_TASK_IDENTIFIER =
   "pause-autosending-campaigns";
 
@@ -17,7 +14,7 @@ const TIMEZONES = timezones.map((tz: string) => parseIanaZone(tz));
 const getAutosendingCampaigns = async (): Promise<Array<CampaignRecord>> =>
   r.knex("all_campaign").where({ autosend_status: "sending" });
 
-const getMessagesCount = async (campaignId: number) =>
+const getQueuedMessagesJobsCount = async (campaignId: number) =>
   r
     .knex("graphile_worker.jobs")
     .where({
@@ -27,56 +24,46 @@ const getMessagesCount = async (campaignId: number) =>
     .count("id")
     .first();
 
-// Get Array of [tz, texting_hours_end] for whereIn query
+// Get Array of [tz, tz_next_hour] for whereIn query
 // DateTime end of hour takes us to the last second
 // add a minute to change time to next hour, and get the hour value
-const getHoursWithTimezones = () =>
+const getTimezonesWithHours = () =>
   TIMEZONES.map((tz: string) => [
     tz,
-    DateTime.now().setZone(tz).endOf("hour").plus({ minutes: 1 }).hour
+    DateTime.now().setZone(tz).startOf("hour").hour
   ]);
 
-const getAutosendingContacts = async (campaigns: Array<CampaignRecord>) => {
-  const campaignIds = campaigns.map((c: CampaignRecord) => c.id);
-  const timeZoneParams = getHoursWithTimezones();
+const getElligibleContactsCount = async (campaign: CampaignRecord) => {
+  const timeZoneParams = getTimezonesWithHours();
 
-  const contactsToUnqueueWithTimezone = await r
+  const [{ count: contactsWithTimezoneCount }] = await r
     .knex("campaign_contact")
     .join("campaign", "campaign.id", "campaign_contact.campaign_id")
-    .where({ message_status: "needsMessage" })
-    .whereIn("campaign.id", campaignIds)
-    .whereIn(
+    .where({ message_status: "needsMessage", campaign_id: campaign.id })
+    .whereNotNull("campaign_contact.timezone")
+    .whereNotIn(
       ["campaign_contact.timezone", "campaign.texting_hours_end"],
       timeZoneParams
     )
-    .pluck("campaign_contact.id");
+    .count("campaign_contact.id");
 
-  const contactsToUnqueueWithoutTimezone = await r
+  const [{ count: contactsWithoutTimezoneCount }] = await r
     .knex("campaign_contact")
     .join("campaign", "campaign.id", "campaign_contact.campaign_id")
     .where({
       "campaign_contact.timezone": null,
-      message_status: "needsMessage"
+      message_status: "needsMessage",
+      campaign_id: campaign.id
     })
-    .whereIn("campaign.id", campaignIds)
-    .whereIn(
+    .whereNotIn(
       ["campaign.timezone", "campaign.texting_hours_end"],
       timeZoneParams
     )
-    .pluck("campaign_contact.id");
+    .count("campaign_contact.id");
 
-  return contactsToUnqueueWithTimezone.concat(contactsToUnqueueWithoutTimezone);
-};
-
-export const unqueueAutosendingMessages: Task = async (_payload, _helpers) => {
-  const campaigns = await getAutosendingCampaigns();
-  const contacts = await getAutosendingContacts(campaigns);
-
-  await r
-    .knex("graphile_worker.jobs")
-    .where({ task_identifier: retryInteractionStepIdentifier })
-    .whereRaw("payload->>'campaignContactId' = ANY(?)", [contacts])
-    .delete();
+  return (
+    Number(contactsWithTimezoneCount) + Number(contactsWithoutTimezoneCount)
+  );
 };
 
 export const pauseAutosendingCampaigns: Task = async (_payload, _helpers) => {
@@ -84,15 +71,19 @@ export const pauseAutosendingCampaigns: Task = async (_payload, _helpers) => {
 
   const campaignsToPause = [];
   for (const campaign of runningCampaigns) {
-    const { count: messagesToSend } = await getMessagesCount(campaign.id);
+    const { count: messagesToSendCount } = await getQueuedMessagesJobsCount(
+      campaign.id
+    );
 
-    if (messagesToSend === 0) {
+    const elligibleContactsCount = await getElligibleContactsCount(campaign);
+
+    if (Number(messagesToSendCount) + Number(elligibleContactsCount) === 0) {
       campaignsToPause.push(campaign.id);
     }
   }
 
   await r
-    .knex("campaign")
+    .knex("all_campaign")
     .whereIn("id", campaignsToPause)
     .update({ autosend_status: "paused" });
 };

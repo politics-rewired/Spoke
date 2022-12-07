@@ -1952,7 +1952,7 @@ const rootMutations = {
 
     pauseAutosending: async (
       _ignore: any,
-      { campaignId }: Record<string, any>,
+      { campaignId }: { campaignId: string },
       { user }: any
     ) => {
       const id = parseInt(campaignId, 10);
