@@ -119,7 +119,10 @@ class CampaignContactsForm extends React.Component<
     this.setState({ contactsSql });
 
   handleOnContactsFileChange = (contactsFile?: File) =>
-    this.setState({ contactsFile: contactsFile || null });
+    this.setState({
+      contactsFile: contactsFile || null,
+      configureMappingOpen: true
+    });
 
   handleOnExternalListChange = (externalListId: string) =>
     this.setState({ externalListId });
