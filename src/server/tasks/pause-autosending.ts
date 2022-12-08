@@ -4,7 +4,6 @@ import { DateTime, parseIanaZone } from "../../lib/datetime";
 import { timezones } from "../../lib/timezones";
 import type { CampaignRecord } from "../api/types";
 import { r } from "../models";
-import { TASK_IDENTIFIER as retryInteractionStepIdentifier } from "./retry-interaction-step";
 
 export const PAUSE_AUTOSENDING_CAMPAIGNS_TASK_IDENTIFIER =
   "pause-autosending-campaigns";
@@ -13,16 +12,6 @@ const TIMEZONES = timezones.map((tz: string) => parseIanaZone(tz));
 
 const getAutosendingCampaigns = async (): Promise<Array<CampaignRecord>> =>
   r.knex("all_campaign").where({ autosend_status: "sending" });
-
-const getQueuedMessagesJobsCount = async (campaignId: number) =>
-  r
-    .knex("graphile_worker.jobs")
-    .where({
-      task_identifier: retryInteractionStepIdentifier
-    })
-    .whereRaw("payload->>'campaignId' = ?", [campaignId])
-    .count("id")
-    .first();
 
 // Get Array of [tz, tz_next_hour] for whereIn query
 // DateTime end of hour takes us to the last second
@@ -71,13 +60,9 @@ export const pauseAutosendingCampaigns: Task = async (_payload, _helpers) => {
 
   const campaignsToPause = [];
   for (const campaign of runningCampaigns) {
-    const { count: messagesToSendCount } = await getQueuedMessagesJobsCount(
-      campaign.id
-    );
-
     const elligibleContactsCount = await getElligibleContactsCount(campaign);
 
-    if (Number(messagesToSendCount) + Number(elligibleContactsCount) === 0) {
+    if (elligibleContactsCount === 0) {
       campaignsToPause.push(campaign.id);
     }
   }
