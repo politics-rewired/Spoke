@@ -27,6 +27,19 @@ fragment ConversationInfo on Conversation {
       cell
     }
     updatedAt
+    tags {
+      id
+      tag {
+        title
+        textColor
+        backgroundColor
+      }
+      tagger {
+        firstName
+        lastName
+        email
+      }
+    }
   }
   campaign {
     id

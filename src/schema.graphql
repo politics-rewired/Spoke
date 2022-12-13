@@ -899,8 +899,7 @@ type CampaignContact {
   messageStatus: String!
   assignmentId: String
   updatedAt: Date!
-
-  contactTags: [Tag]
+  tags: [CampaignContactTag!]!
 }
 
 input CampaignContactInput {
@@ -910,6 +909,16 @@ input CampaignContactInput {
   zip: String
   external_id: String
   customFields: String
+}
+
+
+
+type CampaignContactTag {
+  id: String!
+  tag: Tag!
+  tagger: User!
+  createdAt: String!
+  updatedAt: String!
 }
 
 

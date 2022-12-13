@@ -44,7 +44,7 @@ class ApplyTagDialog extends Component {
       escalateTag.confirmationSteps &&
       escalateTag.confirmationSteps.length > 0
     ) {
-      this.setState({ pendingTag: escalateTag });
+      this.setState({ pendingTag: { tag: escalateTag } });
     } else {
       this.handleOnConfirmAddEscalatedTag(escalateTag);
     }
@@ -54,36 +54,37 @@ class ApplyTagDialog extends Component {
 
   handleOnConfirmAddEscalatedTag = (escalateTag) => {
     const selectedTags = [...this.state.selectedTags];
-    if (selectedTags.findIndex((tag) => tag.id === escalateTag.id) === -1) {
-      selectedTags.push(escalateTag);
+    if (selectedTags.findIndex((tag) => tag.tag.id === escalateTag.id) === -1) {
+      selectedTags.push({ tag: escalateTag });
       this.setState({ selectedTags });
     }
     this.handleOnCancelEscalateTag();
   };
 
-  handleApplyTags = () => {
+  getTagsPayload = () => {
     const { contactTags } = this.props;
     const { selectedTags } = this.state;
-    const contactTagIds = new Set(contactTags.map((tag) => tag.id));
-    const selectedTagIds = new Set(selectedTags.map((tag) => tag.id));
-    const addedTags = selectedTags.filter((tag) => !contactTagIds.has(tag.id));
-    const removedTags = contactTags.filter(
-      (tag) => !selectedTagIds.has(tag.id)
+    const contactTagIds = new Set(contactTags.map((tag) => tag.tag.id));
+    const selectedTagIds = new Set(selectedTags.map((tag) => tag.tag.id));
+    const addedTags = selectedTags.filter(
+      (tag) => !contactTagIds.has(tag.tag.id)
     );
+    const removedTags = contactTags.filter(
+      (tag) => !selectedTagIds.has(tag.tag.id)
+    );
+
+    return [addedTags, removedTags];
+  };
+
+  handleApplyTags = () => {
+    const [addedTags, removedTags] = this.getTagsPayload();
 
     this.props.onApplyTag(addedTags, removedTags);
     this.handleOnCancelEscalateTag();
   };
 
   handleApplyTagsAndMoveOn = () => {
-    const { contactTags } = this.props;
-    const { selectedTags } = this.state;
-    const contactTagIds = new Set(contactTags.map((tag) => tag.id));
-    const selectedTagIds = new Set(selectedTags.map((tag) => tag.id));
-    const addedTags = selectedTags.filter((tag) => !contactTagIds.has(tag.id));
-    const removedTags = contactTags.filter(
-      (tag) => !selectedTagIds.has(tag.id)
-    );
+    const [addedTags, removedTags] = this.getTagsPayload();
 
     this.props.onApplyTagsAndMoveOn(addedTags, removedTags);
     this.handleOnCancelEscalateTag();
