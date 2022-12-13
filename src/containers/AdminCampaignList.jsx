@@ -95,6 +95,11 @@ class AdminCampaignList extends React.Component {
     });
   };
 
+  handleClickSpeedDial = () => {
+    const { speedDialOpen } = this.state;
+    this.setState({ speedDialOpen: !speedDialOpen });
+  };
+
   releaseAllReplies = () => {
     const ageInHours = parseFloat(this.numberOfHoursToReleaseRef.input.value);
     const releaseOnRestricted = this.releaseOnRestrictedRef.state.switched;
@@ -269,7 +274,7 @@ class AdminCampaignList extends React.Component {
             ariaLabel="SpeedDial example"
             style={theme.components.floatingButton}
             icon={<SpeedDialIcon />}
-            onClose={() => this.setState({ speedDialOpen: false })}
+            onClick={this.handleClickSpeedDial}
             onOpen={() => this.setState({ speedDialOpen: true })}
             open={this.state.speedDialOpen}
             direction="up"
