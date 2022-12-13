@@ -181,17 +181,12 @@ async function createOptOut(trx, campaignContactId, optOut, loaders, user) {
     }
   }
 
-  let optOutId;
-  try {
-    optOutId = await cacheableData.optOut.save(trx, {
-      cell,
-      reason,
-      assignmentId,
-      organizationId
-    });
-  } catch (error) {
-    logger.error("Error creating opt out:", error);
-  }
+  const optOutId = await cacheableData.optOut.save(trx, {
+    cell,
+    reason,
+    assignmentId,
+    organizationId
+  });
 
   if (message) {
     const checkOptOut = false;
