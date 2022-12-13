@@ -17,10 +17,10 @@ import React from "react";
 import { withRouter } from "react-router-dom";
 import { compose } from "recompose";
 
-import { withAuthzContext } from "../components/AuthzProvider";
 import CreateCampaignFromTemplateDialog from "../components/CreateCampaignFromTemplateDialog";
 import LoadingIndicator from "../components/LoadingIndicator";
 import theme from "../styles/theme";
+import { withAuthzContext } from "./AuthzProvider";
 import CampaignList from "./CampaignList";
 import { loadData } from "./hoc/with-operations";
 

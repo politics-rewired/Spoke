@@ -1,4 +1,5 @@
 import { gql } from "@apollo/client";
+import type { CampaignContact, Message } from "@spoke/spoke-codegen";
 import { css, StyleSheet } from "aphrodite/no-important";
 import muiThemeable from "material-ui/styles/muiThemeable";
 import React from "react";
@@ -7,8 +8,6 @@ import type { match } from "react-router-dom";
 import { compose } from "recompose";
 import * as yup from "yup";
 
-import type { CampaignContact } from "../api/campaign-contact";
-import type { Message } from "../api/message";
 import GSForm from "../components/forms/GSForm";
 import SpokeFormField from "../components/forms/SpokeFormField";
 import { dataTest } from "../lib/attributes";

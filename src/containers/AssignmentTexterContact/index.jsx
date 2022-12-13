@@ -27,16 +27,12 @@ import { withRouter } from "react-router-dom";
 import { compose } from "recompose";
 import * as yup from "yup";
 
-import AssignmentTexterSurveys from "../../components/AssignmentTexterSurveys";
-import BulkSendButton from "../../components/BulkSendButton";
 import CannedResponseMenu from "../../components/CannedResponseMenu";
 import ColorButton from "../../components/ColorButton";
 import Empty from "../../components/Empty";
 import GSForm from "../../components/forms/GSForm";
 import MessageLengthInfo from "../../components/MessageLengthInfo";
-import MessageList from "../../components/MessageList";
 import SendButton from "../../components/SendButton";
-import SendButtonArrow from "../../components/SendButtonArrow";
 import { dataTest } from "../../lib/attributes";
 import {
   getChildren,
@@ -45,11 +41,15 @@ import {
 } from "../../lib/interaction-step-helpers";
 import { applyScript } from "../../lib/scripts";
 import { isContactNowWithinCampaignHours } from "../../lib/timezones";
-import ApplyTagDialog from "./ApplyTagDialog";
-import ContactActionDialog from "./ContactActionDialog";
-import MessageTextField from "./MessageTextField";
-import NoMessagesIcon from "./NoMessagesIcon";
-import TopFixedSection from "./TopFixedSection";
+import ApplyTagDialog from "./components/ApplyTagDialog";
+import AssignmentTexterSurveys from "./components/AssignmentTexterSurveys";
+import BulkSendButton from "./components/BulkSendButton";
+import ContactActionDialog from "./components/ContactActionDialog";
+import MessageList from "./components/MessageList";
+import MessageTextField from "./components/MessageTextField";
+import NoMessagesIcon from "./components/NoMessagesIcon";
+import SendButtonArrow from "./components/SendButtonArrow";
+import TopFixedSection from "./components/TopFixedSection";
 
 const TexterDialogType = Object.freeze({
   None: "None",

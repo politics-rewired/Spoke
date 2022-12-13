@@ -7,7 +7,7 @@ import {
 import React, { useCallback } from "react";
 
 import { useSpokeContext } from "../../../client/spoke-context";
-import { useAuthzContext } from "../../../components/AuthzProvider";
+import { useAuthzContext } from "../../AuthzProvider";
 
 export interface ApproveCampaignButtonProps {
   campaignId: string;

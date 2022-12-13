@@ -12,21 +12,21 @@ import { Helmet } from "react-helmet";
 import { withRouter } from "react-router-dom";
 import { compose } from "recompose";
 
-import { withAuthzContext } from "../../components/AuthzProvider";
 import CampaignNavigation from "../../components/CampaignNavigation";
 import ScriptPreviewButton from "../../components/ScriptPreviewButton";
 import { dataTest } from "../../lib/attributes";
 import { DateTime } from "../../lib/datetime";
 import theme from "../../styles/theme";
+import { withAuthzContext } from "../AuthzProvider";
 import { loadData } from "../hoc/with-operations";
-import CampaignExportModal from "./CampaignExportModal";
-import CampaignSurveyStats from "./CampaignSurveyStats";
-import DeliverabilityStats from "./DeliverabilityStats";
+import CampaignExportModal from "./components/CampaignExportModal";
+import CampaignSurveyStats from "./components/CampaignSurveyStats";
+import DeliverabilityStats from "./components/DeliverabilityStats";
+import TexterStats from "./components/TexterStats";
+import TopLineStats from "./components/TopLineStats";
+import VanExportModal from "./components/VanExportModal";
+import VanSyncModal from "./components/VanSyncModal";
 import { GET_CAMPAIGN, GET_ORGANIZATION_DATA } from "./queries";
-import TexterStats from "./TexterStats";
-import TopLineStats from "./TopLineStats";
-import VanExportModal from "./VanExportModal";
-import VanSyncModal from "./VanSyncModal";
 
 const styles = StyleSheet.create({
   container: {

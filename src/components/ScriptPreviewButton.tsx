@@ -4,7 +4,7 @@ import { useGetCampaignScriptPreviewQuery } from "@spoke/spoke-codegen";
 import React from "react";
 
 import { useSpokeContext } from "../client/spoke-context";
-import { useAuthzContext } from "./AuthzProvider";
+import { useAuthzContext } from "../containers/AuthzProvider";
 
 export interface ScriptPreviewButtonProps {
   campaignId: string;
