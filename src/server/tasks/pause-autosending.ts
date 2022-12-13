@@ -1,58 +1,38 @@
 import type { Task } from "graphile-worker";
 
-import { DateTime, parseIanaZone } from "../../lib/datetime";
-import { timezones } from "../../lib/timezones";
 import type { CampaignRecord } from "../api/types";
 import { r } from "../models";
 
 export const PAUSE_AUTOSENDING_CAMPAIGNS_TASK_IDENTIFIER =
   "pause-autosending-campaigns";
 
-const TIMEZONES = timezones.map((tz: string) => parseIanaZone(tz));
-
 const getAutosendingCampaigns = async (): Promise<Array<CampaignRecord>> =>
-  r.knex("all_campaign").where({ autosend_status: "sending" });
-
-// Get Array of [tz, tz_next_hour] for whereIn query
-// DateTime end of hour takes us to the last second
-// add a minute to change time to next hour, and get the hour value
-const getTimezonesWithHours = () =>
-  TIMEZONES.map((tz: string) => [
-    tz,
-    DateTime.now().setZone(tz).startOf("hour").hour
-  ]);
+  r
+    .knex("all_campaign")
+    .where({ autosend_status: "sending", is_archived: false });
 
 const getElligibleContactsCount = async (campaign: CampaignRecord) => {
-  const timeZoneParams = getTimezonesWithHours();
-
-  const [{ count: contactsWithTimezoneCount }] = await r
-    .knex("campaign_contact")
-    .join("campaign", "campaign.id", "campaign_contact.campaign_id")
-    .where({ message_status: "needsMessage", campaign_id: campaign.id })
-    .whereNotNull("campaign_contact.timezone")
-    .whereNotIn(
-      ["campaign_contact.timezone", "campaign.texting_hours_end"],
-      timeZoneParams
-    )
-    .count("campaign_contact.id");
-
-  const [{ count: contactsWithoutTimezoneCount }] = await r
-    .knex("campaign_contact")
-    .join("campaign", "campaign.id", "campaign_contact.campaign_id")
-    .where({
-      "campaign_contact.timezone": null,
-      message_status: "needsMessage",
-      campaign_id: campaign.id
-    })
-    .whereNotIn(
-      ["campaign.timezone", "campaign.texting_hours_end"],
-      timeZoneParams
-    )
-    .count("campaign_contact.id");
-
-  return (
-    Number(contactsWithTimezoneCount) + Number(contactsWithoutTimezoneCount)
+  const { rows: elligibleContactsCountRows } = await r.knex.raw(
+    `
+      select count(cc.id)
+      from campaign_contact cc
+      join campaign c on cc.campaign_id = c.id
+      where c.id = ?
+      and (
+        ( cc.timezone is null
+          and extract(hour from CURRENT_TIMESTAMP at time zone c.timezone) < c.texting_hours_end
+          and extract(hour from CURRENT_TIMESTAMP at time zone c.timezone) >= c.texting_hours_start
+        )
+        or
+        ( c.texting_hours_end > extract(hour from (CURRENT_TIMESTAMP at time zone cc.timezone) + interval '10 minutes')
+           and c.texting_hours_start <= extract(hour from (CURRENT_TIMESTAMP at time zone cc.timezone ))
+        )
+      )
+    `,
+    [campaign.id]
   );
+
+  return Number(elligibleContactsCountRows[0].count);
 };
 
 export const pauseAutosendingCampaigns: Task = async (_payload, _helpers) => {
