@@ -392,14 +392,14 @@ export async function saveNewIncomingMessage(messageInstance) {
   let updateQuery = r.knex("campaign_contact").limit(1);
 
   if (OPT_OUT_TRIGGERS.includes(cleanedUpText)) {
+    updateQuery = updateQuery.update({ message_status: "closed" });
+
     const { id: organizationId } = await r
       .knex("organization")
       .first("organization.id")
       .join("campaign", "organization_id", "=", "organization.id")
       .join("assignment", "campaign_id", "=", "campaign.id")
       .where({ "assignment.id": assignment_id });
-
-    updateQuery = updateQuery.update({ message_status: "closed" });
 
     const optOutId = await cacheableData.optOut.save(r.knex, {
       cell: contact_number,
