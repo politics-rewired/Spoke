@@ -77,8 +77,8 @@ const ConfigureColumnMappingDialog: React.FC<ConfigureColumnMappingDialogProps> 
         complete: (results: ParseResult<any>) => {
           const columnMappings = results?.meta?.fields?.map(
             (header: string) => ({
-              column: header,
-              remap: namedFields[header] ?? null
+              column: header.trim(),
+              remap: namedFields[header.trim()] ?? null
             })
           );
 
@@ -87,7 +87,7 @@ const ConfigureColumnMappingDialog: React.FC<ConfigureColumnMappingDialogProps> 
         }
       });
     }
-  }, [open]);
+  }, [open, contactsFile]);
 
   const handleSave = (formValues: FormValues) => {
     const mappedColumns = formValues.columnMappings.filter((column) =>

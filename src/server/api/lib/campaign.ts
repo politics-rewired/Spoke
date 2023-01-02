@@ -442,8 +442,7 @@ export const editCampaign = async (
     replies_stale_after_minutes: repliesStaleAfter, // this is null to unset it - it must be null, not undefined
     timezone: timezone ? parseIanaZone(timezone) : undefined,
     external_system_id: externalSystemId,
-    messaging_service_sid: messagingServiceSid ?? undefined,
-    column_mapping: columnMapping ?? undefined
+    messaging_service_sid: messagingServiceSid ?? undefined
   };
 
   Object.keys(campaignUpdates).forEach((key) => {
@@ -475,10 +474,24 @@ export const editCampaign = async (
   ) {
     const processedContacts = await processContactsFile({
       file: campaign.contactsFile,
-      columnMapping: JSON.parse(columnMapping)
+      columnMapping
     });
     campaign.contacts = processedContacts.contacts;
     validationStats = processedContacts.validationStats;
+
+    await r.knex.raw(
+      `
+        ? ON CONFLICT (campaign_id)
+        DO UPDATE SET column_mapping = EXCLUDED.column_mapping, updated_at = CURRENT_TIMESTAMP 
+        RETURNING *;
+      `,
+      [
+        r.knex("campaign_contact_upload").insert({
+          campaign_id: id,
+          column_mapping: JSON.stringify(columnMapping)
+        })
+      ]
+    );
   }
 
   if (

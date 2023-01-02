@@ -625,6 +625,11 @@ enum ExternalSyncReadinessState {
   INCLUDES_NOT_ACTIVE_TARGETS
 }
 
+type CsvColumnMapping {
+  column: String!
+  remap: String!
+}
+
 type Campaign {
   id: ID!
   organization: Organization!
@@ -675,7 +680,7 @@ type Campaign {
   autosendStatus: String!
   messagingServiceSid: String
   autosendLimit: Int
-  columnMapping: String
+  columnMapping: [CsvColumnMapping!]
 }
 
 type CampaignEdge {
@@ -714,6 +719,11 @@ input TexterInput {
   ignoreAfterDate: Date!
 }
 
+input CsvColumnMappingInput {
+  column: String!
+  remap: String!
+}
+
 input CampaignInput {
   title: String
   description: String
@@ -744,7 +754,7 @@ input CampaignInput {
   repliesStaleAfter: Int
   messagingServiceSid: String
   autosendLimit: Int
-  columnMapping: String
+  columnMapping: [CsvColumnMappingInput!]
 }
 
 

@@ -82,7 +82,7 @@ interface ContactsState {
   contactsFile: File | null;
   externalListId: string | null;
   filterOutLandlines: boolean;
-  columnMapping: string;
+  columnMapping: Array<ColumnMapping>;
 
   // UI
   source: ContactSourceType;
@@ -138,7 +138,7 @@ class CampaignContactsForm extends React.Component<
 
   handleSaveConfigureMapping = (columnMapping: Array<ColumnMapping>) =>
     this.setState({
-      columnMapping: JSON.stringify(columnMapping),
+      columnMapping,
       configureMappingOpen: false
     });
 
@@ -362,7 +362,10 @@ const queries = {
             id
           }
           datawarehouseAvailable
-          columnMapping
+          columnMapping {
+            column
+            remap
+          }
         }
       }
     `,

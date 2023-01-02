@@ -51,7 +51,7 @@ export const processContactsFile = async ({
       transformHeader: (header) => {
         const trimmedHeader = header.trim();
         if (columnMapping) {
-          const field = columnMapping.find((cM) => cM.column === header);
+          const field = columnMapping.find((cM) => cM.column === trimmedHeader);
           if (field) return field.remap;
         }
         return trimmedHeader;

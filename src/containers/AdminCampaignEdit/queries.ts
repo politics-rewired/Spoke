@@ -96,7 +96,10 @@ export const EditCampaignFragment = gql`
     }
     messagingServiceSid
     editors
-    columnMapping
+    columnMapping {
+      column
+      remap
+    }
     readiness {
       basics
       textingHours
