@@ -2,6 +2,29 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [6.1.0-rc.1](https://github.com/politics-rewired/spoke/compare/v6.0.0...v6.1.0-rc.1) (2023-01-03)
+
+
+### Features
+
+* allow cloning, and deleting template campaigns ([#1523](https://github.com/politics-rewired/spoke/issues/1523)) ([9348046](https://github.com/politics-rewired/spoke/commit/9348046da04409ebd2af45ecaf94cb08de8a64fe))
+* don't hide campaign create options on removing focus ([#1522](https://github.com/politics-rewired/spoke/issues/1522)) ([629a86d](https://github.com/politics-rewired/spoke/commit/629a86da93154f6d12d0580d931e225282c8a541)), closes [#1477](https://github.com/politics-rewired/spoke/issues/1477)
+* **message review:** show tag and tagger details ([#1530](https://github.com/politics-rewired/spoke/issues/1530)) ([7d9b801](https://github.com/politics-rewired/spoke/commit/7d9b801d19c8f6ce86d57f2b8770de1c0fca53d0))
+
+
+### Bug Fixes
+
+* **bulk script editor:** tidy full script version replacement preview ([#1528](https://github.com/politics-rewired/spoke/issues/1528)) ([89f548d](https://github.com/politics-rewired/spoke/commit/89f548da5b821af1be149ec5fcc9af01b790f9d8))
+* **message review:** filter opt outs by organization ([#1527](https://github.com/politics-rewired/spoke/issues/1527)) ([c493e52](https://github.com/politics-rewired/spoke/commit/c493e527523831c3739f90552a84be6baa8116a5))
+
+
+### Backend Changes
+
+* **release:** 6.1.0-rc.0 ([2b6d583](https://github.com/politics-rewired/spoke/commit/2b6d583a207e7bdaa1fb6bae6d9e550d81d300af))
+* standarize components / containers locations ([#1537](https://github.com/politics-rewired/spoke/issues/1537)) ([fbc59d6](https://github.com/politics-rewired/spoke/commit/fbc59d60cba2724417a9054170fa7538d3a6aab7))
+* **mui v4:** update icon menu to v4 button + menu ([#1517](https://github.com/politics-rewired/spoke/issues/1517)) ([77ba0c0](https://github.com/politics-rewired/spoke/commit/77ba0c0343811ff827e8390544357c4ca6f65499))
+* **script editor:** move opt out language warning into a dialog ([#1521](https://github.com/politics-rewired/spoke/issues/1521)) ([5115603](https://github.com/politics-rewired/spoke/commit/511560312244c4cbd2207983aefd7955c4ffc53d))
+
 ## [6.1.0-rc.0](https://github.com/politics-rewired/spoke/compare/v6.0.0...v6.1.0-rc.0) (2023-01-03)
 
 
