@@ -11,6 +11,7 @@ import Autocomplete, {
   createFilterOptions
 } from "@material-ui/lab/Autocomplete";
 import type { FilterOptionsState } from "@material-ui/lab/useAutocomplete";
+import uniq from "lodash/uniq";
 import type { ParseResult } from "papaparse";
 import Papa from "papaparse";
 import React, { useEffect, useState } from "react";
@@ -37,7 +38,7 @@ const namedFields = {
   externalId
 };
 
-const requiredUploadFields = ["firstName", "lastName", "cell"];
+const requiredUploadFields = [firstName, lastName, cell];
 
 const friendlyFieldNames = [firstName, lastName, cell, externalId, zip];
 
@@ -122,6 +123,23 @@ const ConfigureColumnMappingDialog: React.FC<ConfigureColumnMappingDialogProps> 
       Boolean(column.remap)
     );
 
+    const remappedFields = mappedColumns.map((column) => column.remap);
+
+    const missingFields = requiredUploadFields.filter(
+      (requiredUploadField) => !remappedFields.includes(requiredUploadField)
+    );
+
+    if (missingFields.length > 0) {
+      setError(`Required Fields Missing!!! ${missingFields.join(", ")}`);
+      return;
+    }
+
+    // Duplicate remap names found
+    if (remappedFields.length !== uniq(remappedFields).length) {
+      setError("Duplicate fields found. You can only use a field name once");
+      return;
+    }
+
     const remappedColumns = mappedColumns.map((column) => {
       const alias = fieldAliases[column.remap];
       return {
@@ -130,18 +148,8 @@ const ConfigureColumnMappingDialog: React.FC<ConfigureColumnMappingDialogProps> 
       };
     });
 
-    const remappedFields = remappedColumns.map((column) => column.remap);
-
-    const missingFields = requiredUploadFields.filter(
-      (requiredUploadField) => !remappedFields.includes(requiredUploadField)
-    );
-
-    if (missingFields.length > 0) {
-      setError(`Required Fields Missing!!! ${missingFields.join(", ")}`);
-    } else {
-      setError(null);
-      onSave(remappedColumns);
-    }
+    setError(null);
+    onSave(remappedColumns);
   };
 
   // Eslint disable required here to prevent enter from submitting form
@@ -165,8 +173,8 @@ const ConfigureColumnMappingDialog: React.FC<ConfigureColumnMappingDialogProps> 
           {parseComplete ? (
             <div>
               {" "}
-              Required Headers: firstName, lastName, cell <br /> <br />
-              Optional Headers: zip, externalId
+              Required Headers: First Name, Last Name, Cell <br /> <br />
+              Optional Headers: Zip, External ID
               {controlledFields.map((arrayField, index) => (
                 <Grid
                   container
