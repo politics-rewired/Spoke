@@ -7,6 +7,10 @@ import DialogTitle from "@material-ui/core/DialogTitle";
 import Grid from "@material-ui/core/Grid";
 import TextField from "@material-ui/core/TextField";
 import ArrowForwardIcon from "@material-ui/icons/ArrowForward";
+import Autocomplete, {
+  createFilterOptions
+} from "@material-ui/lab/Autocomplete";
+import type { FilterOptionsState } from "@material-ui/lab/useAutocomplete";
 import type { ParseResult } from "papaparse";
 import Papa from "papaparse";
 import React, { useEffect, useState } from "react";
@@ -14,20 +18,36 @@ import { Controller, useFieldArray, useForm } from "react-hook-form";
 
 import LoadingIndicator from "../../../../../components/LoadingIndicator";
 
+const firstName = "First Name";
+const lastName = "Last Name";
+const cell = "Cell Phone";
+const externalId = "External ID";
+const zip = "Zip";
+
 const namedFields = {
-  first_name: "firstName",
-  firstname: "firstName",
-  firstName: "firstName",
-  last_name: "lastName",
-  lastname: "lastName",
-  lastName: "lastName",
-  cell: "cell",
-  zip: "zip",
-  external_id: "external_id",
-  externalId: "external_id"
+  first_name: firstName,
+  firstname: firstName,
+  firstName,
+  last_name: lastName,
+  lastname: lastName,
+  lastName,
+  cell,
+  zip,
+  external_id: externalId,
+  externalId
 };
 
 const requiredUploadFields = ["firstName", "lastName", "cell"];
+
+const friendlyFieldNames = [firstName, lastName, cell, externalId, zip];
+
+const fieldAliases = {
+  "First Name": "firstName",
+  "Last Name": "lastName",
+  "Cell Phone": "cell",
+  "External ID": "external_id",
+  Zip: "zip"
+};
 
 export type ColumnMapping = {
   column: string;
@@ -44,6 +64,8 @@ export interface ConfigureColumnMappingDialogProps {
 type FormValues = {
   columnMappings: Array<ColumnMapping>;
 };
+
+const filter = createFilterOptions();
 
 const ConfigureColumnMappingDialog: React.FC<ConfigureColumnMappingDialogProps> = ({
   contactsFile,
@@ -69,8 +91,14 @@ const ConfigureColumnMappingDialog: React.FC<ConfigureColumnMappingDialogProps> 
     ...watchFieldArray[index]
   }));
 
+  const checkKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+    }
+  };
+
   useEffect(() => {
-    if (open) {
+    if (open && !parseComplete) {
       Papa.parse(contactsFile, {
         header: true,
         preview: 2,
@@ -94,7 +122,15 @@ const ConfigureColumnMappingDialog: React.FC<ConfigureColumnMappingDialogProps> 
       Boolean(column.remap)
     );
 
-    const remappedFields = mappedColumns.map((column) => column.remap);
+    const remappedColumns = mappedColumns.map((column) => {
+      const alias = fieldAliases[column.remap];
+      return {
+        column: column.column,
+        remap: alias ?? column.remap
+      };
+    });
+
+    const remappedFields = remappedColumns.map((column) => column.remap);
 
     const missingFields = requiredUploadFields.filter(
       (requiredUploadField) => !remappedFields.includes(requiredUploadField)
@@ -104,13 +140,20 @@ const ConfigureColumnMappingDialog: React.FC<ConfigureColumnMappingDialogProps> 
       setError(`Required Fields Missing!!! ${missingFields.join(", ")}`);
     } else {
       setError(null);
-      onSave(mappedColumns);
+      onSave(remappedColumns);
     }
   };
 
+  // Eslint disable required here to prevent enter from submitting form
+  // Enter key is used to lock in the freesolo option in autocomplete
+  // https://github.com/react-hook-form/react-hook-form/discussions/2549
+  /* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
   return (
     <Dialog open={open} onClose={onClose}>
-      <form onSubmit={handleSubmit(handleSave)}>
+      <form
+        onSubmit={handleSubmit(handleSave)}
+        onKeyDown={(e) => checkKeyDown(e)}
+      >
         <DialogTitle>Configure Column Mapping</DialogTitle>
         <DialogContent>
           {error && (
@@ -142,6 +185,7 @@ const ConfigureColumnMappingDialog: React.FC<ConfigureColumnMappingDialogProps> 
                       }) => (
                         <TextField
                           {...field}
+                          style={{ width: 200 }}
                           variant="outlined"
                           InputProps={{ readOnly: true }}
                           error={fieldError !== undefined}
@@ -158,15 +202,41 @@ const ConfigureColumnMappingDialog: React.FC<ConfigureColumnMappingDialogProps> 
                       name={`columnMappings.${index}.remap`}
                       control={control}
                       render={({
-                        field,
+                        field: { onChange, value },
                         fieldState: { error: fieldError }
                       }) => (
-                        <TextField
-                          {...field}
-                          variant="outlined"
-                          error={fieldError !== undefined}
-                          helperText={fieldError?.message}
-                          label="Remap To"
+                        <Autocomplete
+                          value={value}
+                          onChange={(_event, newValue) => {
+                            onChange(newValue);
+                          }}
+                          selectOnFocus
+                          clearOnBlur
+                          handleHomeEndKeys
+                          options={friendlyFieldNames}
+                          fullWidth
+                          freeSolo
+                          filterOptions={(
+                            options: string[],
+                            params: FilterOptionsState<string>
+                          ) => {
+                            const filtered = filter(options, params);
+
+                            if (params.inputValue !== "") {
+                              filtered.push(`Create as "${params.inputValue}"`);
+                            }
+
+                            return filtered;
+                          }}
+                          renderInput={(params) => (
+                            <TextField
+                              {...params}
+                              style={{ width: 200 }}
+                              variant="outlined"
+                              error={fieldError !== undefined}
+                              helperText={fieldError?.message}
+                            />
+                          )}
                         />
                       )}
                     />
