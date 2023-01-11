@@ -2,13 +2,18 @@ import type { ApolloQueryResult } from "@apollo/client";
 import { gql } from "@apollo/client";
 import Button from "@material-ui/core/Button";
 import CreateIcon from "@material-ui/icons/Create";
+import type {
+  CampaignVariablePage,
+  CannedResponse
+} from "@spoke/spoke-codegen";
 import isEqual from "lodash/isEqual";
+import unionBy from "lodash/unionBy";
 import uniqBy from "lodash/uniqBy";
 import React from "react";
+import type { DropResult } from "react-beautiful-dnd";
+import { DragDropContext, Draggable, Droppable } from "react-beautiful-dnd";
 import { compose } from "recompose";
 
-import type { CampaignVariablePage } from "../../../../api/campaign-variable";
-import type { CannedResponse } from "../../../../api/canned-response";
 import { LargeList } from "../../../../components/LargeList";
 import { dataTest } from "../../../../lib/attributes";
 import type { MutationMap, QueryMap } from "../../../../network/types";
@@ -78,7 +83,21 @@ class CampaignCannedResponsesForm extends React.Component<InnerProps, State> {
           ({ id }) => id === response.id
         );
         return editedResponse || response;
-      });
+      })
+      .sort(
+        (
+          { displayOrder: displayOrderFirst },
+          { displayOrder: displayOrderSecond }
+        ) => {
+          if (displayOrderFirst > displayOrderSecond) {
+            return 1;
+          }
+          if (displayOrderFirst < displayOrderSecond) {
+            return -1;
+          }
+          return 0;
+        }
+      );
 
     const didChange = !isEqual(cannedResponses, newCannedResponses);
     return { cannedResponses: newCannedResponses, didChange };
@@ -109,9 +128,12 @@ class CampaignCannedResponsesForm extends React.Component<InnerProps, State> {
     const newId = Math.random()
       .toString(36)
       .replace(/[^a-zA-Z1-9]+/g, "");
+
+    const { cannedResponses } = this.pendingCannedResponses();
     const cannedResponsesToAdd = this.state.cannedResponsesToAdd.concat({
       ...response,
-      id: newId
+      id: newId,
+      displayOrder: cannedResponses.length + 1
     });
     this.setState({ cannedResponsesToAdd, shouldShowEditor: false });
   };
@@ -123,9 +145,32 @@ class CampaignCannedResponsesForm extends React.Component<InnerProps, State> {
     const cannedResponseIdsToDelete = [
       ...new Set(this.state.cannedResponseIdsToDelete).add(responseId)
     ];
+
+    const cannedResponseToDelete = this.pendingCannedResponses().cannedResponses.find(
+      ({ id }) => id === responseId
+    );
+
+    const cannedResponsesToUpdate = this.pendingCannedResponses()
+      .cannedResponses.filter(
+        ({ displayOrder }) => displayOrder > cannedResponseToDelete.displayOrder
+      )
+      .map((cannedResponse) => {
+        return {
+          ...cannedResponse,
+          displayOrder: cannedResponse.displayOrder - 1
+        };
+      });
+
+    const { editedCannedResponses } = this.state;
+
     this.setState({
       cannedResponsesToAdd,
-      cannedResponseIdsToDelete
+      cannedResponseIdsToDelete,
+      editedCannedResponses: unionBy(
+        cannedResponsesToUpdate,
+        editedCannedResponses,
+        "id"
+      )
     });
   };
 
@@ -158,6 +203,57 @@ class CampaignCannedResponsesForm extends React.Component<InnerProps, State> {
   // cancel editing and creating canned responses
   handleOnCancelResponseEdit = () => {
     this.setState({ editingResponse: undefined, shouldShowEditor: false });
+  };
+
+  onDragEnd = (result: DropResult) => {
+    if (!result.destination) return;
+
+    const sourceDisplayOrder = result.source.index + 1;
+    const destinationDisplayOrder = result.destination.index + 1;
+    const cannedResponseId = result.draggableId;
+
+    const { cannedResponses } = this.pendingCannedResponses();
+    const { editedCannedResponses } = this.state;
+    const allCannedResponses = unionBy(
+      editedCannedResponses,
+      cannedResponses,
+      "id"
+    );
+    let updatedCannedResponses = [];
+
+    const sourceItem = allCannedResponses.find(
+      ({ id }) => id === cannedResponseId
+    );
+
+    // Get all items that were moved, except item that was moved
+    const movedItems = allCannedResponses.filter(
+      ({ displayOrder }) =>
+        displayOrder >= destinationDisplayOrder &&
+        displayOrder <= sourceDisplayOrder &&
+        displayOrder !== sourceDisplayOrder
+    );
+
+    updatedCannedResponses.push({
+      ...sourceItem,
+      displayOrder: destinationDisplayOrder
+    });
+
+    updatedCannedResponses = updatedCannedResponses.concat(
+      movedItems.map((cannedResponse) => {
+        return {
+          ...cannedResponse,
+          displayOrder: cannedResponse.displayOrder + 1
+        };
+      })
+    );
+
+    this.setState({
+      editedCannedResponses: unionBy(
+        updatedCannedResponses,
+        editedCannedResponses,
+        "id"
+      )
+    });
   };
 
   scriptVariables = () => {
@@ -226,20 +322,45 @@ class CampaignCannedResponsesForm extends React.Component<InnerProps, State> {
           subtitle="Save some scripts for your texters to use to answer additional FAQs that may come up outside of the survey questions and scripts you already set up."
         />
         {cannedResponses.length > 0 ? (
-          <LargeList>
-            {cannedResponses.map((cannedResponse) => (
-              <CannedResponseRow
-                key={cannedResponse.id}
-                cannedResponse={cannedResponse}
-                customFields={customFields}
-                campaignVariables={campaignVariables}
-                onDelete={this.createHandleOnDelete(cannedResponse.id)}
-                onToggleResponseEditor={this.makeHandleToggleResponseDialog(
-                  cannedResponse.id
-                )}
-              />
-            ))}
-          </LargeList>
+          <DragDropContext onDragEnd={this.onDragEnd}>
+            <Droppable droppableId="droppable-canned-responses">
+              {(provided) => (
+                <div ref={provided.innerRef} {...provided.droppableProps}>
+                  <LargeList>
+                    {cannedResponses.map((cannedResponse, index) => (
+                      <Draggable
+                        key={cannedResponse.id}
+                        draggableId={cannedResponse.id}
+                        index={index}
+                      >
+                        {(providedDrag) => (
+                          <div
+                            ref={providedDrag.innerRef}
+                            {...providedDrag.draggableProps}
+                            {...providedDrag.dragHandleProps}
+                          >
+                            <CannedResponseRow
+                              key={cannedResponse.id}
+                              cannedResponse={cannedResponse}
+                              customFields={customFields}
+                              campaignVariables={campaignVariables}
+                              onDelete={this.createHandleOnDelete(
+                                cannedResponse.id
+                              )}
+                              onToggleResponseEditor={this.makeHandleToggleResponseDialog(
+                                cannedResponse.id
+                              )}
+                            />
+                          </div>
+                        )}
+                      </Draggable>
+                    ))}
+                  </LargeList>
+                  {provided.placeholder}
+                </div>
+              )}
+            </Droppable>
+          </DragDropContext>
         ) : (
           <p>No canned responses</p>
         )}
@@ -278,6 +399,7 @@ const queries: QueryMap<InnerProps> = {
             id
             title
             text
+            displayOrder
           }
           isStarted
           isApproved

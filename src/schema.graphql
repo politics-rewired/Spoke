@@ -986,6 +986,7 @@ input CannedResponseInput {
   text: String
   campaignId: String
   userId: String
+  displayOrder: Int
 }
 
 type CannedResponse {
@@ -993,6 +994,7 @@ type CannedResponse {
   title: String!
   text: String!
   isUserCreated: Boolean
+  displayOrder: Int!
 }
 
 
