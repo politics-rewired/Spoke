@@ -31,7 +31,7 @@ git config --local blame.ignoreRevsFile .git-blame-ignore-revs
 Install Node dependencies:
 
 ```sh
-yarn install
+yarn install --ignore-engines
 ```
 
 Copy the example environment. The only change you may need to make is updating the database connection string.
