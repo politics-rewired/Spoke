@@ -54,6 +54,12 @@ yarn migrate:worker
 yarn knex migrate:latest
 ```
 
+Generate code:
+
+```sh
+yarn codegen
+```
+
 Run in development mode:
 
 ```sh
