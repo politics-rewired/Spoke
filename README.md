@@ -47,14 +47,14 @@ Create the `spokedev` database (if it doesn't yet exist)
 psql -c "create database spokedev;"
 ```
 
-Run the migrations
+Run the migrations:
 
 ```sh
 yarn migrate:worker
 yarn knex migrate:latest
 ```
 
-Run codegen
+Run codegen:
 
 ```sh
 yarn codegen
