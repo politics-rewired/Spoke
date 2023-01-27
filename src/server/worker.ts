@@ -1,12 +1,18 @@
 import type { Runner as Scheduler, ScheduleConfig } from "graphile-scheduler";
 import { run as runScheduler } from "graphile-scheduler";
-import type { LogFunctionFactory, Runner, TaskList } from "graphile-worker";
+import type {
+  LogFunctionFactory,
+  Runner,
+  Task,
+  TaskList
+} from "graphile-worker";
 import { Logger, run } from "graphile-worker";
 
 import { config } from "../config";
 import { sleep } from "../lib";
 import logger from "../logger";
 import pgPool from "./db";
+import statsd from "./statsd";
 import {
   assignTexters,
   TASK_IDENTIFIER as assignTextersIdentifier
@@ -71,27 +77,50 @@ const graphileLogger = new Logger(logFactory);
 let worker: Runner | undefined;
 let workerSemaphore = false;
 
+export const wrapMonitoredTask = (task: Task) => async (
+  // TODO: Do these need types? Can we give them types by saying this return type is a Task?
+  payload,
+  helpers
+) => {
+  // Start monitors
+  start = Date.now();
+  r = task(payload, helpers);
+  // Finish monitors
+  latency = Date.now() - start;
+  // TODO: Need to know what identifier, & possibly other metadata, currently in ProgressJobOptions :(
+  statsd.distribution("spoke.server.worker.task_count", latency);
+  return r;
+};
+
 export const getWorker = async (attempt = 0): Promise<Runner> => {
   if (worker) return worker;
 
   const taskList: TaskList = {
-    "handle-autoassignment-request": handleAutoassignmentRequest,
-    "release-stale-replies": releaseStaleReplies,
-    "handle-delivery-report": handleDeliveryReport,
-    "troll-patrol": trollPatrol,
-    "troll-patrol-for-org": trollPatrolForOrganization,
-    "sync-slack-team-members": syncSlackTeamMembers,
-    "update-org-message-usage": updateOrgMessageUsage,
-    "resend-message": resendMessage,
-    "retry-interaction-step": retryInteractionStep,
-    "queue-pending-notifications": queuePendingNotifications,
-    "queue-periodic-notifications": queuePeriodicNotifications,
-    "queue-daily-notifications": queueDailyNotifications,
-    "send-notification-email": sendNotificationEmail,
-    "send-notification-digest": sendNotificationDigestForUser,
-    "queue-action-external-sync": queueActionExternalSync,
-    "sync-contact-question-response": syncContactQuestionResponse,
-    "sync-contact-opt-out": syncContactOptOut,
+    "handle-autoassignment-request": wrapMonitoredTask(
+      handleAutoassignmentRequest
+    ),
+    "release-stale-replies": wrapMonitoredTask(releaseStaleReplies),
+    "handle-delivery-report": wrapMonitoredTask(handleDeliveryReport),
+    "troll-patrol": wrapMonitoredTask(trollPatrol),
+    "troll-patrol-for-org": wrapMonitoredTask(trollPatrolForOrganization),
+    "sync-slack-team-members": wrapMonitoredTask(syncSlackTeamMembers),
+    "update-org-message-usage": wrapMonitoredTask(updateOrgMessageUsage),
+    "resend-message": wrapMonitoredTask(resendMessage),
+    "retry-interaction-step": wrapMonitoredTask(retryInteractionStep),
+    "queue-pending-notifications": wrapMonitoredTask(queuePendingNotifications),
+    "queue-periodic-notifications": wrapMonitoredTask(
+      queuePeriodicNotifications
+    ),
+    "queue-daily-notifications": wrapMonitoredTask(queueDailyNotifications),
+    "send-notification-email": wrapMonitoredTask(sendNotificationEmail),
+    "send-notification-digest": wrapMonitoredTask(
+      sendNotificationDigestForUser
+    ),
+    "queue-action-external-sync": wrapMonitoredTask(queueActionExternalSync),
+    "sync-contact-question-response": wrapMonitoredTask(
+      syncContactQuestionResponse
+    ),
+    "sync-contact-opt-out": wrapMonitoredTask(syncContactOptOut),
     [QUEUE_AUTOSEND_INITIALS_TASK_IDENTIFIER]: queueAutoSendInitials,
     // prettier and eslint are fighting here
     // eslint-disable-next-line max-len
