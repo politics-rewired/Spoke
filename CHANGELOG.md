@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [6.1.0](https://github.com/politics-rewired/spoke/compare/v6.1.0-rc.1...v6.1.0) (2023-02-06)
+
+
+### Bug Fixes
+
+* **instrumentation:** Move metrics middleware earlier in the stack to capture more of the call cycle ([#1552](https://github.com/politics-rewired/spoke/issues/1552)) ([338b241](https://github.com/politics-rewired/spoke/commit/338b2417a51297d8a2111419879fcece9e514f2f))
+
 ## [6.1.0-rc.1](https://github.com/politics-rewired/spoke/compare/v6.0.0...v6.1.0-rc.1) (2023-01-03)
 
 
