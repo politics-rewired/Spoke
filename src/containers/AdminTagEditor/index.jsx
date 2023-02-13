@@ -199,7 +199,7 @@ class AdminTagEditor extends Component {
       <div>
         <TagEditorList
           tags={tagList}
-          oEditTag={this.handleEditTag}
+          onEditTag={this.handleEditTag}
           onDeleteTag={this.handleDeleteTag}
         />
         <Fab
