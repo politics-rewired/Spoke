@@ -9,7 +9,7 @@ import type {
   Tag,
   User
 } from "@spoke/spoke-codegen";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import TagSelector from "../../../components/TagSelector";
 import theme from "../../../styles/theme";
@@ -49,6 +49,9 @@ const ApplyTagDialog: React.FC<ApplyTagDialogProps> = ({
   const [pendingContactTag, setPendingContactTag] = useState<
     CampaignContactTag | undefined
   >(undefined);
+  useEffect(() => {
+    if (open) setSelectedContactTags(contactTags);
+  }, [open]);
 
   const setPendingTag = (changedTag: Tag) => {
     const changedContactTag = {
