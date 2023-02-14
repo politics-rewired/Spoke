@@ -1012,12 +1012,13 @@ export class AssignmentTexterContact extends React.Component {
             {this.renderActionToolbar()}
             <ApplyTagDialog
               open={isTagEditorOpen}
-              contactTags={contact.tags}
               pendingNewTags={pendingNewTags}
               allTags={tags}
               onRequestClose={() => this.setState({ isTagEditorOpen: false })}
               onApplyTag={this.handleApplyTags}
               onApplyTagsAndMoveOn={this.handleApplyTagsAndMoveOn}
+              texter={this.props.texter}
+              contact={contact}
             />
           </div>
         )}
