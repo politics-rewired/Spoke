@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [6.1.1](https://github.com/politics-rewired/spoke/compare/v6.1.0...v6.1.1) (2023-02-15)
+
+
+### Bug Fixes
+
+* **apply tag dialog:** fix type errors ([#1567](https://github.com/politics-rewired/spoke/issues/1567)) ([c017a51](https://github.com/politics-rewired/spoke/commit/c017a51724f54208b9c57a22c1b0ca9b5e14369b))
+
+
+### Backend Changes
+
+* **tag editor list:** convert to .tsx ([#1566](https://github.com/politics-rewired/spoke/issues/1566)) ([b88521e](https://github.com/politics-rewired/spoke/commit/b88521e584b2ceb5e851f39b2183a7bfd5307947))
+
 ## [6.1.0](https://github.com/politics-rewired/spoke/compare/v6.1.0-rc.1...v6.1.0) (2023-02-06)
 
 
