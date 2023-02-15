@@ -173,7 +173,6 @@ export class AssignmentTexterContact extends React.Component {
       tagMessageText: "",
       addedTags: [],
       removedTags: [],
-      pendingNewTags: [],
       responsePopoverOpen: false,
       messageText,
       messageVersionHash,
@@ -475,14 +474,13 @@ export class AssignmentTexterContact extends React.Component {
 
     if (callback) {
       this.setState(
-        { addedTags, removedTags, pendingNewTags, isTagEditorOpen: false },
+        { addedTags, removedTags, isTagEditorOpen: false },
         callback
       );
     } else {
       this.setState({
         addedTags,
         removedTags,
-        pendingNewTags,
         isTagEditorOpen: false
       });
     }
@@ -983,8 +981,7 @@ export class AssignmentTexterContact extends React.Component {
       dialogType,
       messageText,
       alreadySent,
-      isTagEditorOpen,
-      pendingNewTags
+      isTagEditorOpen
     } = this.state;
 
     return (
@@ -1012,7 +1009,6 @@ export class AssignmentTexterContact extends React.Component {
             {this.renderActionToolbar()}
             <ApplyTagDialog
               open={isTagEditorOpen}
-              pendingNewTags={pendingNewTags}
               allTags={tags}
               onRequestClose={() => this.setState({ isTagEditorOpen: false })}
               onApplyTag={this.handleApplyTags}

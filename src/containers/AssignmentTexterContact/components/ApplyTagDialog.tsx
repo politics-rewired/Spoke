@@ -19,7 +19,6 @@ import ApplyTagConfirmationDialog from "./ApplyTagConfirmationDialog";
 export interface ApplyTagDialogProps {
   open: boolean;
   allTags: Tag[];
-  pendingNewTags: CampaignContactTag[];
   onRequestClose: () => Promise<void> | void;
   onApplyTag: (
     addedTags: CampaignContactTag[],
