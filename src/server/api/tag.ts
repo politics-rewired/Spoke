@@ -33,9 +33,18 @@ export const resolvers = {
       "onApplyScript",
       "webhookUrl",
       "isAssignable",
-      "isSystem",
-      "createdAt"
+      "isSystem"
     ]),
+
+    createdAt: async (tag: TagRecord) => {
+      // this needs to be explicitly formatted as a date
+      // when fetched via row_to_json in campaign_contact.tags
+      const rawDate = tag.created_at;
+      const formattedDate =
+        typeof rawDate === "string" ? new Date(rawDate) : rawDate;
+      return formattedDate;
+    },
+
     author: async (tag: TagRecord) =>
       r.reader("user").where({ id: tag.author_id }).first("*"),
 

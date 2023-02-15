@@ -12,6 +12,7 @@ import type {
 import React, { useEffect, useState } from "react";
 
 import TagSelector from "../../../components/TagSelector";
+import { DateTime } from "../../../lib/datetime";
 import theme from "../../../styles/theme";
 import ApplyTagConfirmationDialog from "./ApplyTagConfirmationDialog";
 
@@ -58,8 +59,8 @@ const ApplyTagDialog: React.FC<ApplyTagDialogProps> = ({
       id: `${contact.id}-${changedTag.id}`,
       tag: changedTag,
       tagger: texter,
-      createdAt: Date.now().toString(),
-      updatedAt: Date.now().toString()
+      createdAt: DateTime.local().toISO(),
+      updatedAt: DateTime.local().toISO()
     };
     setPendingContactTag(changedContactTag);
   };
@@ -69,8 +70,8 @@ const ApplyTagDialog: React.FC<ApplyTagDialogProps> = ({
       id: `${contact.id}-${addedTag.id}`,
       tag: addedTag,
       tagger: texter,
-      createdAt: Date.now().toString(),
-      updatedAt: Date.now().toString()
+      createdAt: DateTime.local().toISO(),
+      updatedAt: DateTime.local().toISO()
     };
     setSelectedContactTags([...selectedContactTags, addedContactTag]);
   };

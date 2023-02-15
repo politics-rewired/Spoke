@@ -45,6 +45,7 @@ const contactDataFragment = `
             confirmationSteps
             isAssignable
             isSystem
+            createdAt
           }
         }
 `;
