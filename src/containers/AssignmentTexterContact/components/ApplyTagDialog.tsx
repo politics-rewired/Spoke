@@ -92,18 +92,21 @@ const ApplyTagDialog: React.FC<ApplyTagDialogProps> = ({
     ) {
       addToSelectedTags(escalateTag);
     }
-    handleOnCancelEscalateTag();
+    setPendingContactTag(undefined);
   };
 
   const handleAddEscalatedTag = () => {
-    const escalateTag = allTags.find(isEscalateTag)!;
-
-    if (
-      escalateTag.confirmationSteps &&
-      escalateTag.confirmationSteps.length > 0
-    )
-      setPendingTag(escalateTag);
-    else handleOnConfirmAddEscalatedTag(escalateTag);
+    const escalateTag = allTags.find(isEscalateTag);
+    if (escalateTag !== undefined) {
+      if (
+        escalateTag.confirmationSteps &&
+        escalateTag.confirmationSteps.length > 0
+      ) {
+        setPendingTag(escalateTag);
+      } else {
+        handleOnConfirmAddEscalatedTag(escalateTag);
+      }
+    }
   };
 
   const getTagsPayload = () => {
@@ -122,13 +125,13 @@ const ApplyTagDialog: React.FC<ApplyTagDialogProps> = ({
   const handleApplyTags = () => {
     const [addedTags, removedTags] = getTagsPayload();
     onApplyTag(addedTags, removedTags);
-    handleOnCancelEscalateTag();
+    setPendingContactTag(undefined);
   };
 
   const handleApplyTagsAndMoveOn = () => {
     const [addedTags, removedTags] = getTagsPayload();
     onApplyTagsAndMoveOn(addedTags, removedTags);
-    handleOnCancelEscalateTag();
+    setPendingContactTag(undefined);
   };
 
   const escalateTag = allTags.find(isEscalateTag);
