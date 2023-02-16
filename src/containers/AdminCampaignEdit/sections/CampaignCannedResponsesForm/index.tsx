@@ -223,7 +223,7 @@ class CampaignCannedResponsesForm extends React.Component<InnerProps, State> {
       <div>
         <CampaignFormSectionHeading
           title="Canned responses for texters"
-          subtitle="Save some scripts for your texters to use to answer additional FAQs that may come up outside of the survey questions and scripts you already set up."
+          subtitle="Share additional FAQ responses with your texters that are NOT associated with logging data. Please note that canned responses are not tracked or stored when used. Responses associated with data collection should be included in your interaction script instead."
         />
         {cannedResponses.length > 0 ? (
           <LargeList>
