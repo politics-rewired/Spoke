@@ -1,0 +1,48 @@
+query GetOrganizationTags($organizationId: String!) {
+  organization(id: $organizationId) {
+    id
+    tagList {
+      id
+      title
+      description
+      confirmationSteps
+      onApplyScript
+      isSystem
+      isAssignable
+      textColor
+      backgroundColor
+      createdAt
+    }
+  }
+}
+
+query GetContactTags($contactId: String!) {
+  contact(id: $contactId) {
+    id
+    tags {
+      id
+      tag {
+        id
+        title
+        description
+        confirmationSteps
+        onApplyScript
+        isSystem
+        isAssignable
+        createdAt
+      }
+    }
+  }
+}
+
+# Mutations
+
+mutation TagConversation(
+  $contactId: String!
+  $tagPayload: ContactTagActionInput!
+) {
+  tagConversation(campaignContactId: $contactId, tag: $tagPayload) {
+    id
+    assignmentId
+  }
+}

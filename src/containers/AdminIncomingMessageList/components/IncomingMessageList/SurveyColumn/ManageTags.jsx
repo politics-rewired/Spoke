@@ -1,10 +1,14 @@
-import { gql } from "@apollo/client";
 import Button from "@material-ui/core/Button";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
+import {
+  GetContactTagsDocument,
+  GetOrganizationTagsDocument,
+  TagConversationDocument
+} from "@spoke/spoke-codegen";
 import isEqual from "lodash/isEqual";
 import PropTypes from "prop-types";
 import React, { Component } from "react";
@@ -143,25 +147,7 @@ ManageTags.propTypes = {
 
 const queries = {
   organizationTags: {
-    query: gql`
-      query getOrganizationTags($organizationId: String!) {
-        organization(id: $organizationId) {
-          id
-          tagList {
-            id
-            title
-            description
-            confirmationSteps
-            onApplyScript
-            isSystem
-            isAssignable
-            textColor
-            backgroundColor
-            createdAt
-          }
-        }
-      }
-    `,
+    query: GetOrganizationTagsDocument,
     options: (ownProps) => ({
       variables: {
         organizationId: ownProps.organizationId
@@ -170,26 +156,7 @@ const queries = {
     })
   },
   contactTags: {
-    query: gql`
-      query getContactTags($contactId: String!) {
-        contact(id: $contactId) {
-          id
-          tags {
-            id
-            tag {
-              id
-              title
-              description
-              confirmationSteps
-              onApplyScript
-              isSystem
-              isAssignable
-              createdAt
-            }
-          }
-        }
-      }
-    `,
+    query: GetContactTagsDocument,
     options: (ownProps) => ({
       variables: {
         contactId: ownProps.contactId
@@ -201,17 +168,7 @@ const queries = {
 
 const mutations = {
   tagContact: (ownProps) => (tagPayload) => ({
-    mutation: gql`
-      mutation tagConversation(
-        $contactId: String!
-        $tagPayload: ContactTagActionInput!
-      ) {
-        tagConversation(campaignContactId: $contactId, tag: $tagPayload) {
-          id
-          assignmentId
-        }
-      }
-    `,
+    mutation: TagConversationDocument,
     variables: {
       contactId: ownProps.contactId,
       tagPayload
