@@ -4,7 +4,7 @@ import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
-import type { CampaignContactTag } from "@spoke/spoke-codegen";
+import type { TagInfoFragment } from "@spoke/spoke-codegen";
 import {
   GetContactTagsDocument,
   useGetContactTagsQuery,
@@ -68,9 +68,7 @@ interface ManageTagsProps {
 
 const ManageTags: React.FC<ManageTagsProps> = (props) => {
   const [isTagEditorOpen, setIsTagEditorOpen] = useState(false);
-  const [selectedTags, setSelectedTags] = useState<
-    Omit<CampaignContactTag, "updatedAt" | "tagger" | "createdAt">[]
-  >([]);
+  const [selectedTags, setSelectedTags] = useState<TagInfoFragment[]>([]);
   const [tagContact, { loading: isWorking }] = useTagConversationMutation({
     refetchQueries: [
       {
@@ -89,7 +87,9 @@ const ManageTags: React.FC<ManageTagsProps> = (props) => {
   const organizationTags = useMemo(() => data?.organizationTags ?? [], [
     data?.organizationTags
   ]);
-  const savedTags = useMemo(() => data?.contactTags ?? [], [data?.contactTags]);
+  const savedTags = useMemo(() => data?.contactTags?.map((t) => t.tag) ?? [], [
+    data?.contactTags
+  ]);
   const previousSavedTags = usePrevious(savedTags);
 
   useEffect(() => {
@@ -112,21 +112,16 @@ const ManageTags: React.FC<ManageTagsProps> = (props) => {
 
   const handleCloseTagManager = () => setIsTagEditorOpen(false);
 
-  const handleOnChangeTags = (tags: CampaignContactTag[]) =>
-    setSelectedTags(tags);
+  const handleOnChangeTags = (tags: TagInfoFragment[]) => setSelectedTags(tags);
 
   const handleSaveTags = async () => {
-    const contactTagIds = new Set(savedTags.map((tag) => tag.tag.id));
-    const selectedTagIds = new Set(selectedTags.map((tag) => tag.tag.id));
-    const addedTags = selectedTags.filter(
-      (tag) => !contactTagIds.has(tag.tag.id)
-    );
-    const removedTags = savedTags.filter(
-      (tag) => !selectedTagIds.has(tag.tag.id)
-    );
+    const contactTagIds = new Set(savedTags.map((tag) => tag.id));
+    const selectedTagIds = new Set(selectedTags.map((tag) => tag.id));
+    const addedTags = selectedTags.filter((tag) => !contactTagIds.has(tag.id));
+    const removedTags = savedTags.filter((tag) => !selectedTagIds.has(tag.id));
     const tagPayload = {
-      addedTagIds: addedTags.map((tag) => tag.tag.id),
-      removedTagIds: removedTags.map((tag) => tag.tag.id)
+      addedTagIds: addedTags.map((tag) => tag.id),
+      removedTagIds: removedTags.map((tag) => tag.id)
     };
 
     try {

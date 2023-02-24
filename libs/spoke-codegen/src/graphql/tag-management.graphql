@@ -1,17 +1,21 @@
+fragment TagInfo on Tag {
+  id
+  title
+  description
+  confirmationSteps
+  onApplyScript
+  isSystem
+  isAssignable
+  textColor
+  backgroundColor
+  createdAt
+}
+
 query GetOrganizationTags($organizationId: String!) {
   organization(id: $organizationId) {
     id
     tagList {
-      id
-      title
-      description
-      confirmationSteps
-      onApplyScript
-      isSystem
-      isAssignable
-      textColor
-      backgroundColor
-      createdAt
+      ...TagInfo
     }
   }
 }
@@ -22,14 +26,7 @@ query GetContactTags($contactId: String!) {
     tags {
       id
       tag {
-        id
-        title
-        description
-        confirmationSteps
-        onApplyScript
-        isSystem
-        isAssignable
-        createdAt
+        ...TagInfo
       }
     }
   }

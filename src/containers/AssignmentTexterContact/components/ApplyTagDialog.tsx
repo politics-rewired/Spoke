@@ -7,6 +7,7 @@ import type {
   CampaignContact,
   CampaignContactTag,
   Tag,
+  TagInfoFragment,
   User
 } from "@spoke/spoke-codegen";
 import React, { useEffect, useState } from "react";
@@ -18,7 +19,7 @@ import ApplyTagConfirmationDialog from "./ApplyTagConfirmationDialog";
 
 export interface ApplyTagDialogProps {
   open: boolean;
-  allTags: Tag[];
+  allTags: TagInfoFragment[];
   onRequestClose: () => Promise<void> | void;
   onApplyTag: (
     addedTags: CampaignContactTag[],
@@ -41,57 +42,38 @@ const ApplyTagDialog: React.FC<ApplyTagDialogProps> = ({
   texter,
   contact
 }: ApplyTagDialogProps) => {
-  const contactTags = contact.tags;
+  const contactTags = contact.tags.map((t) => t.tag);
 
   const [selectedContactTags, setSelectedContactTags] = useState<
-    CampaignContactTag[]
+    TagInfoFragment[]
   >(contactTags);
-  const [pendingContactTag, setPendingContactTag] = useState<
-    CampaignContactTag | undefined
-  >(undefined);
+  const [pendingTag, setPendingTag] = useState<TagInfoFragment | undefined>(
+    undefined
+  );
   useEffect(() => {
-    if (open) setSelectedContactTags(contactTags);
+    if (open)
+      setSelectedContactTags(contactTags.map((contactTag) => contactTag));
   }, [open]);
 
-  const setPendingTag = (changedTag: Tag) => {
-    const changedContactTag = {
-      id: `${contact.id}-${changedTag.id}`,
-      tag: changedTag,
-      tagger: texter,
-      createdAt: DateTime.local().toISO(),
-      updatedAt: DateTime.local().toISO()
-    };
-    setPendingContactTag(changedContactTag);
+  const addToSelectedTags = (addedTag: TagInfoFragment) => {
+    setSelectedContactTags([...selectedContactTags, addedTag]);
   };
 
-  const addToSelectedTags = (addedTag: Tag) => {
-    const addedContactTag = {
-      id: `${contact.id}-${addedTag.id}`,
-      tag: addedTag,
-      tagger: texter,
-      createdAt: DateTime.local().toISO(),
-      updatedAt: DateTime.local().toISO()
-    };
-    setSelectedContactTags([...selectedContactTags, addedContactTag]);
-  };
-
-  const isEscalateTag = (tag: Tag) =>
+  const isEscalateTag = (tag: TagInfoFragment) =>
     tag.title === "Escalated" || tag.title === "Escalate";
-  const isNonAssignableTagApplied = (appliedTags: CampaignContactTag[]) =>
-    appliedTags.findIndex((t) => !t.tag.isAssignable) > -1;
+  const isNonAssignableTagApplied = (appliedTags: TagInfoFragment[]) =>
+    appliedTags.findIndex((t) => !t.isAssignable) > -1;
 
-  const handleOnTagChange = (changedTags: CampaignContactTag[]) =>
+  const handleOnTagChange = (changedTags: TagInfoFragment[]) =>
     setSelectedContactTags(changedTags);
 
-  const handleOnCancelEscalateTag = () => setPendingContactTag(undefined);
+  const handleOnCancelEscalateTag = () => setPendingTag(undefined);
 
-  const handleOnConfirmAddEscalatedTag = (escalateTag: Tag) => {
-    if (
-      selectedContactTags.findIndex((t) => t.tag.id === escalateTag.id) === -1
-    ) {
+  const handleOnConfirmAddEscalatedTag = (escalateTag: TagInfoFragment) => {
+    if (selectedContactTags.findIndex((t) => t.id === escalateTag.id) === -1) {
       addToSelectedTags(escalateTag);
     }
-    setPendingContactTag(undefined);
+    setPendingTag(undefined);
   };
 
   const handleAddEscalatedTag = () => {
@@ -109,12 +91,18 @@ const ApplyTagDialog: React.FC<ApplyTagDialogProps> = ({
   };
 
   const getTagsPayload = () => {
-    const contactTagIds = new Set(contactTags.map((t) => t.tag.id));
-    const selectedTagIds = new Set(selectedContactTags.map((t) => t.tag.id));
-    const addedTags = selectedContactTags.filter(
-      (t) => !contactTagIds.has(t.tag.id)
-    );
-    const removedTags = contactTags.filter(
+    const contactTagIds = new Set(contact.tags.map((t) => t.tag.id));
+    const selectedTagIds = new Set(selectedContactTags.map((t) => t.id));
+    const addedTags = selectedContactTags
+      .filter((t) => !contactTagIds.has(t.id))
+      .map<CampaignContactTag>((addedTag) => ({
+        id: `${contact.id}-${addedTag.id}`,
+        tag: addedTag as Tag,
+        tagger: texter,
+        createdAt: DateTime.local().toISO(),
+        updatedAt: DateTime.local().toISO()
+      }));
+    const removedTags = contact.tags.filter(
       (t) => !selectedTagIds.has(t.tag.id)
     );
 
@@ -124,13 +112,13 @@ const ApplyTagDialog: React.FC<ApplyTagDialogProps> = ({
   const handleApplyTags = () => {
     const [addedTags, removedTags] = getTagsPayload();
     onApplyTag(addedTags, removedTags);
-    setPendingContactTag(undefined);
+    setPendingTag(undefined);
   };
 
   const handleApplyTagsAndMoveOn = () => {
     const [addedTags, removedTags] = getTagsPayload();
     onApplyTagsAndMoveOn(addedTags, removedTags);
-    setPendingContactTag(undefined);
+    setPendingTag(undefined);
   };
 
   const escalateTag = allTags.find(isEscalateTag);
@@ -203,7 +191,7 @@ const ApplyTagDialog: React.FC<ApplyTagDialogProps> = ({
         <DialogActions>{selectTagActions}</DialogActions>
       </Dialog>
       <ApplyTagConfirmationDialog
-        pendingTag={pendingContactTag}
+        pendingTag={pendingTag}
         onCancel={handleOnCancelEscalateTag}
         onConfirm={handleOnConfirmAddEscalatedTag}
       />

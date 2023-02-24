@@ -1,18 +1,11 @@
-import type { CampaignContactTag, Tag } from "@spoke/spoke-codegen";
+import type { TagInfoFragment } from "@spoke/spoke-codegen";
 import React from "react";
 import type { StylesConfig } from "react-select";
 import Select from "react-select";
 
 import MenuPortal from "./MenuPortal";
 
-type MenuValue = {
-  value: string;
-  label: string;
-  textColor: string;
-  backgroundColor: string;
-};
-
-const tagStyles: StylesConfig<MenuValue, true> = {
+const tagStyles: StylesConfig<TagInfoFragment, true> = {
   option: (styles, { data }) => ({
     ...styles,
     color: data.textColor
@@ -32,47 +25,28 @@ const tagStyles: StylesConfig<MenuValue, true> = {
 };
 
 interface TagSelectorProps {
-  dataSource: Tag[];
-  value: CampaignContactTag[];
-  onChange: (changedTags: CampaignContactTag[]) => Promise<void> | void;
+  dataSource: TagInfoFragment[];
+  value: TagInfoFragment[];
+  onChange: (changedTags: TagInfoFragment[]) => Promise<void> | void;
 }
 
 const TagSelector: React.FC<TagSelectorProps> = (props) => {
-  // differentiate select and clear tag actions
-  const handleSelectChange = (tagsArray: MenuValue[]) => {
-    const { dataSource, onChange } = props;
-
-    const selectedTags: CampaignContactTag[] = [];
-    tagsArray.forEach((tag) => {
-      const newTag = dataSource.find((t) => t.id === tag.value);
-      if (newTag) selectedTags.push({ tag: newTag });
-    });
-    onChange(selectedTags);
-  };
+  const handleSelectChange = (tagsArray: TagInfoFragment[]) =>
+    props.onChange(tagsArray);
 
   const { dataSource, value } = props;
-  const menuOptions: MenuValue[] = dataSource.map((tag) => ({
-    label: tag.title,
-    value: tag.id,
-    textColor: tag.textColor,
-    backgroundColor: tag.backgroundColor
-  }));
-  const menuValues: MenuValue[] = value.map((tag) => ({
-    value: tag.tag.id,
-    label: tag.tag.title,
-    textColor: tag.tag.textColor,
-    backgroundColor: tag.tag.backgroundColor
-  }));
 
   return (
     <>
       <p>Apply tags:</p>
-      <Select<MenuValue>
+      <Select<TagInfoFragment>
         isMulti
         isSearchable
-        value={menuValues}
+        value={value}
         components={{ MenuPortal }}
-        options={menuOptions}
+        options={dataSource}
+        getOptionValue={(option: TagInfoFragment) => option.id}
+        getOptionLabel={(option: TagInfoFragment) => option.title}
         menuPortalTarget={document.body}
         onChange={handleSelectChange}
         styles={tagStyles}
