@@ -38,10 +38,10 @@ query GetContactTags($contactId: String!) {
 # Mutations
 
 mutation TagConversation(
-  $contactId: String!
-  $tagPayload: ContactTagActionInput!
+  $campaignContactId: String!
+  $tag: ContactTagActionInput!
 ) {
-  tagConversation(campaignContactId: $contactId, tag: $tagPayload) {
+  tagConversation(campaignContactId: $campaignContactId, tag: $tag) {
     id
     assignmentId
   }
