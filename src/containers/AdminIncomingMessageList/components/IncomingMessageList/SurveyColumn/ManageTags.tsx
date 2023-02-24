@@ -13,6 +13,7 @@ import {
 import isEqual from "lodash/isEqual";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 
+import LoadingIndicator from "../../../../../components/LoadingIndicator";
 import TagSelector from "../../../../../components/TagSelector";
 
 const useGetTagsData = (organizationId: string, contactId: string) => {
@@ -92,7 +93,10 @@ const ManageTags: React.FC<ManageTagsProps> = (props) => {
   }, [savedTags, previousSavedTags, setSelectedTags]);
 
   if (loading || !data) {
-    return <div />;
+    return <LoadingIndicator />;
+  }
+  if (tagsError) {
+    return <p>{tagsError.message}</p>;
   }
 
   const handleOnClickEditTags = () => {
