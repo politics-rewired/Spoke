@@ -65,7 +65,7 @@ const TagSelector: React.FC<TagSelectorProps> = (props) => {
   }));
 
   return (
-    <div>
+    <>
       <p>Apply tags:</p>
       <Select<MenuValue>
         isMulti
@@ -77,7 +77,7 @@ const TagSelector: React.FC<TagSelectorProps> = (props) => {
         onChange={handleSelectChange}
         styles={tagStyles}
       />
-    </div>
+    </>
   );
 };
 
