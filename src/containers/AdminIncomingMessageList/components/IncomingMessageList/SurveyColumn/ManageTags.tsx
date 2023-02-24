@@ -137,9 +137,6 @@ const ManageTags: React.FC<ManageTagsProps> = (props) => {
 
   const handleCloseErrorDialog = () => setError(undefined);
 
-  const tagList = organizationTags;
-  const tags = savedTags;
-
   const actions = [
     <Button
       key="save"
@@ -173,12 +170,12 @@ const ManageTags: React.FC<ManageTagsProps> = (props) => {
         variant="contained"
         disabled={isWorking}
         onClick={handleOnClickEditTags}
-      >{`Edit Tags (${tags.length})`}</Button>
+      >{`Edit Tags (${savedTags.length})`}</Button>
       <Dialog open={isTagEditorOpen} onClose={handleCloseTagManager}>
         <DialogTitle>Manage Tags</DialogTitle>
         <DialogContent>
           <TagSelector
-            dataSource={tagList}
+            dataSource={organizationTags}
             value={selectedTags}
             onChange={handleOnChangeTags}
           />
