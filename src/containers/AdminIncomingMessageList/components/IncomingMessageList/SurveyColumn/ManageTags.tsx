@@ -133,7 +133,7 @@ const ManageTags: React.FC<ManageTagsProps> = (props) => {
       const response = await tagContact({
         variables: { campaignContactId: props.contactId, tag: tagPayload }
       });
-      if (response.errors) throw response.errors;
+      if (response.errors) throw response.errors[0];
       handleCloseTagManager();
     } catch (err: any) {
       setError(err.message);
