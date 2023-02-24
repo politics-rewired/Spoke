@@ -6,6 +6,7 @@ import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import type { CampaignContactTag } from "@spoke/spoke-codegen";
 import {
+  GetContactTagsDocument,
   useGetContactTagsQuery,
   useGetOrganizationTagsQuery,
   useTagConversationMutation
@@ -71,7 +72,12 @@ const ManageTags: React.FC<ManageTagsProps> = (props) => {
     Omit<CampaignContactTag, "updatedAt" | "tagger" | "createdAt">[]
   >([]);
   const [tagContact, { loading: isWorking }] = useTagConversationMutation({
-    // refetchQueries: ["getContactTags"]
+    refetchQueries: [
+      {
+        query: GetContactTagsDocument,
+        variables: { contactId: props.contactId }
+      }
+    ]
   });
   const [error, setError] = useState<string | undefined>(undefined);
 
