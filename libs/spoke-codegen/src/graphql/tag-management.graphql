@@ -11,6 +11,13 @@ fragment TagInfo on Tag {
   createdAt
 }
 
+fragment ContactTagInfo on CampaignContactTag {
+  id
+  tag {
+    ...TagInfo
+  }
+}
+
 query GetOrganizationTags($organizationId: String!) {
   organization(id: $organizationId) {
     id
@@ -24,10 +31,7 @@ query GetContactTags($contactId: String!) {
   contact(id: $contactId) {
     id
     tags {
-      id
-      tag {
-        ...TagInfo
-      }
+      ...ContactTagInfo
     }
   }
 }

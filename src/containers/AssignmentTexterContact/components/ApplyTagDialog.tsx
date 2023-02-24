@@ -5,11 +5,12 @@ import DialogContent from "@material-ui/core/DialogContent";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import type {
   CampaignContact,
-  CampaignContactTag,
+  ContactTagInfoFragment,
   Tag,
   TagInfoFragment,
   User
 } from "@spoke/spoke-codegen";
+import { useGetContactTagsQuery } from "@spoke/spoke-codegen";
 import React, { useEffect, useState } from "react";
 
 import TagSelector from "../../../components/TagSelector";
@@ -22,15 +23,15 @@ export interface ApplyTagDialogProps {
   allTags: TagInfoFragment[];
   onRequestClose: () => Promise<void> | void;
   onApplyTag: (
-    addedTags: CampaignContactTag[],
-    removedTags: CampaignContactTag[]
+    addedTags: ContactTagInfoFragment[],
+    removedTags: ContactTagInfoFragment[]
   ) => Promise<void> | void;
   onApplyTagsAndMoveOn: (
-    addedTags: CampaignContactTag[],
-    removedTags: CampaignContactTag[]
+    addedTags: ContactTagInfoFragment[],
+    removedTags: ContactTagInfoFragment[]
   ) => Promise<void> | void;
   texter: User;
-  contact: CampaignContact;
+  contact: Omit<CampaignContact, "tags">;
 }
 
 const ApplyTagDialog: React.FC<ApplyTagDialogProps> = ({
@@ -42,17 +43,22 @@ const ApplyTagDialog: React.FC<ApplyTagDialogProps> = ({
   texter,
   contact
 }: ApplyTagDialogProps) => {
-  const contactTags = contact.tags.map((t) => t.tag);
+  const { data } = useGetContactTagsQuery({
+    variables: { contactId: contact.id }
+  });
+  const contactTags = data?.contact?.tags ?? [];
+  const contactTagsTags = contactTags.map((t) => t.tag);
 
   const [selectedContactTags, setSelectedContactTags] = useState<
     TagInfoFragment[]
-  >(contactTags);
+  >(contactTagsTags);
   const [pendingTag, setPendingTag] = useState<TagInfoFragment | undefined>(
     undefined
   );
   useEffect(() => {
-    if (open)
-      setSelectedContactTags(contactTags.map((contactTag) => contactTag));
+    if (open) {
+      setSelectedContactTags(contactTagsTags.map((contactTag) => contactTag));
+    }
   }, [open]);
 
   const addToSelectedTags = (addedTag: TagInfoFragment) => {
@@ -91,32 +97,32 @@ const ApplyTagDialog: React.FC<ApplyTagDialogProps> = ({
   };
 
   const getTagsPayload = () => {
-    const contactTagIds = new Set(contact.tags.map((t) => t.tag.id));
+    const contactTagIds = new Set(contactTags.map((t) => t.tag.id));
     const selectedTagIds = new Set(selectedContactTags.map((t) => t.id));
     const addedTags = selectedContactTags
       .filter((t) => !contactTagIds.has(t.id))
-      .map<CampaignContactTag>((addedTag) => ({
+      .map<ContactTagInfoFragment>((addedTag) => ({
         id: `${contact.id}-${addedTag.id}`,
         tag: addedTag as Tag,
         tagger: texter,
         createdAt: DateTime.local().toISO(),
         updatedAt: DateTime.local().toISO()
       }));
-    const removedTags = contact.tags.filter(
+    const removedTags: ContactTagInfoFragment[] = contactTags.filter(
       (t) => !selectedTagIds.has(t.tag.id)
     );
 
-    return [addedTags, removedTags];
+    return { addedTags, removedTags };
   };
 
   const handleApplyTags = () => {
-    const [addedTags, removedTags] = getTagsPayload();
+    const { addedTags, removedTags } = getTagsPayload();
     onApplyTag(addedTags, removedTags);
     setPendingTag(undefined);
   };
 
   const handleApplyTagsAndMoveOn = () => {
-    const [addedTags, removedTags] = getTagsPayload();
+    const { addedTags, removedTags } = getTagsPayload();
     onApplyTagsAndMoveOn(addedTags, removedTags);
     setPendingTag(undefined);
   };

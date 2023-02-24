@@ -6,6 +6,7 @@ import CheckCircleIcon from "@material-ui/icons/CheckCircle";
 import NavigateBeforeIcon from "@material-ui/icons/NavigateBefore";
 import NavigateNextIcon from "@material-ui/icons/NavigateNext";
 import {
+  GetContactTagsDocument,
   GetOrganizationTagsDocument,
   TagConversationDocument
 } from "@spoke/spoke-codegen";
@@ -510,7 +511,13 @@ const mutations = {
     variables: {
       campaignContactId,
       tag
-    }
+    },
+    refetchQueries: [
+      {
+        query: GetContactTagsDocument,
+        variables: { contactId: campaignContactId }
+      }
+    ]
   }),
   editCampaignContactMessageStatus: () => (
     messageStatus,
