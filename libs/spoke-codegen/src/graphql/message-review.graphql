@@ -30,6 +30,7 @@ fragment ConversationInfo on Conversation {
     tags {
       id
       tag {
+        id
         title
         textColor
         backgroundColor

@@ -487,7 +487,7 @@ export class AssignmentTexterContact extends React.Component {
 
     if (!callback && addedTags.length > 0) {
       const mostImportantTag = sortBy(addedTags, "id")[0];
-      const tagMessageText = mostImportantTag.onApplyScript;
+      const tagMessageText = mostImportantTag.tag.onApplyScript;
       if (tagMessageText !== "") this.handleChangeScript(tagMessageText);
     }
   };

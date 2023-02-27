@@ -15,7 +15,7 @@ const ShowTags: React.FC<ShowTagsProps> = ({ tags }) => (
     <h2>Contact Tags</h2>
     {tags.map((tag: CampaignContactTagWithLabel) => (
       <Chip
-        key={tag.tag.id}
+        key={tag.id}
         style={{
           marginLeft: 5,
           marginRight: 5,

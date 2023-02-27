@@ -5,6 +5,11 @@ import ButtonGroup from "@material-ui/core/ButtonGroup";
 import CheckCircleIcon from "@material-ui/icons/CheckCircle";
 import NavigateBeforeIcon from "@material-ui/icons/NavigateBefore";
 import NavigateNextIcon from "@material-ui/icons/NavigateNext";
+import {
+  GetContactTagsDocument,
+  GetOrganizationTagsDocument,
+  TagConversationDocument
+} from "@spoke/spoke-codegen";
 import { css, StyleSheet } from "aphrodite";
 import { ToolbarTitle } from "material-ui/Toolbar";
 import PropTypes from "prop-types";
@@ -470,25 +475,7 @@ const queries = {
     })
   },
   organizationTags: {
-    query: gql`
-      query getTags($organizationId: String!) {
-        organization(id: $organizationId) {
-          id
-          tagList {
-            id
-            title
-            description
-            confirmationSteps
-            onApplyScript
-            isSystem
-            isAssignable
-            createdAt
-            textColor
-            backgroundColor
-          }
-        }
-      }
-    `,
+    query: GetOrganizationTagsDocument,
     options: (ownProps) => ({
       variables: {
         organizationId: ownProps.organizationId
@@ -520,21 +507,17 @@ const mutations = {
     }
   }),
   tagContact: () => (campaignContactId, tag) => ({
-    mutation: gql`
-      mutation tagConversation(
-        $campaignContactId: String!
-        $tag: ContactTagActionInput!
-      ) {
-        tagConversation(campaignContactId: $campaignContactId, tag: $tag) {
-          id
-          assignmentId
-        }
-      }
-    `,
+    mutation: TagConversationDocument,
     variables: {
       campaignContactId,
       tag
-    }
+    },
+    refetchQueries: [
+      {
+        query: GetContactTagsDocument,
+        variables: { contactId: campaignContactId }
+      }
+    ]
   }),
   editCampaignContactMessageStatus: () => (
     messageStatus,
