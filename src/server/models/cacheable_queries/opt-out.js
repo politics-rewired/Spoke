@@ -110,6 +110,8 @@ export const optOutCache = {
         reason_code: reason,
         cell
       })
+      .onConflict(["cell", "organization_id"])
+      .merge("updated_at")
       .returning(["id"]);
 
     const optOutId = opttedOutId.id;
@@ -151,7 +153,10 @@ export const optOutCache = {
         reason_code: reason
       }));
 
-      await trx("opt_out").insert(optOuts);
+      await trx("opt_out")
+        .insert(optOuts)
+        .onConflict(["cell", "organization_id"])
+        .merge("updated_at");
 
       const contactIdsQuery = r
         .reader("campaign_contact")
