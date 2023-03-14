@@ -240,6 +240,13 @@ export const sendMessage = async (
   }
 
   if (checkOptOut && !!record.is_opted_out) {
+    // if trying to message an opted out contact
+    // mark conversation as closed before throwing error
+    await r
+      .knex("campaign_contact")
+      .update({ message_status: "closed" })
+      .where({ id: record.cc_id });
+
     throw new ContactOptedOutError();
   }
 

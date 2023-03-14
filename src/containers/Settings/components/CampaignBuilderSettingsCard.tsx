@@ -16,7 +16,7 @@ import {
 } from "@spoke/spoke-codegen";
 import React from "react";
 
-import { useAuthzContext } from "../../../components/AuthzProvider";
+import { useAuthzContext } from "../../AuthzProvider";
 
 export interface CampaignBuilderSettingsCardProps {
   organizationId: string;

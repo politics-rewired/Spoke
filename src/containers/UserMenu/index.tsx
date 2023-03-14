@@ -12,8 +12,8 @@ import { useGetCurrentUserForMenuQuery } from "@spoke/spoke-codegen";
 import React, { useCallback, useRef, useState } from "react";
 import { useHistory } from "react-router-dom";
 
-import { useAuthzContext } from "../../components/AuthzProvider";
 import { dataTest } from "../../lib/attributes";
+import { useAuthzContext } from "../AuthzProvider";
 import OrganizationItem from "./components/OrganizationItem";
 
 interface Props {

@@ -1,6 +1,6 @@
 {
   "name": "spoke",
-  "version": "6.0.0-rc.0",
+  "version": "6.1.2",
   "description": "Spoke",
   "main": "src/server",
   "engines": {
@@ -40,7 +40,7 @@
     "dev": "nf start --wrap --procfile ./dev-tools/Procfile.dev",
     "dev:server": "nodemon -e ts,tsx,js,jsx -w ./src --exec babel-node --extensions .ts,.tsx,.js,.jsx ./src/server",
     "dev:client": "webpack serve --config webpack.config.ts",
-    "dev:codegen:schema": "run-when-changed --watch \"src/api/**/*\" --exec \"yarn codegen:schema\"",
+    "dev:codegen:schema": "run-when-changed --watch \"libs/gql-schema/**/*\" --exec \"yarn codegen:schema\"",
     "dev:codegen:ts": "run-when-changed --watch \"src/schema.graphql\" --watch \"libs/spoke-codegen/src/graphql/**/*.graphql\" --exec \"yarn codegen:ts\"",
     "dev:client-nowrap": "nf start --trim 500 --procfile ./dev-tools/Procfile.dev",
     "util:insert-invite": "babel-node ./dev-tools/insert-invite.js",
@@ -308,7 +308,8 @@
     "@types/react": "^15.6.28",
     "material-ui": "^0.20.1",
     "pg-connection-string": "~2.4.0",
-    "fs-capacitor": "6.2.0"
+    "fs-capacitor": "6.2.0",
+    "knex": "^2.3.0"
   },
   "config": {
     "commitizen": {

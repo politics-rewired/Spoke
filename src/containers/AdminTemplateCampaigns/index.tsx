@@ -3,7 +3,9 @@ import { makeStyles } from "@material-ui/core/styles";
 import AddIcon from "@material-ui/icons/Add";
 import {
   GetTemplateCampaignsDocument,
+  useCloneTemplateCampaignMutation,
   useCreateTemplateCampaignMutation,
+  useDeleteTemplateCampaignMutation,
   useGetTemplateCampaignsQuery
 } from "@spoke/spoke-codegen";
 import React, { useCallback } from "react";
@@ -28,16 +30,27 @@ export const AdminTemplateCampaigns: React.FC = () => {
   const classes = useStyles();
   const history = useHistory();
   const { organizationId } = useParams<{ organizationId: string }>();
+
   const { data, loading, error } = useGetTemplateCampaignsQuery({
     variables: { organizationId }
   });
+
+  const refetchQueries = [
+    { query: GetTemplateCampaignsDocument, variables: { organizationId } }
+  ];
+
   const [
     createTemplateCampaign,
     { loading: createTemplateLoading }
   ] = useCreateTemplateCampaignMutation({
-    refetchQueries: [
-      { query: GetTemplateCampaignsDocument, variables: { organizationId } }
-    ]
+    refetchQueries
+  });
+
+  const [deleteTemplateCampaign] = useDeleteTemplateCampaignMutation({
+    refetchQueries
+  });
+  const [cloneTemplateCampaign] = useCloneTemplateCampaignMutation({
+    refetchQueries
   });
 
   const templateCampaigns = (
@@ -61,6 +74,18 @@ export const AdminTemplateCampaigns: React.FC = () => {
     );
   };
 
+  const createCloneClickEdit = (templateCampaignId: string) => async () => {
+    await cloneTemplateCampaign({
+      variables: { organizationId, campaignId: templateCampaignId }
+    });
+  };
+
+  const createDeleteClickEdit = (templateCampaignId: string) => async () => {
+    await deleteTemplateCampaign({
+      variables: { organizationId, campaignId: templateCampaignId }
+    });
+  };
+
   return (
     <>
       {loading && "Loading..."}
@@ -69,9 +94,12 @@ export const AdminTemplateCampaigns: React.FC = () => {
       <div className={classes.listContainer}>
         {templateCampaigns.map((templateCampaign) => (
           <TemplateCampaignRow
+            organizationId={organizationId}
             key={templateCampaign.id}
             templateCampaign={templateCampaign}
             onClickEdit={createHandleClickEdit(templateCampaign.id)}
+            onClickClone={createCloneClickEdit(templateCampaign.id)}
+            onClickDelete={createDeleteClickEdit(templateCampaign.id)}
           />
         ))}
       </div>

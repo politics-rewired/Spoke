@@ -4210,6 +4210,14 @@ ALTER TABLE ONLY public.unhealthy_link_domain
 
 
 --
+-- Name: opt_out unique_cell_per_organization_id; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.opt_out
+    ADD CONSTRAINT unique_cell_per_organization_id UNIQUE (cell, organization_id);
+
+
+--
 -- Name: canned_response unique_per_campaign; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 

@@ -242,6 +242,8 @@ type RootMutation {
   createInvite(invite:InviteInput!): Invite
   createCampaign(campaign:CampaignInput!): Campaign
   createTemplateCampaign(organizationId: String!): Campaign!
+  deleteTemplateCampaign(organizationId: String!, campaignId: String!): Boolean!
+  cloneTemplateCampaign(organizationId: String!, campaignId: String!): Campaign!
   editCampaign(id:String!, campaign:CampaignInput!): Campaign
   saveCampaignGroups(organizationId: String!, campaignGroups: [CampaignGroupInput!]!): [CampaignGroup!]!
   deleteCampaignGroup(organizationId: String!, campaignGroupId: String!): Boolean!
@@ -428,8 +430,8 @@ type Organization {
   unhealthyLinkDomains: [UnhealthyLinkDomain]!
   numbersApiKey: String
   settings: OrganizationSettings!
-  tagList: [Tag]
-  escalationTagList: [Tag]
+  tagList: [Tag!]!
+  escalationTagList: [Tag!]!
   teams: [Team]!
   externalSystems(after: Cursor, first: Int): ExternalSystemPage!
   messagingServices(after: Cursor, first: Int, active: Boolean): MessagingServicePage
@@ -899,8 +901,7 @@ type CampaignContact {
   messageStatus: String!
   assignmentId: String
   updatedAt: Date!
-
-  contactTags: [Tag]
+  tags: [CampaignContactTag!]!
 }
 
 input CampaignContactInput {
@@ -910,6 +911,16 @@ input CampaignContactInput {
   zip: String
   external_id: String
   customFields: String
+}
+
+
+
+type CampaignContactTag {
+  id: String!
+  tag: Tag!
+  tagger: User!
+  createdAt: String!
+  updatedAt: String!
 }
 
 

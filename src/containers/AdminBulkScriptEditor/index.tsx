@@ -20,7 +20,7 @@ import isEmpty from "lodash/isEmpty";
 import React, { useState } from "react";
 
 import { formatErrorMessage } from "../hoc/with-operations";
-import ChangesDialog from "./ChangesDialog";
+import ChangesDialog from "./components/ChangesDialog";
 
 const PROTECTED_CHARACTERS = ["/"];
 
