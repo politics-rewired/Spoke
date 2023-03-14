@@ -448,28 +448,6 @@ export class AssignmentTexterContact extends React.Component {
   };
 
   handleApplyTags = (addedTags, removedTags, callback) => {
-    const pendingNewTags = this.props.contact.contactTags || [];
-
-    addedTags.forEach((addedTag) => {
-      const tagDoesNotExist = !pendingNewTags.find(
-        (currentTag) => currentTag.id === addedTag.id
-      );
-
-      if (tagDoesNotExist) {
-        pendingNewTags.push(addedTag);
-      }
-    });
-
-    removedTags.forEach((removedTag) => {
-      const idxOfExistingTag = pendingNewTags.findIndex(
-        (currentTag) => currentTag.id === removedTag.id
-      );
-
-      if (idxOfExistingTag > -1) {
-        pendingNewTags.splice(idxOfExistingTag, 1);
-      }
-    });
-
     this.tagContact(addedTags, removedTags);
 
     if (callback) {
