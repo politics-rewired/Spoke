@@ -18417,13 +18417,6 @@ material-colors@^1.2.1:
   resolved "https://registry.yarnpkg.com/material-colors/-/material-colors-1.2.6.tgz#6d1958871126992ceecc72f4bcc4d8f010865f46"
   integrity sha512-6qE4B9deFBIa9YSpOc9O0Sgc43zTeVYbgDT5veRKSlB2+ZuHNoVVxA1L/ckMUayV9Ay9y7Z/SZCLcGteW9i7bg==
 
-material-ui-chip-input@0.18.5:
-  version "0.18.5"
-  resolved "https://registry.yarnpkg.com/material-ui-chip-input/-/material-ui-chip-input-0.18.5.tgz#7ccf5e8733eb1282349ff610a92810d55242a2f5"
-  integrity sha512-5d0rzs1v9dOg3GavG0SjmVPzXjO8mstGyS+mtlwSvG+FjEg8Osedk5i1/mUzmk74f0r7boHfIXv7OJnHIzt2eA==
-  dependencies:
-    prop-types "^15.5.7"
-
 material-ui-color-picker@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/material-ui-color-picker/-/material-ui-color-picker-1.0.1.tgz#3f4b7728e9fc810d1c68c1ea95cbae0c264e8e76"
