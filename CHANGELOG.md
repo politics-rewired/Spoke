@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [6.2.0-rc.0](https://github.com/politics-rewired/spoke/compare/v6.1.2...v6.2.0-rc.0) (2023-03-14)
+
+
+### Features
+
+* pause autosending at end of day ([#1533](https://github.com/politics-rewired/spoke/issues/1533)) ([d85d164](https://github.com/politics-rewired/spoke/commit/d85d1640e60968c83b5f062c7062454ad6f887d2))
+
+
+### Bug Fixes
+
+* **messaging services:** add fakeservice default ([#1570](https://github.com/politics-rewired/spoke/issues/1570)) ([89d7d8b](https://github.com/politics-rewired/spoke/commit/89d7d8b2311ff564818bc0a425c69ccfe9a91d9e))
+
+
+### Backend Changes
+
+* remove dead code ([#1575](https://github.com/politics-rewired/spoke/issues/1575)) ([f84e210](https://github.com/politics-rewired/spoke/commit/f84e210dfc852d3ca0a70a80de7cf7fd3b1d880d))
+* replace chip-input with autocomplete ([#1538](https://github.com/politics-rewired/spoke/issues/1538)) ([d49f354](https://github.com/politics-rewired/spoke/commit/d49f354e4b0b981be1674b34dcec4daeb08fc1f1))
+* replace useless map with copy-on-destructure ([#1574](https://github.com/politics-rewired/spoke/issues/1574)) ([d13a4e7](https://github.com/politics-rewired/spoke/commit/d13a4e7ba51db400b095588ce5ede5c685bf6e23))
+* **knex:** resolve to v.2.3.0 ([#1539](https://github.com/politics-rewired/spoke/issues/1539)) ([4c68e7e](https://github.com/politics-rewired/spoke/commit/4c68e7ee46752af583d935a2d082078e8747d82d))
+* **message response:** convert to functional component ([#1541](https://github.com/politics-rewired/spoke/issues/1541)) ([b8b68dd](https://github.com/politics-rewired/spoke/commit/b8b68dd7f080114cf2a0babbe467e5f788c83d3b))
+
 ### [6.1.2](https://github.com/politics-rewired/spoke/compare/v6.1.1...v6.1.2) (2023-02-27)
 
 
