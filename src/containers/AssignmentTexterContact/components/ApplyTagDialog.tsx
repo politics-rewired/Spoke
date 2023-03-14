@@ -57,7 +57,7 @@ const ApplyTagDialog: React.FC<ApplyTagDialogProps> = ({
   );
   useEffect(() => {
     if (open) {
-      setSelectedContactTags(contactTagsTags.map((contactTag) => contactTag));
+      setSelectedContactTags([...contactTagsTags]);
     }
   }, [open]);
 
