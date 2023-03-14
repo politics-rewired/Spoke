@@ -1,15 +1,15 @@
 /* eslint-disable import/prefer-default-export */
+import type {
+  Campaign,
+  CampaignInput,
+  CampaignsFilter
+} from "@spoke/spoke-codegen";
 import isEmpty from "lodash/isEmpty";
 import isEqual from "lodash/isEqual";
 import isNil from "lodash/isNil";
 import type { QueryResult } from "pg";
 import MemoizeHelper, { Buckets, cacheOpts } from "src/server/memoredis";
 
-import type {
-  Campaign,
-  CampaignInput,
-  CampaignsFilter
-} from "../../../api/campaign";
 import type { RelayPaginatedResponse } from "../../../api/pagination";
 import { config } from "../../../config";
 import { gzip, makeTree } from "../../../lib";
@@ -792,6 +792,39 @@ WHERE campaign_id = ?`,
   );
 
   return invalidFields;
+};
+
+export const unqueueAutosending = async (campaign: CampaignRecord) => {
+  if (campaign.autosend_status === "sending") {
+    await r.knex.raw(
+      `
+        select count(*)
+        from (
+          select graphile_worker.remove_job(key)
+          from graphile_worker.jobs
+          where task_identifier = 'retry-interaction-step'
+            and payload->>'campaignId' = ?
+        ) deleted_jobs
+      `,
+      [campaign.id]
+    );
+  }
+
+  return campaign;
+};
+
+export const markAutosendingPaused = async (campaign: CampaignRecord) => {
+  if (campaign.autosend_status === "sending") {
+    const [updatedCampaignResult] = await r
+      .knex("campaign")
+      .update({ autosend_status: "paused" })
+      .where({ id: campaign.id })
+      .returning("*");
+
+    return updatedCampaignResult;
+  }
+
+  return campaign;
 };
 
 export const deleteCampaign = async (campaignId: string) => {
