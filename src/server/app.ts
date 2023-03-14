@@ -38,6 +38,23 @@ const {
 export const createApp = async () => {
   const app = express();
 
+  if (config.DD_AGENT_HOST && config.DD_DOGSTATSD_PORT) {
+    const datadogOptions = {
+      dogstatsd: statsd,
+      path: true,
+      method: false,
+      response_code: true,
+      graphql_paths: ["/graphql"],
+      tags: config.DD_TAGS.split(",")
+    };
+
+    if (config.CLIENT_NAME) {
+      datadogOptions.tags.push(`client:${config.CLIENT_NAME}`);
+    }
+
+    app.use(connectDatadog(datadogOptions));
+  }
+
   if (config.LOG_LEVEL === "verbose" || config.LOG_LEVEL === "debug") {
     app.use(requestLogging);
   }
@@ -97,23 +114,6 @@ export const createApp = async () => {
 
   if (PUBLIC_DIR) {
     app.use(express.static(PUBLIC_DIR, { maxAge: "180 days" }));
-  }
-
-  if (config.DD_AGENT_HOST && config.DD_DOGSTATSD_PORT) {
-    const datadogOptions = {
-      dogstatsd: statsd,
-      path: true,
-      method: false,
-      response_code: true,
-      graphql_paths: ["/graphql"],
-      tags: config.DD_TAGS.split(",")
-    };
-
-    if (config.CLIENT_NAME) {
-      datadogOptions.tags.push(`client:${config.CLIENT_NAME}`);
-    }
-
-    app.use(connectDatadog(datadogOptions));
   }
 
   const graphqlRouter = await createGraphqlRouter();

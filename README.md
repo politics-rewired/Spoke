@@ -16,7 +16,7 @@ that goal. See [`HOWTO_migrate-from-moveon-main.md`](./docs/HOWTO_migrate-from-m
 
 Prerequisites:
 
-- Node (>= 16.14) -- See [How to Install Node](https://nodejs.dev/learn/how-to-install-nodejs)
+- Node (^16.14) -- See [How to Install Node](https://nodejs.dev/learn/how-to-install-nodejs)
 - Yarn (>= 1.19.1) -- See [Installing Yarn](https://classic.yarnpkg.com/en/docs/install)
 - Postgres (>= 11) -- See [install](https://postgresql.org/download) and [start](https://www.postgresql.org/docs/current/server-start.html) documentation
 
@@ -47,11 +47,17 @@ Create the `spokedev` database (if it doesn't yet exist)
 psql -c "create database spokedev;"
 ```
 
-Run the migrations
+Run the migrations:
 
 ```sh
 yarn migrate:worker
 yarn knex migrate:latest
+```
+
+Run codegen:
+
+```sh
+yarn codegen
 ```
 
 Run in development mode:
@@ -59,6 +65,14 @@ Run in development mode:
 ```sh
 yarn dev
 ```
+
+If you plan to build container images locally for use in production you may want to set the default architecture by adding the following to your shell config (e.g. `~/.bash_profile`):
+
+```sh
+export DOCKER_DEFAULT_PLATFORM=linux/amd64
+```
+
+or pass `--platform=linux/amd64` to all `docker buildx` commands.
 
 ### SMS
 

@@ -3,9 +3,9 @@ import PropTypes from "prop-types";
 import React from "react";
 
 import { loadData } from "../hoc/with-operations";
-import AssignmentHUD from "./AssignmentHUD";
-import CampaignListLoader from "./CampaignListLoader";
-import { OperationDialog, operations } from "./OperationDialog";
+import AssignmentHUD from "./components/AssignmentHUD";
+import CampaignListLoader from "./components/CampaignListLoader";
+import { OperationDialog, operations } from "./components/OperationDialog";
 
 export class CampaignList extends React.Component {
   state = {

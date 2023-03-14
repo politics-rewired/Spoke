@@ -49,8 +49,8 @@ export const schema = `
     unhealthyLinkDomains: [UnhealthyLinkDomain]!
     numbersApiKey: String
     settings: OrganizationSettings!
-    tagList: [Tag]
-    escalationTagList: [Tag]
+    tagList: [Tag!]!
+    escalationTagList: [Tag!]!
     teams: [Team]!
     externalSystems(after: Cursor, first: Int): ExternalSystemPage!
     messagingServices(after: Cursor, first: Int, active: Boolean): MessagingServicePage

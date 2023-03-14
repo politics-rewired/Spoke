@@ -14,8 +14,8 @@ import React, { Component } from "react";
 import LoadingIndicator from "../../components/LoadingIndicator";
 import theme from "../../styles/theme";
 import { PrettyErrors, withOperations } from "../hoc/with-operations";
-import AddDomainDialog from "./AddDomainDialog";
-import ShortLinkDomainList from "./ShortLinkDomainList";
+import AddDomainDialog from "./components/AddDomainDialog";
+import ShortLinkDomainList from "./components/ShortLinkDomainList";
 
 class AdminShortLinkDomains extends Component {
   state = {

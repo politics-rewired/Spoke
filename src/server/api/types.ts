@@ -277,6 +277,24 @@ export interface LogRecord {
   service_type: MessagingServiceType | null;
 }
 
+export interface TagRecord {
+  id: number;
+  organization_id: number;
+  title: string;
+  description: string;
+  text_color: string;
+  background_color: string;
+  author_id: string;
+  confirmation_steps: Array<string>;
+  on_apply_script: string;
+  webhook_url: string;
+  is_assignable: string;
+  is_system: string;
+  created_at: string;
+  updated_at: string;
+  deleted_at: string;
+}
+
 export enum NotificationTypes {
   AssignmentCreated = "AssignmentCreated",
   AssignmentUpdated = "AssignmentUpdated",

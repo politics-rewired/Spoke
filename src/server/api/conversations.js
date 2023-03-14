@@ -102,6 +102,11 @@ async function getConversationsJoinsAndWhereClause(
       .select("cell")
       .from("opt_out")
       .whereRaw("opt_out.cell=campaign_contact.cell");
+
+    if (!config.OPTOUTS_SHARE_ALL_ORGS) {
+      subQuery.where({ organization_id: organizationId });
+    }
+
     if (contactsFilter.isOptedOut) {
       query = query.whereExists(subQuery);
     } else {

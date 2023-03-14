@@ -2,6 +2,91 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [6.1.2](https://github.com/politics-rewired/spoke/compare/v6.1.1...v6.1.2) (2023-02-27)
+
+
+### Bug Fixes
+
+* fix tag application ([#1573](https://github.com/politics-rewired/spoke/issues/1573)) ([00c8cb9](https://github.com/politics-rewired/spoke/commit/00c8cb9bfec77c7605425f5b16d8b968e34adb92))
+
+### [6.1.1](https://github.com/politics-rewired/spoke/compare/v6.1.0...v6.1.1) (2023-02-15)
+
+
+### Bug Fixes
+
+* **apply tag dialog:** fix type errors ([#1567](https://github.com/politics-rewired/spoke/issues/1567)) ([c017a51](https://github.com/politics-rewired/spoke/commit/c017a51724f54208b9c57a22c1b0ca9b5e14369b))
+
+
+### Backend Changes
+
+* **tag editor list:** convert to .tsx ([#1566](https://github.com/politics-rewired/spoke/issues/1566)) ([b88521e](https://github.com/politics-rewired/spoke/commit/b88521e584b2ceb5e851f39b2183a7bfd5307947))
+
+## [6.1.0](https://github.com/politics-rewired/spoke/compare/v6.1.0-rc.1...v6.1.0) (2023-02-06)
+
+
+### Bug Fixes
+
+* **instrumentation:** Move metrics middleware earlier in the stack to capture more of the call cycle ([#1552](https://github.com/politics-rewired/spoke/issues/1552)) ([338b241](https://github.com/politics-rewired/spoke/commit/338b2417a51297d8a2111419879fcece9e514f2f))
+
+## [6.1.0-rc.1](https://github.com/politics-rewired/spoke/compare/v6.0.0...v6.1.0-rc.1) (2023-01-03)
+
+
+### Features
+
+* allow cloning, and deleting template campaigns ([#1523](https://github.com/politics-rewired/spoke/issues/1523)) ([9348046](https://github.com/politics-rewired/spoke/commit/9348046da04409ebd2af45ecaf94cb08de8a64fe))
+* don't hide campaign create options on removing focus ([#1522](https://github.com/politics-rewired/spoke/issues/1522)) ([629a86d](https://github.com/politics-rewired/spoke/commit/629a86da93154f6d12d0580d931e225282c8a541)), closes [#1477](https://github.com/politics-rewired/spoke/issues/1477)
+* **message review:** show tag and tagger details ([#1530](https://github.com/politics-rewired/spoke/issues/1530)) ([7d9b801](https://github.com/politics-rewired/spoke/commit/7d9b801d19c8f6ce86d57f2b8770de1c0fca53d0))
+
+
+### Bug Fixes
+
+* **bulk script editor:** tidy full script version replacement preview ([#1528](https://github.com/politics-rewired/spoke/issues/1528)) ([89f548d](https://github.com/politics-rewired/spoke/commit/89f548da5b821af1be149ec5fcc9af01b790f9d8))
+* **message review:** filter opt outs by organization ([#1527](https://github.com/politics-rewired/spoke/issues/1527)) ([c493e52](https://github.com/politics-rewired/spoke/commit/c493e527523831c3739f90552a84be6baa8116a5))
+
+
+### Backend Changes
+
+* **release:** 6.1.0-rc.0 ([2b6d583](https://github.com/politics-rewired/spoke/commit/2b6d583a207e7bdaa1fb6bae6d9e550d81d300af))
+* standarize components / containers locations ([#1537](https://github.com/politics-rewired/spoke/issues/1537)) ([fbc59d6](https://github.com/politics-rewired/spoke/commit/fbc59d60cba2724417a9054170fa7538d3a6aab7))
+* **mui v4:** update icon menu to v4 button + menu ([#1517](https://github.com/politics-rewired/spoke/issues/1517)) ([77ba0c0](https://github.com/politics-rewired/spoke/commit/77ba0c0343811ff827e8390544357c4ca6f65499))
+* **script editor:** move opt out language warning into a dialog ([#1521](https://github.com/politics-rewired/spoke/issues/1521)) ([5115603](https://github.com/politics-rewired/spoke/commit/511560312244c4cbd2207983aefd7955c4ffc53d))
+
+## [6.1.0-rc.0](https://github.com/politics-rewired/spoke/compare/v6.0.0...v6.1.0-rc.0) (2023-01-03)
+
+
+### Features
+
+* allow cloning, and deleting template campaigns ([#1523](https://github.com/politics-rewired/spoke/issues/1523)) ([9348046](https://github.com/politics-rewired/spoke/commit/9348046da04409ebd2af45ecaf94cb08de8a64fe))
+* don't hide campaign create options on removing focus ([#1522](https://github.com/politics-rewired/spoke/issues/1522)) ([629a86d](https://github.com/politics-rewired/spoke/commit/629a86da93154f6d12d0580d931e225282c8a541)), closes [#1477](https://github.com/politics-rewired/spoke/issues/1477)
+* **message review:** show tag and tagger details ([#1530](https://github.com/politics-rewired/spoke/issues/1530)) ([7d9b801](https://github.com/politics-rewired/spoke/commit/7d9b801d19c8f6ce86d57f2b8770de1c0fca53d0))
+
+
+### Bug Fixes
+
+* **bulk script editor:** tidy full script version replacement preview ([#1528](https://github.com/politics-rewired/spoke/issues/1528)) ([89f548d](https://github.com/politics-rewired/spoke/commit/89f548da5b821af1be149ec5fcc9af01b790f9d8))
+* **message review:** filter opt outs by organization ([#1527](https://github.com/politics-rewired/spoke/issues/1527)) ([c493e52](https://github.com/politics-rewired/spoke/commit/c493e527523831c3739f90552a84be6baa8116a5))
+
+
+### Backend Changes
+
+* standarize components / containers locations ([#1537](https://github.com/politics-rewired/spoke/issues/1537)) ([fbc59d6](https://github.com/politics-rewired/spoke/commit/fbc59d60cba2724417a9054170fa7538d3a6aab7))
+* **mui v4:** update icon menu to v4 button + menu ([#1517](https://github.com/politics-rewired/spoke/issues/1517)) ([77ba0c0](https://github.com/politics-rewired/spoke/commit/77ba0c0343811ff827e8390544357c4ca6f65499))
+* **script editor:** move opt out language warning into a dialog ([#1521](https://github.com/politics-rewired/spoke/issues/1521)) ([5115603](https://github.com/politics-rewired/spoke/commit/511560312244c4cbd2207983aefd7955c4ffc53d))
+
+## [6.0.0](https://github.com/politics-rewired/spoke/compare/v6.0.0-rc.1...v6.0.0) (2022-12-13)
+
+## [6.0.0-rc.1](https://github.com/politics-rewired/spoke/compare/v6.0.0-rc.0...v6.0.0-rc.1) (2022-12-06)
+
+
+### Features
+
+* **assemble-numbers:** add counter to sendMessage ([#1518](https://github.com/politics-rewired/spoke/issues/1518)) ([73aea18](https://github.com/politics-rewired/spoke/commit/73aea180c00b28bb181be3b68c91d2dc6b8a8fa7))
+
+
+### Bug Fixes
+
+* **autosending:** change how initials are picked ([#1542](https://github.com/politics-rewired/spoke/issues/1542)) ([60922fc](https://github.com/politics-rewired/spoke/commit/60922fcf711313eb25d46060f03514b0a454cd4d))
+
 ## [6.0.0-rc.0](https://github.com/politics-rewired/spoke/compare/v5.1.0...v6.0.0-rc.0) (2022-11-03)
 
 

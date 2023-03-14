@@ -16,6 +16,7 @@ import { hasRole } from "../../lib/permissions";
 import { applyScript } from "../../lib/scripts";
 import { replaceAll } from "../../lib/utils";
 import logger from "../../logger";
+import type { SpokeRequestContext } from "../contexts/types";
 import pgPool from "../db";
 import { eventBus, EventType } from "../event-bus";
 import {
@@ -56,7 +57,7 @@ import {
   notifyOnTagConversation
 } from "./lib/alerts";
 import { getStepsToUpdate } from "./lib/bulk-script-editor";
-import { copyCampaign, editCampaign } from "./lib/campaign";
+import { copyCampaign, deleteCampaign, editCampaign } from "./lib/campaign";
 import { saveNewIncomingMessage } from "./lib/message-sending";
 import { processNumbers } from "./lib/opt-out";
 import { sendMessage } from "./lib/send-message";
@@ -875,6 +876,35 @@ const rootMutations = {
 
       cacheableData.campaign.reload(templateCampaign.id);
       return templateCampaign;
+    },
+
+    deleteTemplateCampaign: async (
+      _root: any,
+      { organizationId, campaignId }: Record<string, any>,
+      { user }: SpokeRequestContext
+    ) => {
+      await accessRequired(user, organizationId, "ADMIN");
+
+      await deleteCampaign(campaignId);
+
+      return true;
+    },
+
+    cloneTemplateCampaign: async (
+      _root: any,
+      { organizationId, campaignId }: Record<string, any>,
+      { user, db }: SpokeRequestContext
+    ) => {
+      await accessRequired(user, organizationId, "ADMIN");
+
+      const [result] = await copyCampaign({
+        db,
+        campaignId,
+        userId: parseInt(user.id, 10),
+        template: true
+      });
+
+      return result;
     },
 
     copyCampaign: async (_root, { id }, { user, loaders, db }) => {

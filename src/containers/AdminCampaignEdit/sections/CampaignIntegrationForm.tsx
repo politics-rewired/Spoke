@@ -1,18 +1,18 @@
 import type { ApolloQueryResult } from "@apollo/client";
 import { gql } from "@apollo/client";
 import Button from "@material-ui/core/Button";
+import type { ExternalSystem } from "@spoke/spoke-codegen";
+import {
+  GetCampaignSyncConfigsDocument,
+  GetSyncTargetsDocument
+} from "@spoke/spoke-codegen";
 import isEmpty from "lodash/isEmpty";
 import MenuItem from "material-ui/MenuItem";
 import SelectField from "material-ui/SelectField";
 import React from "react";
 import { compose } from "recompose";
 
-import type { ExternalSystem } from "../../../api/external-system";
 import type { RelayPaginatedResponse } from "../../../api/pagination";
-import {
-  GET_SYNC_CONFIGS,
-  GET_SYNC_TARGETS
-} from "../../../components/SyncConfigurationModal/queries";
 import type { MutationMap, QueryMap } from "../../../network/types";
 import { loadData } from "../../hoc/with-operations";
 import CampaignFormSectionHeading from "../components/CampaignFormSectionHeading";
@@ -215,11 +215,11 @@ const mutations: MutationMap<InnerProps> = {
     },
     refetchQueries: [
       {
-        query: GET_SYNC_CONFIGS,
+        query: GetCampaignSyncConfigsDocument,
         variables: { campaignId: ownProps.campaignId }
       },
       {
-        query: GET_SYNC_TARGETS,
+        query: GetSyncTargetsDocument,
         variables: { campaignId: ownProps.campaignId }
       }
     ]

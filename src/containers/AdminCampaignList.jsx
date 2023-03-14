@@ -17,10 +17,10 @@ import React from "react";
 import { withRouter } from "react-router-dom";
 import { compose } from "recompose";
 
-import { withAuthzContext } from "../components/AuthzProvider";
 import CreateCampaignFromTemplateDialog from "../components/CreateCampaignFromTemplateDialog";
 import LoadingIndicator from "../components/LoadingIndicator";
 import theme from "../styles/theme";
+import { withAuthzContext } from "./AuthzProvider";
 import CampaignList from "./CampaignList";
 import { loadData } from "./hoc/with-operations";
 
@@ -93,6 +93,11 @@ class AdminCampaignList extends React.Component {
       releaseAllRepliesError: undefined,
       releaseAllRepliesResult: undefined
     });
+  };
+
+  handleClickSpeedDial = () => {
+    const { speedDialOpen } = this.state;
+    this.setState({ speedDialOpen: !speedDialOpen });
   };
 
   releaseAllReplies = () => {
@@ -269,7 +274,7 @@ class AdminCampaignList extends React.Component {
             ariaLabel="SpeedDial example"
             style={theme.components.floatingButton}
             icon={<SpeedDialIcon />}
-            onClose={() => this.setState({ speedDialOpen: false })}
+            onClick={this.handleClickSpeedDial}
             onOpen={() => this.setState({ speedDialOpen: true })}
             open={this.state.speedDialOpen}
             direction="up"
