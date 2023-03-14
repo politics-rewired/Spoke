@@ -14,7 +14,7 @@ const queueActionExternalSync: Task = async (
   { actionId, actionType, campaignContactId }: queueActionExternalSyncPayload,
   helpers: JobHelpers
 ) => {
-  const [syncId] = await r
+  const [{ id: syncId }] = await r
     .knex("action_external_system_sync")
     .insert({
       action_type: actionType,
