@@ -3,6 +3,7 @@ import ReactDOMServer from "react-dom/server";
 
 import type { CampaignRecord, OrganizationRecord } from "../../api/types";
 import { NotificationTypes } from "../../api/types";
+import Footer from "./footer";
 
 interface FormattedNotification {
   notificationType: NotificationTypes;
@@ -73,19 +74,24 @@ const Digest: React.FC<DigestProps> = ({
   textingUrl,
   settingsUrl
 }) => {
+  const orgName = organization.name;
   return (
-    <div>
-      <p>You have outstanding text assignments from {organization.name}</p>
-      {notifications.map((notification) => renderDigestRow(notification))}
-      <p>
-        You can start sending texts right away here:{" "}
-        <a href={textingUrl}>{textingUrl}</a>
-      </p>
-      <br />
-      <p>
-        To modify your notification settings, go <a href={settingsUrl}>here</a>
-      </p>
-    </div>
+    <>
+      <div>
+        <p>You have outstanding text assignments from {orgName}</p>
+        {notifications.map((notification) => renderDigestRow(notification))}
+        <p>
+          You can start sending texts right away here:{" "}
+          <a href={textingUrl}>{textingUrl}</a>
+        </p>
+        <br />
+        <p>
+          To modify your notification settings, go{" "}
+          <a href={settingsUrl}>here</a>
+        </p>
+      </div>
+      <Footer orgName={orgName} settingsUrl={settingsUrl} />
+    </>
   );
 };
 

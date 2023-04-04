@@ -3,6 +3,7 @@ import ReactDOMServer from "react-dom/server";
 
 import type { CampaignRecord, OrganizationRecord } from "../../api/types";
 import { NotificationTypes } from "../../api/types";
+import Footer from "./footer";
 
 interface NotificationProps {
   campaign: CampaignRecord;
@@ -19,22 +20,22 @@ const AssignmentCreated: React.FC<NotificationProps> = ({
   textingUrl,
   settingsUrl
 }) => {
+  const orgName = organization.name;
   return (
-    <div>
-      <p>You just got a new texting assignment from {organization.name}</p>
-      <p>
-        [{campaign.title}]: {assignmentCount} first messages to send
-      </p>
-      <br />
-      <p>
-        You can start sending texts right away here:{" "}
-        <a href={textingUrl}>{textingUrl}</a>
-      </p>
-      <br />
-      <p>
-        To modify your notification settings, go <a href={settingsUrl}>here</a>
-      </p>
-    </div>
+    <>
+      <div>
+        <p>You just got a new texting assignment from {orgName}</p>
+        <p>
+          [{campaign.title}]: {assignmentCount} first messages to send
+        </p>
+        <br />
+        <p>
+          You can start sending texts right away here:{" "}
+          <a href={textingUrl}>{textingUrl}</a>
+        </p>
+      </div>
+      <Footer orgName={orgName} settingsUrl={settingsUrl} />
+    </>
   );
 };
 
@@ -45,22 +46,22 @@ const AssignmentUpdated: React.FC<NotificationProps> = ({
   textingUrl,
   settingsUrl
 }) => {
+  const orgName = organization.name;
   return (
-    <div>
-      <p>Your texting assignment from {organization.name} has been updated.</p>
-      <p>
-        [{campaign.title}]: {assignmentCount} first messages to send.{" "}
-      </p>
-      <br />
-      <p>
-        You can start sending texts right away here:{" "}
-        <a href={textingUrl}>{textingUrl}</a>
-      </p>
-      <br />
-      <p>
-        To modify your notification settings, go <a href={settingsUrl}>here</a>
-      </p>
-    </div>
+    <>
+      <div>
+        <p>Your texting assignment from {orgName} has been updated.</p>
+        <p>
+          [{campaign.title}]: {assignmentCount} first messages to send.{" "}
+        </p>
+        <br />
+        <p>
+          You can start sending texts right away here:{" "}
+          <a href={textingUrl}>{textingUrl}</a>
+        </p>
+      </div>
+      <Footer orgName={orgName} settingsUrl={settingsUrl} />
+    </>
   );
 };
 
@@ -70,22 +71,21 @@ const AssignmentMessageReceived: React.FC<NotificationProps> = ({
   textingUrl,
   settingsUrl
 }) => {
+  const orgName = organization.name;
   return (
-    <div>
-      <p>
-        Someone responded to your message from ${organization.name} in $
-        {campaign.title}
-      </p>
-      <br />
-      <p>
-        You can look at your pending texts here:{" "}
-        <a href={textingUrl}>{textingUrl}</a>
-      </p>
-      <br />
-      <p>
-        To modify your notification settings, go <a href={settingsUrl}>here</a>
-      </p>
-    </div>
+    <>
+      <div>
+        <p>
+          Someone responded to your message from ${orgName} in ${campaign.title}
+        </p>
+        <br />
+        <p>
+          You can look at your pending texts here:{" "}
+          <a href={textingUrl}>{textingUrl}</a>
+        </p>
+      </div>
+      <Footer orgName={orgName} settingsUrl={settingsUrl} />
+    </>
   );
 };
 
