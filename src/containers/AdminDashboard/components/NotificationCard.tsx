@@ -37,10 +37,9 @@ const Register10DlcBrandNoticeCard: React.FC<Register10DlcBrandNotice> = (
       <CardContent>
         <p>
           You must provide details required for us to register a 10DLC brand on
-          your behalf by February 22nd, 2022! If you do not provide this
-          information by then, you may not be able to send messages starting on
-          March 1st, 2022 until 3-5 business days after you provide this
-          information.
+          your behalf by May 1st, 2023! If you do not provide this information
+          by then, you may not be able to send messages starting on May 1st,
+          2023 until 5-10 business days after you provide this information.
         </p>
 
         <p>
