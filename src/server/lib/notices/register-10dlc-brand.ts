@@ -43,8 +43,6 @@ export const get10DlcBrandNotices: OrgLevelNotificationGetter = async (
   userId,
   organizationId
 ) => {
-  return [];
-
   const query = r
     .knex("messaging_service")
     .join(
