@@ -172,7 +172,7 @@ const mutations: MutationMap<OuterProps> = {
       const variables = { campaignId: ownProps.campaignId };
       const data: any = cloneDeep(
         store.readQuery({
-          query: GetSyncTargetsDocument,
+          query: GetCampaignSyncConfigsDocument,
           variables
         })
       );
@@ -214,7 +214,7 @@ const mutations: MutationMap<OuterProps> = {
       const variables = { campaignId: ownProps.campaignId };
       const data: any = cloneDeep(
         store.readQuery({
-          query: GetSyncTargetsDocument,
+          query: GetCampaignSyncConfigsDocument,
           variables
         })
       );
