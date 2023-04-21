@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [6.1.3](https://github.com/politics-rewired/spoke/compare/v6.1.2...v6.1.3) (2023-04-21)
+
+
+### Bug Fixes
+
+* van configuration reading the wrong query ([3935821](https://github.com/politics-rewired/spoke/commit/3935821290124c3d28a5842ef439ce8a2ed8445c))
+
 ### [6.1.2](https://github.com/politics-rewired/spoke/compare/v6.1.1...v6.1.2) (2023-02-27)
 
 
