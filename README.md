@@ -34,11 +34,16 @@ Install Node dependencies:
 yarn install
 ```
 
-Copy the example environment. The only change you may need to make is updating the database connection string.
+Copy the example environment. You will need to update the database connection
+string: it should contain the correct host, port, and username/password
+credentials to your development Postgres server.
 
 ```sh
 cp .env.example .env
 vi .env
+
+# in this case, the server is running at port 5432 (the default Postgres port)
+# DATABASE_URL=postgres://spoke:spoke@localhost:5432/spokedev
 ```
 
 Create the `spokedev` database (if it doesn't yet exist)
