@@ -44,7 +44,8 @@
     "dev:codegen:ts": "run-when-changed --watch \"src/schema.graphql\" --watch \"libs/spoke-codegen/src/graphql/**/*.graphql\" --exec \"yarn codegen:ts\"",
     "dev:client-nowrap": "nf start --trim 500 --procfile ./dev-tools/Procfile.dev",
     "util:insert-invite": "babel-node ./dev-tools/insert-invite.js",
-    "util:generate-contacts": "babel-node ./dev-tools/generate-contacts.js"
+    "util:generate-contacts": "babel-node ./dev-tools/generate-contacts.js",
+    "util:graphql-docs": "spectaql -c ./config.spectaql.yml"
   },
   "repository": {
     "type": "git",
