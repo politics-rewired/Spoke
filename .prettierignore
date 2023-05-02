@@ -11,3 +11,4 @@ CHANGELOG.md
 tsconfig.json
 libs/spoke-codegen/src/generated.ts
 libs/spoke-codegen/src/pg-types.ts
+public/**/*
