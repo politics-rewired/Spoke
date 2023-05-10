@@ -325,5 +325,6 @@
     "./**/*.{js,jsx,ts,tsx}": [
       "eslint --fix"
     ]
-  }
+  },
+  "packageManager": "yarn@3.5.1"
 }
