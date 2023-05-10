@@ -144,14 +144,6 @@ yarn codegen
 yarn dev
 ```
 
-If you plan to build container images locally for use in production you may want to set the default architecture by adding the following to your shell config (e.g. `~/.bash_profile`):
-
-```sh
-export DOCKER_DEFAULT_PLATFORM=linux/amd64
-```
-
-or pass `--platform=linux/amd64` to all `docker buildx` commands.
-
 ### SMS
 
 For development, you can set `DEFAULT_SERVICE=fakeservice` to skip using an SMS provider (Assemble Switchboard or Twilio) and insert the message directly into the database. This is set by default in `.env`.
@@ -224,6 +216,16 @@ yarn release --prerelease
 # or the pre-release type
 yarn release --prerelease alpha
 ```
+
+## Building container images locally
+
+If you plan to build container images locally for use in production you may want to set the default architecture by adding the following to your shell config (e.g. `~/.bash_profile`):
+
+```sh
+export DOCKER_DEFAULT_PLATFORM=linux/amd64
+```
+
+or pass `--platform=linux/amd64` to all `docker buildx` commands.
 
 ## Deploying
 
