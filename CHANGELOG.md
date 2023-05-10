@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [6.2.0-rc.2](https://github.com/politics-rewired/spoke/compare/v6.2.0-rc.1...v6.2.0-rc.2) (2023-05-10)
+
+
+### Bug Fixes
+
+* fix tollAlarms query ([#1602](https://github.com/politics-rewired/spoke/issues/1602)) ([cc27fc4](https://github.com/politics-rewired/spoke/commit/cc27fc42a98416f3a2f50d44360ea3237a319b9c))
+
 ## [6.2.0-rc.1](https://github.com/politics-rewired/spoke/compare/v6.2.0-rc.0...v6.2.0-rc.1) (2023-05-08)
 
 
