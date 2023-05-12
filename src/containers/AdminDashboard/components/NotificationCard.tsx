@@ -74,7 +74,10 @@ export const NotificationCard: React.FC<InnerProps> = (props) => {
   return (
     <div>
       {props.data.notices.edges.map(({ node }) => {
-        if (isRegister10DlcBrandNotice(node)) {
+        if (
+          !window.HIDE_10DLC_REGISTRATION_WARNING &&
+          isRegister10DlcBrandNotice(node)
+        ) {
           return <Register10DlcBrandNoticeCard key={node.id} {...node} />;
         }
         return null;

@@ -445,6 +445,11 @@ const validators = {
       "A comma separated list of contact fields to not ship to the client. Can include 'external_id, cell, and lastName'",
     default: ""
   }),
+  HIDE_10DLC_REGISTRATION_WARNING: bool({
+    desc: "Whether the 10DLC Registration Warning is disabled for Admins",
+    default: false,
+    isClient: true
+  }),
   JOBS_SAME_PROCESS: bool({
     desc:
       "Whether jobs should be executed in the same process in which they are created (vs. processing asyncronously via worker processes).",
