@@ -12,6 +12,7 @@ import type {
   Register10DlcBrandNotice
 } from "@spoke/spoke-codegen";
 import React from "react";
+import Registration10DLCWarningText from "src/components/Registration10DLCWarningText";
 
 import { isRegister10DlcBrandNotice } from "../../../api/notice";
 import type { QueryMap } from "../../../network/types";
@@ -35,24 +36,7 @@ const Register10DlcBrandNoticeCard: React.FC<Register10DlcBrandNotice> = (
         avatar={<Warning color="error" />}
       />
       <CardContent>
-        <p>
-          You must provide details required for us to register a 10DLC brand on
-          your behalf by May 1st, 2023! If you do not provide this information
-          by then, you may not be able to send messages starting on May 1st,
-          2023 until 5-10 business days after you provide this information.
-        </p>
-
-        <p>
-          To learn more about this change, please see our{" "}
-          <a
-            href="https://docs.spokerewired.com/article/124-10dlc"
-            target="_blank"
-            rel="noreferrer"
-          >
-            10DLC knowledge base article
-          </a>
-          .
-        </p>
+        <Registration10DLCWarningText />
 
         {props.tcrBrandRegistrationUrl === null && (
           <p style={{ fontWeight: "bold" }}>
