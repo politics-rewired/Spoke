@@ -1309,7 +1309,7 @@ const rootMutations = {
           );
         } else if (config.DEFAULT_SERVICE === "fakeservice") {
           await trx("messaging_service").insert({
-            messaging_service_sid: "fakeservice",
+            messaging_service_sid: `fakeservice${newOrganization.id}`,
             organization_id: newOrganization.id,
             service_type: "assemble-numbers"
           });
