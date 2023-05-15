@@ -389,9 +389,22 @@ const CampaignInteractionStepsForm: React.FC<InnerProps> = (props) => {
         title="What do you want to discuss?"
         subtitle="You can add scripts and questions and your texters can indicate responses from your contacts. For example, you might want to collect RSVPs to an event or find out whether to follow up about a different volunteer activity."
       />
-      <Box m={2}>
-        <ScriptPreviewButton campaignId={campaignId} />
-      </Box>
+      <div style={{ display: "flex", justifyContent: "space-between" }}>
+        <Box m={2}>
+          <ScriptPreviewButton campaignId={campaignId} />
+        </Box>
+        <Box m={2}>
+          <Button
+            {...dataTest("interactionSubmit", true)}
+            variant="contained"
+            color="primary"
+            disabled={isSaveDisabled}
+            onClick={handleSave}
+          >
+            {finalSaveLabel}
+          </Button>
+        </Box>
+      </div>
       {renderInvalidScriptFields()}
       <InteractionStepCard
         interactionStep={finalFree}
