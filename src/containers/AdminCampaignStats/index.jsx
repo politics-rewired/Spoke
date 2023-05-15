@@ -21,6 +21,7 @@ import { withAuthzContext } from "../AuthzProvider";
 import { loadData } from "../hoc/with-operations";
 import CampaignExportModal from "./components/CampaignExportModal";
 import CampaignSurveyStats from "./components/CampaignSurveyStats";
+import CopyCampaignModal from "./components/CopyCampaignModal";
 import DeliverabilityStats from "./components/DeliverabilityStats";
 import TexterStats from "./components/TexterStats";
 import TopLineStats from "./components/TopLineStats";
@@ -414,6 +415,13 @@ class AdminCampaignStats extends React.Component {
           open={this.state.syncVanOpen}
           onRequestClose={this.handleDismissVanSync}
           onComplete={this.handleCompleteVanSync}
+        />
+        <CopyCampaignModal
+          currentOrgId={organizationId}
+          campaignId={campaignId}
+          open={this.state.copyCampaignModalOpen}
+          onRequestClose={this.handleDismissCopyCampaign}
+          onComplete={this.handleCompleteCopyCampaign}
         />
       </div>
     );
