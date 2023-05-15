@@ -21,6 +21,11 @@ mutation ExportCampaign($options: CampaignExportInput!) {
   }
 }
 
+mutation CopyCampaigns($templateId: String!, $quantity: Int!, $targetOrgId: String!) {
+  copyCampaigns(sourceCampaignId: $templateId, quantity: $quantity, targetOrgId: $targetOrgId) {
+    id
+  }
+}
 
 query GetCampaignSyncConfigs($campaignId: String!) {
   campaign(id: $campaignId) {

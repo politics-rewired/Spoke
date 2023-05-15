@@ -45,3 +45,11 @@ export const GET_ORGANIZATION_DATA = gql`
     }
   }
 `;
+
+export const GET_ORGANIZATIONS = gql`
+  query getOrganizations {
+    organizations {
+      id
+    }
+  }
+`;
