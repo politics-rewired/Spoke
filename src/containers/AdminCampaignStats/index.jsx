@@ -83,6 +83,7 @@ class AdminCampaignStats extends React.Component {
     exportDialogOpen: false,
     exportVanOpen: false,
     syncVanOpen: false,
+    copyCampaignModalOpen: false,
     disableExportButton: false,
     disableVanExportButton: false,
     disableVanSyncButton: false,
@@ -150,6 +151,52 @@ class AdminCampaignStats extends React.Component {
       syncVanOpen: false,
       disableVanSyncButton: true
     });
+
+  openCopyCampaignModal = () => this.setState({ copyCampaignModalOpen: true });
+
+  handleDismissCopyCampaign = () =>
+    this.setState({ copyCampaignModalOpen: false });
+
+  handleCompleteCopyCampaign = (copiedCampaignId) => {
+    this.setState({ copyCampaignModalOpen: false });
+    if (copiedCampaignId === undefined)
+      this.setState({
+        campaignJustCopied: true,
+        copyingCampaign: false,
+        copyCampaignError: "There was an error copying this campaign."
+      });
+    else
+      this.setState({
+        campaignJustCopied: true,
+        copyingCampaign: false,
+        copiedCampaignId
+      });
+  };
+
+  handleCopyCampaignSameOrg = () => {
+    this.setState({ copyingCampaign: true });
+
+    this.props.mutations
+      .copyCampaign()
+      .then((result) => {
+        if (result.errors) {
+          throw result.errors;
+        }
+
+        this.setState({
+          campaignJustCopied: true,
+          copyingCampaign: false,
+          copiedCampaignId: result.data.copyCampaign.id
+        });
+      })
+      .catch((error) =>
+        this.setState({
+          campaignJustCopied: true,
+          copyingCampaign: false,
+          copyCampaignError: error
+        })
+      );
+  };
 
   prevCampaignClicked = (campaignId) => {
     const { history } = this.props;
@@ -323,30 +370,11 @@ class AdminCampaignStats extends React.Component {
                           {...dataTest("copyCampaign")}
                           variant="contained"
                           disabled={this.state.copyingCampaign}
-                          onClick={() => {
-                            this.setState({ copyingCampaign: true });
-
-                            this.props.mutations
-                              .copyCampaign()
-                              .then((result) => {
-                                if (result.errors) {
-                                  throw result.errors;
-                                }
-
-                                this.setState({
-                                  campaignJustCopied: true,
-                                  copyingCampaign: false,
-                                  copiedCampaignId: result.data.copyCampaign.id
-                                });
-                              })
-                              .catch((error) =>
-                                this.setState({
-                                  campaignJustCopied: true,
-                                  copyingCampaign: false,
-                                  copyCampaignError: error
-                                })
-                              );
-                          }}
+                          onClick={
+                            onlyCopyCampaignSameOrg
+                              ? this.handleCopyCampaignSameOrg
+                              : this.openCopyCampaignModal
+                          }
                         >
                           Copy Campaign
                         </Button>
