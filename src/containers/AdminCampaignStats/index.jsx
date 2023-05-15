@@ -27,7 +27,11 @@ import TexterStats from "./components/TexterStats";
 import TopLineStats from "./components/TopLineStats";
 import VanExportModal from "./components/VanExportModal";
 import VanSyncModal from "./components/VanSyncModal";
-import { GET_CAMPAIGN, GET_ORGANIZATION_DATA } from "./queries";
+import {
+  GET_CAMPAIGN,
+  GET_ORGANIZATION_DATA,
+  GET_ORGANIZATIONS
+} from "./queries";
 
 const styles = StyleSheet.create({
   container: {
@@ -165,7 +169,7 @@ class AdminCampaignStats extends React.Component {
       disableVanExportButton,
       disableVanSyncButton
     } = this.state;
-    const { data, match, isAdmin } = this.props;
+    const { data, match, isAdmin, isSuperadmin } = this.props;
     const { organizationId, campaignId } = match.params;
     const { campaign } = data;
     const { pendingJobs } = campaign;
@@ -203,6 +207,12 @@ class AdminCampaignStats extends React.Component {
       : "No Due Date";
     const isOverdue = DateTime.local() >= DateTime.fromISO(campaign.dueBy);
     const newTitle = `${this.props.organizationData.organization.name} - Campaigns - ${campaignId}: ${campaign.title}`;
+
+    // only a superadmin with multiple active orgs can copy a campaign to another org
+    const orgLength = this.props.orgs?.organizations?.length;
+    const onlyCopyCampaignSameOrg =
+      !isSuperadmin || orgLength === undefined || orgLength < 2;
+    console.log(onlyCopyCampaignSameOrg);
 
     return (
       <div>
@@ -453,6 +463,10 @@ const queries = {
         organizationId: ownProps.match.params.organizationId
       }
     })
+  },
+
+  orgs: {
+    query: GET_ORGANIZATIONS
   }
 };
 
