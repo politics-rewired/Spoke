@@ -259,7 +259,6 @@ class AdminCampaignStats extends React.Component {
     const orgLength = this.props.orgs?.organizations?.length;
     const onlyCopyCampaignSameOrg =
       !isSuperadmin || orgLength === undefined || orgLength < 2;
-    console.log(onlyCopyCampaignSameOrg);
 
     return (
       <div>
