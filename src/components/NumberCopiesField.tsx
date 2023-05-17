@@ -1,28 +1,28 @@
 import TextField from "@material-ui/core/TextField";
-import React, { useState } from "react";
+import React from "react";
 
 export interface NumberCopiesFieldProps {
-  onChange: React.ChangeEventHandler<unknown>;
+  qty: number;
+  onChange: React.ChangeEventHandler<HTMLInputElement>;
 }
 
 export const NumberCopiesField: React.FC<NumberCopiesFieldProps> = (props) => {
-  const [qty, setQty] = useState<number>(1);
-  const handleQtyChange = (event: React.ChangeEvent<{ value: unknown }>) => {
-    const newQty = event.target.value as number;
+  const handleQtyChange: React.ChangeEventHandler<HTMLInputElement> = (
+    event
+  ) => {
+    const newQty = event.target.valueAsNumber;
     // Enforce 20 copy limit based on Spoke client team feedback
     // https://github.com/politics-rewired/Spoke/issues/1608#issuecomment-1547025486
-    if (newQty > 0 && newQty < 21) {
-      setQty(newQty);
-      props.onChange(event);
-    }
+    if (newQty > 0 && newQty < 21) props.onChange(event);
   };
 
   return (
     <TextField
-      label="Quantity"
+      label="Quantity (max 20)"
       type="number"
-      value={qty}
+      value={props.qty}
       onChange={handleQtyChange}
+      onFocus={(event) => event.target.select()}
     />
   );
 };

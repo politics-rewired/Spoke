@@ -34,9 +34,9 @@ export const CopyCampaignModal: React.FC<CopyCampaignModalProps> = ({
   const handleOrgSelected = (selectedOrgId: string) =>
     setTargetOrgId(selectedOrgId);
 
-  const handleNumCopiesChanged = (
-    event: React.ChangeEvent<{ value: unknown }>
-  ) => setNumCopies(Number(event.target.value));
+  const handleNumCopiesChanged: React.ChangeEventHandler<HTMLInputElement> = (
+    event
+  ) => setNumCopies(event.target.valueAsNumber);
 
   const onConfirm = async () => {
     const newCampaignData = await copyCampaigns({
@@ -62,7 +62,7 @@ export const CopyCampaignModal: React.FC<CopyCampaignModalProps> = ({
           onChange={handleOrgSelected}
         />
         <br />
-        <NumberCopiesField onChange={handleNumCopiesChanged} />
+        <NumberCopiesField qty={numCopies} onChange={handleNumCopiesChanged} />
       </DialogContent>
       <DialogActions>
         <Button variant="contained" color="primary" onClick={onConfirm}>
