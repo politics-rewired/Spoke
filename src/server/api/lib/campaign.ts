@@ -170,10 +170,18 @@ export interface CopyCampaignOptions {
   userId: number;
   quantity?: number;
   template?: boolean;
+  targetOrgId?: number | null;
 }
 
 export const copyCampaign = async (options: CopyCampaignOptions) => {
-  const { db, campaignId, userId, quantity = 1, template } = options;
+  const {
+    db,
+    campaignId,
+    userId,
+    quantity = 1,
+    template,
+    targetOrgId = null
+  } = options;
 
   const result = await db.primary.transaction(async (trx) => {
     const cloneSingle = async (count: number) => {
@@ -203,7 +211,7 @@ export const copyCampaign = async (options: CopyCampaignOptions) => {
             external_system_id
           )
           select
-            organization_id,
+            coalesce(?, organization_id),
             (case
               when is_template then replace(concat('COPY - ', title), '#', ?::text)
               else 'COPY - ' || title
@@ -228,7 +236,7 @@ export const copyCampaign = async (options: CopyCampaignOptions) => {
           where id = ?
           returning *
         `,
-        [count, userId, campaignId]
+        [targetOrgId, count, userId, campaignId]
       );
 
       if (template) {
@@ -307,14 +315,20 @@ export const copyCampaign = async (options: CopyCampaignOptions) => {
       // Copy Teams
       await trx.raw(
         `
+          with target_org as (select ?::int as id)
           insert into campaign_team (campaign_id, team_id)
           select
             ? as campaign_id,
             team_id
-          from campaign_team
-          where campaign_id = ?
+          from campaign_team ct
+          join team t on ct.team_id = t.id
+          where campaign_id = ? 
+          and exists (-- don't copy teams from another organization
+            select 1 from target_org where target_org.id is null 
+            or target_org.id = t.organization_id
+          )
         `,
-        [newCampaign.id, campaignId]
+        [targetOrgId, newCampaign.id, campaignId]
       );
 
       if (!template) {
