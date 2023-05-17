@@ -933,7 +933,7 @@ const rootMutations = {
 
     copyCampaigns: async (
       _root,
-      { sourceCampaignId, quantity, orgId: targetOrgId = null },
+      { sourceCampaignId, quantity, targetOrgId = null },
       { user, loaders, db }
     ) => {
       const campaignId = parseInt(sourceCampaignId, 10);
@@ -945,7 +945,7 @@ const rootMutations = {
         campaignId,
         userId: parseInt(user.id, 10),
         quantity,
-        orgId: targetOrgId
+        targetOrgId
       });
 
       const memoizer = await MemoizeHelper.getMemoizer();
