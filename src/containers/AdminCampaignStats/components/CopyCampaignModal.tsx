@@ -58,7 +58,7 @@ export const CopyCampaignModal: React.FC<CopyCampaignModalProps> = ({
           below.
         </DialogContentText>
         <OrganizationSelector
-          initialOrgId={targetOrgId}
+          orgId={targetOrgId}
           onChange={handleOrgSelected}
         />
         <br />

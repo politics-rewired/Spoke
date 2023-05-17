@@ -5,6 +5,11 @@ import Divider from "@material-ui/core/Divider";
 import Grid from "@material-ui/core/Grid";
 import Snackbar from "@material-ui/core/Snackbar";
 import Alert from "@material-ui/lab/Alert";
+import {
+  GetCampaignDocument,
+  GetOrganizationDataDocument,
+  GetOrganizationsDocument
+} from "@spoke/spoke-codegen";
 import { css, StyleSheet } from "aphrodite";
 import PropTypes from "prop-types";
 import React from "react";
@@ -27,11 +32,6 @@ import TexterStats from "./components/TexterStats";
 import TopLineStats from "./components/TopLineStats";
 import VanExportModal from "./components/VanExportModal";
 import VanSyncModal from "./components/VanSyncModal";
-import {
-  GET_CAMPAIGN,
-  GET_ORGANIZATION_DATA,
-  GET_ORGANIZATIONS
-} from "./queries";
 
 const styles = StyleSheet.create({
   container: {
@@ -475,7 +475,7 @@ AdminCampaignStats.propTypes = {
 
 const queries = {
   data: {
-    query: GET_CAMPAIGN,
+    query: GetCampaignDocument,
     options: (ownProps) => ({
       variables: {
         campaignId: ownProps.match.params.campaignId
@@ -484,7 +484,7 @@ const queries = {
   },
 
   organizationData: {
-    query: GET_ORGANIZATION_DATA,
+    query: GetOrganizationDataDocument,
     options: (ownProps) => ({
       variables: {
         organizationId: ownProps.match.params.organizationId
@@ -493,7 +493,7 @@ const queries = {
   },
 
   orgs: {
-    query: GET_ORGANIZATIONS
+    query: GetOrganizationsDocument
   }
 };
 

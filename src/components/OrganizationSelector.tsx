@@ -6,14 +6,13 @@ import { useGetOrganizationsQuery } from "@spoke/spoke-codegen";
 import React, { useMemo, useState } from "react";
 
 export interface OrganizationSelectorProps {
-  initialOrgId: string;
+  orgId: string;
   onChange: (selectedOrgId: string) => Promise<void> | void;
 }
 
 export const OrganizationSelector: React.FC<OrganizationSelectorProps> = (
   props
 ) => {
-  const [orgId, setOrgId] = useState<string>(props.initialOrgId);
   const [orgInput, setOrgInput] = useState<string>("");
 
   const { data, loading } = useGetOrganizationsQuery();
@@ -31,16 +30,13 @@ export const OrganizationSelector: React.FC<OrganizationSelectorProps> = (
     value: string | null | undefined,
     _reason: AutocompleteChangeReason
   ) => {
-    if (value) {
-      setOrgId(value);
-      props.onChange(value);
-    }
+    if (value) props.onChange(value);
   };
 
   if (loading) return <Skeleton />;
   return (
     <Autocomplete
-      value={orgId}
+      value={props.orgId}
       options={orgOptions}
       inputValue={orgInput}
       getOptionLabel={(option) => orgLabelMap.get(option) ?? ""}

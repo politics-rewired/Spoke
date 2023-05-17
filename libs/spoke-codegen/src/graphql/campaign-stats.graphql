@@ -15,6 +15,48 @@ query GetTexterStats($campaignId: String!, $contactsFilter: ContactsFilter!) {
   }
 }
 
+query getCampaign($campaignId: String!) {
+  campaign(id: $campaignId) {
+    id
+    title
+    dueBy
+    isArchived
+    useDynamicAssignment
+    pendingJobs {
+      id
+      jobType
+      assigned
+      status
+    }
+  }
+}
+
+query getOrganizationData($organizationId: String!) {
+  organization(id: $organizationId) {
+    id
+    name
+    uuid
+    teams {
+      id
+      title
+    }
+    texters: people {
+      id
+      firstName
+      lastName
+      displayName
+    }
+    numbersApiKey
+    campaigns(cursor: { offset: 0, limit: 5000 }) {
+      campaigns {
+        id
+        title
+        createdAt
+      }
+    }
+  }
+}
+
 mutation ExportCampaign($options: CampaignExportInput!) {
   exportCampaign(options: $options) {
     id
