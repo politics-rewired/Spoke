@@ -1997,7 +1997,7 @@ const rootMutations = {
       const campaign = await r
         .knex("campaign")
         .where({ id })
-        .first(["organization_id", "is_archived", "autosend_status"]);
+        .first(["id", "organization_id", "is_archived", "autosend_status"]);
 
       const organizationId = campaign.organization_id;
 
