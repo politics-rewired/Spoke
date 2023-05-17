@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [6.3.0-rc.1](https://github.com/politics-rewired/spoke/compare/v6.3.0-rc.0...v6.3.0-rc.1) (2023-05-17)
+
+
+### Bug Fixes
+
+* **autosending:** fetch campaign id when pausing ([#1611](https://github.com/politics-rewired/spoke/issues/1611)) ([da8772e](https://github.com/politics-rewired/spoke/commit/da8772e787082816cd28248e61832d6d5d097e54))
+
 ## [6.3.0-rc.0](https://github.com/politics-rewired/spoke/compare/v6.2.0...v6.3.0-rc.0) (2023-05-17)
 
 
