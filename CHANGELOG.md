@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [6.3.0-rc.0](https://github.com/politics-rewired/spoke/compare/v6.2.0...v6.3.0-rc.0) (2023-05-17)
+
+
+### Features
+
+* support cross org copy campaign ([#1609](https://github.com/politics-rewired/spoke/issues/1609)) ([bf7ff4d](https://github.com/politics-rewired/spoke/commit/bf7ff4d132f661e5676e67175f694629f3ef3be7))
+
 ## [6.2.0](https://github.com/politics-rewired/spoke/compare/v6.2.0-rc.2...v6.2.0) (2023-05-16)
 
 ## [6.2.0-rc.2](https://github.com/politics-rewired/spoke/compare/v6.2.0-rc.1...v6.2.0-rc.2) (2023-05-10)
