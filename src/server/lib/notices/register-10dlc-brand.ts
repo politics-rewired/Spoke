@@ -54,7 +54,8 @@ export const get10DlcBrandNotices: OrgLevelNotificationGetter = async (
     .groupBy("messaging_service_sid")
     .where({
       service_type: "assemble-numbers",
-      user_id: userId
+      user_id: userId,
+      active: true
     })
     .whereIn("role", ["OWNER", "ADMIN"]);
   if (organizationId !== undefined) {
