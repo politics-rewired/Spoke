@@ -5,10 +5,11 @@ import {
   useGetCampaignStatusQuery,
   useStartCampaignMutation
 } from "@spoke/spoke-codegen";
-import React, { useCallback } from "react";
+import React, { useCallback, useState } from "react";
 
 import { useSpokeContext } from "../../../client/spoke-context";
 import { useAuthzContext } from "../../AuthzProvider";
+import CampaignSurveyResponseWarningDialog from "./CampaignSurveyResponseWarningDialog";
 
 export interface StartCampaignButtonProps {
   campaignId: string;
@@ -24,13 +25,14 @@ export const StartCampaignButton: React.FC<StartCampaignButtonProps> = (
   const { data, loading } = useGetCampaignStatusQuery({
     variables: { campaignId }
   });
-  const {
-    data: _campaignStepsData
-    // loading: todo
-  } = useGetCampaignInteractionStepsQuery({
+  const { data: campaignStepsData } = useGetCampaignInteractionStepsQuery({
     variables: { campaignId }
   });
   const [startCampaign] = useStartCampaignMutation();
+
+  // manage warning confirmation and confirmation dialog state
+  const [warningIsConfirmed, setWarningConfirmed] = useState<boolean>(false);
+  const [showConfirmDialog, setShowConfirmDialog] = useState<boolean>(false);
 
   const requiresApproval =
     !authz.isSuperadmin &&
@@ -45,20 +47,32 @@ export const StartCampaignButton: React.FC<StartCampaignButtonProps> = (
 
   const tooltipText = requiresApproval ? "Superadmin approval required" : "";
 
-  // const campaignInteractionSteps =
-  //   campaignStepsData?.campaign?.interactionSteps ?? [];
+  const campaignInteractionSteps =
+    campaignStepsData?.campaign?.interactionSteps ?? [];
 
-  // const campaignHasSurveyResponses = campaignInteractionSteps.length > 1;
+  const campaignHasSurveyResponses = campaignInteractionSteps.length > 1;
 
-  // still todo
-  // branch on start
-  // display modal + confirm logic
+  const confirmWarningAndStartCampaign = useCallback(() => {
+    setWarningConfirmed(true);
+    setShowConfirmDialog(false);
+    startCampaign({ variables: { campaignId } });
+  }, [startCampaign, campaignId, setWarningConfirmed, setShowConfirmDialog]);
 
   const handleClick = useCallback(() => {
     if (disabled) return;
 
+    if (!campaignHasSurveyResponses && !warningIsConfirmed) {
+      return setShowConfirmDialog(true);
+    }
+
     startCampaign({ variables: { campaignId } });
-  }, [startCampaign, campaignId]);
+  }, [
+    startCampaign,
+    campaignId,
+    campaignHasSurveyResponses,
+    warningIsConfirmed,
+    setShowConfirmDialog
+  ]);
 
   const startText = data?.campaign?.isStarted
     ? "Already started"
@@ -69,19 +83,27 @@ export const StartCampaignButton: React.FC<StartCampaignButtonProps> = (
     : "Start this campaign";
 
   return (
-    <Tooltip title={tooltipText} placement="top">
-      <span>
-        <Button
-          variant="contained"
-          color="primary"
-          style={{ width: 210 }}
-          disabled={disabled}
-          onClick={handleClick}
-        >
-          {startText}
-        </Button>
-      </span>
-    </Tooltip>
+    <>
+      <Tooltip title={tooltipText} placement="top">
+        <span>
+          <Button
+            variant="contained"
+            color="primary"
+            style={{ width: 210 }}
+            disabled={disabled}
+            onClick={handleClick}
+          >
+            {startText}
+          </Button>
+        </span>
+      </Tooltip>
+      <CampaignSurveyResponseWarningDialog
+        open={showConfirmDialog}
+        campaignId={campaignId}
+        confirmWarningAndStartCampaign={confirmWarningAndStartCampaign}
+        setShowConfirmDialog={setShowConfirmDialog}
+      />
+    </>
   );
 };
 
