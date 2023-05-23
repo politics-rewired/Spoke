@@ -1,6 +1,7 @@
 import Button from "@material-ui/core/Button";
 import Tooltip from "@material-ui/core/Tooltip";
 import {
+  useGetCampaignInteractionStepsQuery,
   useGetCampaignStatusQuery,
   useStartCampaignMutation
 } from "@spoke/spoke-codegen";
@@ -23,6 +24,12 @@ export const StartCampaignButton: React.FC<StartCampaignButtonProps> = (
   const { data, loading } = useGetCampaignStatusQuery({
     variables: { campaignId }
   });
+  const {
+    data: _campaignStepsData
+    // loading: todo
+  } = useGetCampaignInteractionStepsQuery({
+    variables: { campaignId }
+  });
   const [startCampaign] = useStartCampaignMutation();
 
   const requiresApproval =
@@ -37,6 +44,15 @@ export const StartCampaignButton: React.FC<StartCampaignButtonProps> = (
     requiresApproval;
 
   const tooltipText = requiresApproval ? "Superadmin approval required" : "";
+
+  // const campaignInteractionSteps =
+  //   campaignStepsData?.campaign?.interactionSteps ?? [];
+
+  // const campaignHasSurveyResponses = campaignInteractionSteps.length > 1;
+
+  // still todo
+  // branch on start
+  // display modal + confirm logic
 
   const handleClick = useCallback(() => {
     if (disabled) return;
