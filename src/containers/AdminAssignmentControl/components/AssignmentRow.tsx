@@ -67,7 +67,13 @@ const AssignmentRow: React.FC<Props> = (props) => {
     isRowDisabled || !isAssignmentEnabled || id === "general";
 
   return (
-    <Grid container spacing={2} wrap="nowrap" alignItems="center">
+    <Grid
+      container
+      spacing={2}
+      wrap="nowrap"
+      alignItems="center"
+      justifyContent="space-between"
+    >
       <Grid item>
         <Chip label={title} style={{ color: textColor, backgroundColor }} />
       </Grid>
@@ -97,7 +103,7 @@ const AssignmentRow: React.FC<Props> = (props) => {
           />
         </SelectField>
       </Grid>
-      <Grid item>
+      <Grid item style={{ width: 200 }}>
         <TextField
           label="Max to request at once"
           type="number"
