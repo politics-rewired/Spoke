@@ -8,7 +8,7 @@ import Toggle from "material-ui/Toggle";
 import React from "react";
 
 import { TextRequestType } from "../../../api/types";
-import type { TagWithTitle, TeamForAssignment } from "./types";
+import type { TagWithTitle, TeamForAssignment } from "../types";
 
 interface Props {
   assignmentPool: TeamForAssignment;
