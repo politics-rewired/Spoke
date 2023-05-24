@@ -1,9 +1,11 @@
 import React from "react";
 import ReactDOMServer from "react-dom/server";
 
+import assemblePalette from "../../../styles/assemble-palette";
 import type { CampaignRecord, OrganizationRecord } from "../../api/types";
 import { NotificationTypes } from "../../api/types";
 import Footer from "./footer";
+import Header from "./header";
 
 interface NotificationProps {
   campaign: CampaignRecord;
@@ -12,6 +14,47 @@ interface NotificationProps {
   settingsUrl: string;
   textingUrl: string;
 }
+
+interface NotificationWrapperProps {
+  children: React.ReactNode;
+  organizationName: string;
+  settingsUrl: string;
+}
+
+const styles = {
+  font: {
+    fontFamily: "Helvetica"
+  },
+  button: {
+    width: 80,
+    backgroundColor: assemblePalette.primary.navy,
+    padding: `12px 20px`,
+    borderRadius: 4,
+    cursor: "pointer",
+    marginBottom: 10,
+    "text-align": "center"
+  },
+  buttonText: {
+    color: "white",
+    textDecoration: "none"
+  }
+};
+
+const NotificationWrapper: React.FC<NotificationWrapperProps> = ({
+  children,
+  organizationName,
+  settingsUrl
+}) => {
+  return (
+    <html lang="en">
+      <Header />
+      <body style={styles.font}>
+        {children}
+        <Footer orgName={organizationName} settingsUrl={settingsUrl} />
+      </body>
+    </html>
+  );
+};
 
 const AssignmentCreated: React.FC<NotificationProps> = ({
   organization,
@@ -22,20 +65,19 @@ const AssignmentCreated: React.FC<NotificationProps> = ({
 }) => {
   const orgName = organization.name;
   return (
-    <>
-      <div>
-        <p>You just got a new texting assignment from {orgName}</p>
-        <p>
-          [{campaign.title}]: {assignmentCount} first messages to send
-        </p>
-        <br />
-        <p>
-          You can start sending texts right away here:{" "}
-          <a href={textingUrl}>{textingUrl}</a>
-        </p>
+    <NotificationWrapper organizationName={orgName} settingsUrl={settingsUrl}>
+      <p>Hello!</p>
+      <p>
+        You just got a new texting assignment from {orgName}: {campaign.title}.
+      </p>
+      <p>There are {assignmentCount} first message(s) to send.</p>
+      <div style={styles.button}>
+        <a style={styles.buttonText} href={textingUrl}>
+          Send Now
+        </a>
       </div>
-      <Footer orgName={orgName} settingsUrl={settingsUrl} />
-    </>
+      <br />
+    </NotificationWrapper>
   );
 };
 
@@ -48,20 +90,24 @@ const AssignmentUpdated: React.FC<NotificationProps> = ({
 }) => {
   const orgName = organization.name;
   return (
-    <>
-      <div>
-        <p>Your texting assignment from {orgName} has been updated.</p>
-        <p>
-          [{campaign.title}]: {assignmentCount} first messages to send.{" "}
-        </p>
-        <br />
-        <p>
-          You can start sending texts right away here:{" "}
-          <a href={textingUrl}>{textingUrl}</a>
-        </p>
+    <NotificationWrapper organizationName={orgName} settingsUrl={settingsUrl}>
+      <p>Hello!</p>
+      <p>
+        Your texting assignment from {orgName}: {campaign.title} has been
+        updated.
+      </p>
+      <p>
+        {assignmentCount === "1"
+          ? `There is one message to send. `
+          : `There are ${assignmentCount} messages to send. `}
+      </p>
+      <div style={styles.button}>
+        <a style={styles.buttonText} href={textingUrl}>
+          Send Now
+        </a>
       </div>
-      <Footer orgName={orgName} settingsUrl={settingsUrl} />
-    </>
+      <br />
+    </NotificationWrapper>
   );
 };
 
@@ -73,19 +119,19 @@ const AssignmentMessageReceived: React.FC<NotificationProps> = ({
 }) => {
   const orgName = organization.name;
   return (
-    <>
-      <div>
-        <p>
-          Someone responded to your message from ${orgName} in ${campaign.title}
-        </p>
-        <br />
-        <p>
-          You can look at your pending texts here:{" "}
-          <a href={textingUrl}>{textingUrl}</a>
-        </p>
+    <NotificationWrapper organizationName={orgName} settingsUrl={settingsUrl}>
+      <p>Hello!</p>
+      <p>
+        Someone responded to your message from {orgName} in {campaign.title}.
+        Check out your pending texts!
+      </p>
+      <div style={styles.button}>
+        <a style={styles.buttonText} href={textingUrl}>
+          Send Now
+        </a>
       </div>
-      <Footer orgName={orgName} settingsUrl={settingsUrl} />
-    </>
+      <br />
+    </NotificationWrapper>
   );
 };
 
