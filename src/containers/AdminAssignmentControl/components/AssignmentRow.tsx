@@ -37,12 +37,13 @@ const AssignmentRow: React.FC<Props> = (props) => {
   ) => onChange({ assignmentType });
 
   const handleChangeMaxCount = (
-    _event: React.FormEvent<unknown>,
-    maxRequestCount: string
-  ) =>
+    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const maxRequestCount = event?.target?.value;
     onChange({
       maxRequestCount: maxRequestCount ? parseInt(maxRequestCount, 10) : null
     });
+  };
 
   const handleChangeEscalationTags = (
     _event: React.ChangeEvent<any>,
@@ -98,7 +99,7 @@ const AssignmentRow: React.FC<Props> = (props) => {
       </Grid>
       <Grid item>
         <TextField
-          floatingLabelText="Max to request at once"
+          label="Max to request at once"
           type="number"
           value={maxRequestCount}
           disabled={isRowDisabled || !isAssignmentEnabled}
