@@ -8,16 +8,20 @@ import Toggle from "material-ui/Toggle";
 import React from "react";
 
 import { TextRequestType } from "../../../api/types";
-import type { TagWithTitle, TeamForAssignment } from "../types";
+import type {
+  TagWithTitle,
+  TeamForAssignment,
+  TeamInputWithTags
+} from "../types";
 
-interface Props {
+interface AssignmentRowProps {
   assignmentPool: TeamForAssignment;
   escalationTagList: TagWithTitle[];
   isRowDisabled: boolean;
-  onChange: (payload: any) => Promise<void> | void;
+  onChange: (payload: TeamInputWithTags) => Promise<void> | void;
 }
 
-const AssignmentRow: React.FC<Props> = (props) => {
+const AssignmentRow: React.FC<AssignmentRowProps> = (props) => {
   const {
     assignmentPool,
     isRowDisabled = false,
@@ -47,8 +51,8 @@ const AssignmentRow: React.FC<Props> = (props) => {
 
   const handleChangeEscalationTags = (
     _event: React.ChangeEvent<any>,
-    value: Array<TagWithTitle> | null
-  ) => {
+    value: TagWithTitle[]
+  ): void => {
     onChange({ escalationTags: value });
   };
 
