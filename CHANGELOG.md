@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [6.3.1-rc.0](https://github.com/politics-rewired/spoke/compare/v6.3.0...v6.3.1-rc.0) (2023-05-24)
+
+
+### Bug Fixes
+
+* cannot save assign control max count ([#1617](https://github.com/politics-rewired/spoke/issues/1617)) ([2efe135](https://github.com/politics-rewired/spoke/commit/2efe135ffd8f7eca594e904d2b5bfd5c859cf7c8))
+
 ## [6.3.0](https://github.com/politics-rewired/spoke/compare/v6.3.0-rc.1...v6.3.0) (2023-05-23)
 
 ## [6.3.0-rc.1](https://github.com/politics-rewired/spoke/compare/v6.3.0-rc.0...v6.3.0-rc.1) (2023-05-17)
