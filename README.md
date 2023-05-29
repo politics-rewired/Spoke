@@ -16,7 +16,7 @@ that goal. See [`HOWTO_migrate-from-moveon-main.md`](./docs/HOWTO_migrate-from-m
 
 Prerequisites:
 
-- Node (^16.14) -- See [How to Install Node](https://nodejs.dev/learn/how-to-install-nodejs)
+- Node (^18.16) -- See [How to Install Node](https://nodejs.dev/learn/how-to-install-nodejs)
 - Yarn (>= 1.19.1) -- See [Installing Yarn](https://classic.yarnpkg.com/en/docs/install)
 - Postgres (>= 11) -- See [install](https://postgresql.org/download) and [start](https://www.postgresql.org/docs/current/server-start.html) documentation
 
