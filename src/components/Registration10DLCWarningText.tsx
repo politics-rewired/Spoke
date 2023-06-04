@@ -12,7 +12,7 @@ const Registration10DLCWarningText: React.FC = () => (
     <p>
       To learn more about this change, please see our{" "}
       <a
-        href="https://docs.spokerewired.com/article/124-10dlc"
+        href="https://docs.spokerewired.com/article/10dlc"
         target="_blank"
         rel="noreferrer"
       >
