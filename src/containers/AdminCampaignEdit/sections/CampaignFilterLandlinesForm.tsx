@@ -95,7 +95,7 @@ class FilterLandlinesForm extends React.Component<Props, State> {
                 <p>
                   Filtering landlines or otherwise un-textable numbers takes a
                   few minutes to run, but is a free service that can help you
-                  avoid paying for messages to numbers that won't receive them! 
+                  avoid paying for messages to numbers that won't receive them!
                 </p>
                 <p>
                   If you're pretty sure your phone numbers are valid, skip this
