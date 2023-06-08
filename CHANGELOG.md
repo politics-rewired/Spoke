@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [6.3.2](https://github.com/politics-rewired/spoke/compare/v6.3.1...v6.3.2) (2023-06-08)
+
+
+### Bug Fixes
+
+* **10dlc:** revert notification article link ([cbc054e](https://github.com/politics-rewired/spoke/commit/cbc054e0953a4f281a05c1a1c7b72d72e17c2771))
+
 ### [6.3.1](https://github.com/politics-rewired/spoke/compare/v6.3.1-rc.0...v6.3.1) (2023-06-08)
 
 
