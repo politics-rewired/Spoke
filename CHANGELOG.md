@@ -2,6 +2,30 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [6.3.2](https://github.com/politics-rewired/spoke/compare/v6.3.1...v6.3.2) (2023-06-08)
+
+
+### Bug Fixes
+
+* **10dlc:** revert notification article link ([cbc054e](https://github.com/politics-rewired/spoke/commit/cbc054e0953a4f281a05c1a1c7b72d72e17c2771))
+
+### [6.3.1](https://github.com/politics-rewired/spoke/compare/v6.3.1-rc.0...v6.3.1) (2023-06-08)
+
+
+### Backend Changes
+
+* **10dlc:** update notifications ([#1606](https://github.com/politics-rewired/spoke/issues/1606)) ([8b79424](https://github.com/politics-rewired/spoke/commit/8b794243fe5d56acfde5034a8915a543a4d8801b))
+* add .tool-versions for asdf ([#1598](https://github.com/politics-rewired/spoke/issues/1598)) ([eddc9c3](https://github.com/politics-rewired/spoke/commit/eddc9c3bb44f71a28893ca6635d2f6b35a4d5cf5))
+
+### [6.3.1-rc.0](https://github.com/politics-rewired/spoke/compare/v6.3.0...v6.3.1-rc.0) (2023-05-24)
+
+
+### Bug Fixes
+
+* cannot save assign control max count ([#1617](https://github.com/politics-rewired/spoke/issues/1617)) ([2efe135](https://github.com/politics-rewired/spoke/commit/2efe135ffd8f7eca594e904d2b5bfd5c859cf7c8))
+
+## [6.3.0](https://github.com/politics-rewired/spoke/compare/v6.3.0-rc.1...v6.3.0) (2023-05-23)
+
 ## [6.3.0-rc.1](https://github.com/politics-rewired/spoke/compare/v6.3.0-rc.0...v6.3.0-rc.1) (2023-05-17)
 
 

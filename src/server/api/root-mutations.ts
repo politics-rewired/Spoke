@@ -2908,18 +2908,22 @@ const rootMutations = {
 
             // Update team_escalation_tags
             if (team.escalationTagIds) {
-              await trx("team_escalation_tags")
-                .where({ team_id: teamToReturn.id })
-                .del();
-
               teamToReturn.escalationTags = await trx("team_escalation_tags")
-                .insert(
-                  team.escalationTagIds.map((tagId) => ({
-                    team_id: teamToReturn.id,
-                    tag_id: tagId
-                  }))
-                )
+                .where({ team_id: teamToReturn.id })
+                .del()
                 .returning("*");
+
+              // knex disallows empty array inserts
+              if (team.escalationTagIds.length !== 0) {
+                teamToReturn.escalationTags = await trx("team_escalation_tags")
+                  .insert(
+                    team.escalationTagIds.map((tagId) => ({
+                      team_id: teamToReturn.id,
+                      tag_id: tagId
+                    }))
+                  )
+                  .returning("*");
+              }
             }
 
             return teamToReturn;

@@ -14,11 +14,33 @@ that goal. See [`HOWTO_migrate-from-moveon-main.md`](./docs/HOWTO_migrate-from-m
 
 ## Getting Started
 
-Prerequisites:
+### Prerequisites
 
-- Node (^16.14) -- See [How to Install Node](https://nodejs.dev/learn/how-to-install-nodejs)
-- Yarn (>= 1.19.1) -- See [Installing Yarn](https://classic.yarnpkg.com/en/docs/install)
-- Postgres (>= 11) -- See [install](https://postgresql.org/download) and [start](https://www.postgresql.org/docs/current/server-start.html) documentation
+Runtimes and package managers:
+
+- Node (^16.14)
+- Yarn (>= 1.19.1)
+
+External services:
+
+- Postgres (>= 11)
+  - [Install](https://postgresql.org/download) and [start](https://www.postgresql.org/docs/current/server-start.html) documentation
+
+### Setting up a development environment
+
+Install Node and Yarn. We recommend using the [asdf version manager](https://github.com/asdf-vm/asdf).
+
+```sh
+# Example using `asdf` (https://github.com/asdf-vm/asdf)
+asdf plugin add nodejs https://github.com/asdf-vm/asdf-nodejs.git
+asdf plugin add yarn https://github.com/twuni/asdf-yarn
+asdf install
+```
+
+You can also install the prereqs manually:
+
+- [Node install documentation](https://nodejs.dev/learn/how-to-install-nodejs)
+- [Yarn install documentation](https://classic.yarnpkg.com/en/docs/install)
 
 Clone the repo:
 
