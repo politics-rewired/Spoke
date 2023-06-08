@@ -8,15 +8,15 @@ import React from "react";
 interface CampaignSurveyResponseWarningDialogProps {
   open: boolean;
   campaignId: string;
-  confirmWarningAndStartCampaign: () => void;
-  setShowConfirmDialog: (bool: boolean) => void;
+  onConfirm: () => void;
+  onClose: () => void;
 }
 
 const CampaignSurveyResponseWarningDialog = ({
   open,
   campaignId,
-  confirmWarningAndStartCampaign,
-  setShowConfirmDialog
+  onConfirm,
+  onClose
 }: CampaignSurveyResponseWarningDialogProps) => {
   return (
     <Dialog open={open}>
@@ -47,18 +47,14 @@ const CampaignSurveyResponseWarningDialog = ({
       </DialogContent>
       <DialogActions>
         {[
-          <Button
-            key="save"
-            variant="contained"
-            onClick={confirmWarningAndStartCampaign}
-          >
+          <Button key="save" variant="contained" onClick={onConfirm}>
             Start this campaign
           </Button>,
           <Button
             key="close"
             variant="contained"
             color="primary"
-            onClick={() => setShowConfirmDialog(false)}
+            onClick={onClose}
           >
             Cancel
           </Button>

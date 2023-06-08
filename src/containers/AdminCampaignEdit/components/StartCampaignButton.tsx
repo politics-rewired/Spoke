@@ -31,8 +31,8 @@ export const StartCampaignButton: React.FC<StartCampaignButtonProps> = (
   const [startCampaign] = useStartCampaignMutation();
 
   // manage warning confirmation and confirmation dialog state
-  const [warningIsConfirmed, setWarningConfirmed] = useState<boolean>(false);
-  const [showConfirmDialog, setShowConfirmDialog] = useState<boolean>(false);
+  const [warningConfirmed, setWarningConfirmed] = useState<boolean>(false);
+  const [confirmDialogOpen, setConfirmDialogOpen] = useState<boolean>(false);
 
   const requiresApproval =
     !authz.isSuperadmin &&
@@ -52,17 +52,21 @@ export const StartCampaignButton: React.FC<StartCampaignButtonProps> = (
 
   const campaignHasSurveyResponses = campaignInteractionSteps.length > 1;
 
-  const confirmWarningAndStartCampaign = useCallback(() => {
+  const handleConfirmWarningAndStartCampaign = useCallback(() => {
     setWarningConfirmed(true);
-    setShowConfirmDialog(false);
+    setConfirmDialogOpen(false);
     startCampaign({ variables: { campaignId } });
-  }, [startCampaign, campaignId, setWarningConfirmed, setShowConfirmDialog]);
+  }, [startCampaign, campaignId, setWarningConfirmed, setConfirmDialogOpen]);
+
+  const handleCloseDialog = useCallback(() => {
+    setConfirmDialogOpen(false);
+  }, [setConfirmDialogOpen]);
 
   const handleClick = useCallback(() => {
     if (disabled) return;
 
-    if (!campaignHasSurveyResponses && !warningIsConfirmed) {
-      return setShowConfirmDialog(true);
+    if (!campaignHasSurveyResponses && !warningConfirmed) {
+      return setConfirmDialogOpen(true);
     }
 
     startCampaign({ variables: { campaignId } });
@@ -70,8 +74,8 @@ export const StartCampaignButton: React.FC<StartCampaignButtonProps> = (
     startCampaign,
     campaignId,
     campaignHasSurveyResponses,
-    warningIsConfirmed,
-    setShowConfirmDialog
+    warningConfirmed,
+    setConfirmDialogOpen
   ]);
 
   const startText = data?.campaign?.isStarted
@@ -98,10 +102,10 @@ export const StartCampaignButton: React.FC<StartCampaignButtonProps> = (
         </span>
       </Tooltip>
       <CampaignSurveyResponseWarningDialog
-        open={showConfirmDialog}
+        open={confirmDialogOpen}
         campaignId={campaignId}
-        confirmWarningAndStartCampaign={confirmWarningAndStartCampaign}
-        setShowConfirmDialog={setShowConfirmDialog}
+        onConfirm={handleConfirmWarningAndStartCampaign}
+        onClose={handleCloseDialog}
       />
     </>
   );
