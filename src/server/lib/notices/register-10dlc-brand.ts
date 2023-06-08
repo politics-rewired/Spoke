@@ -43,8 +43,6 @@ export const get10DlcBrandNotices: OrgLevelNotificationGetter = async (
   userId,
   organizationId
 ) => {
-  return [];
-
   const query = r
     .knex("messaging_service")
     .join(
@@ -56,7 +54,8 @@ export const get10DlcBrandNotices: OrgLevelNotificationGetter = async (
     .groupBy("messaging_service_sid")
     .where({
       service_type: "assemble-numbers",
-      user_id: userId
+      user_id: userId,
+      active: true
     })
     .whereIn("role", ["OWNER", "ADMIN"]);
   if (organizationId !== undefined) {

@@ -12,6 +12,7 @@ import type {
   Register10DlcBrandNotice
 } from "@spoke/spoke-codegen";
 import React from "react";
+import Registration10DLCWarningText from "src/components/Registration10DLCWarningText";
 
 import { isRegister10DlcBrandNotice } from "../../../api/notice";
 import type { QueryMap } from "../../../network/types";
@@ -35,25 +36,7 @@ const Register10DlcBrandNoticeCard: React.FC<Register10DlcBrandNotice> = (
         avatar={<Warning color="error" />}
       />
       <CardContent>
-        <p>
-          You must provide details required for us to register a 10DLC brand on
-          your behalf by February 22nd, 2022! If you do not provide this
-          information by then, you may not be able to send messages starting on
-          March 1st, 2022 until 3-5 business days after you provide this
-          information.
-        </p>
-
-        <p>
-          To learn more about this change, please see our{" "}
-          <a
-            href="https://docs.spokerewired.com/article/124-10dlc"
-            target="_blank"
-            rel="noreferrer"
-          >
-            10DLC knowledge base article
-          </a>
-          .
-        </p>
+        <Registration10DLCWarningText />
 
         {props.tcrBrandRegistrationUrl === null && (
           <p style={{ fontWeight: "bold" }}>
@@ -91,7 +74,10 @@ export const NotificationCard: React.FC<InnerProps> = (props) => {
   return (
     <div>
       {props.data.notices.edges.map(({ node }) => {
-        if (isRegister10DlcBrandNotice(node)) {
+        if (
+          window.SHOW_10DLC_REGISTRATION_WARNING &&
+          isRegister10DlcBrandNotice(node)
+        ) {
           return <Register10DlcBrandNoticeCard key={node.id} {...node} />;
         }
         return null;
