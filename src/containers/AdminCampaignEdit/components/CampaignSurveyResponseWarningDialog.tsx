@@ -24,6 +24,10 @@ const CampaignSurveyResponseWarningDialog = ({
         {`Heads up! Campaign ${campaignId} currently has no survey responses. Do you want to start this campaign anyway?`}
       </DialogTitle>
       <DialogContent>
+        <p>
+          For the best experience for you and your texters, we recommend adding
+          survey responses before starting this campaign!
+        </p>
         Without survey responses, texters can only use{" "}
         <a
           href="https://docs.spokerewired.com/article/67-tags"
@@ -32,18 +36,20 @@ const CampaignSurveyResponseWarningDialog = ({
         >
           Tags
         </a>{" "}
-        to log data on this campaign. Tags do not prepopulate scripts for
-        texters and are not scoped to a single campaign. Canned responses
-        prepopulate scripts but log no data at all. (
-        <a
-          href="https://docs.spokerewired.com/article/125-survey-responses-vs-canned-responses"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Read more
-        </a>
-        ) For the best experience for you and your texters, we recommend adding
-        survey responses before starting this campaign!
+        to log data on this campaign.
+        <p>
+          Tags do not prepopulate scripts for texters and are not scoped to a
+          single campaign. Canned responses prepopulate scripts but log no data
+          at all. (
+          <a
+            href="https://docs.spokerewired.com/article/125-survey-responses-vs-canned-responses"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Read more
+          </a>
+          )
+        </p>
       </DialogContent>
       <DialogActions>
         {[
