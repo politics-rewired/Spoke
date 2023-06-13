@@ -630,6 +630,7 @@ type Organization {
     first: Int
     active: Boolean
   ): MessagingServicePage
+  messagingServicesCount(active: Boolean): Int
   campaignGroups(after: Cursor, first: Int): CampaignGroupPage!
   templateCampaigns(after: Cursor, first: Int): CampaignPage!
   deletedAt: String
