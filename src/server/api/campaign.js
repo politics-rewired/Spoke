@@ -11,6 +11,7 @@ import { currentEditors } from "../models/cacheable_queries";
 import { accessRequired } from "./errors";
 import { getDeliverabilityStats, invalidScriptFields } from "./lib/campaign";
 import { symmetricEncrypt } from "./lib/crypto";
+import { getMessagingServiceById } from "./lib/message-sending";
 import { formatPage } from "./lib/pagination";
 import { sqlResolvers } from "./lib/utils";
 import { getOrgFeature } from "./organization-settings";
@@ -843,6 +844,25 @@ export const resolvers = {
         [campaign.id]
       );
       return autosend_status;
+    },
+    messagingService: async (campaign, _, { user }) => {
+      const {
+        organization_id: orgId,
+        messaging_service_sid: msgServiceId
+      } = campaign.messaging_service_sid;
+
+      if (!msgServiceId) {
+        return null;
+      }
+
+      try {
+        await accessRequired(user, orgId, "ADMIN", true);
+      } catch {
+        return null;
+      }
+
+      const messagingService = await getMessagingServiceById(msgServiceId);
+      return messagingService;
     }
   }
 };
