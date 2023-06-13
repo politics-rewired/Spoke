@@ -261,12 +261,14 @@ class AdminCampaignStats extends React.Component {
     const onlyCopyCampaignSameOrg =
       !isSuperadmin || orgLength === undefined || orgLength < 2;
 
-    const showMessagingServiceName =
-      organization.messagingServicesCount > 1 && campaign.isStarted;
     let msgServiceName = messagingService?.name;
     if (!msgServiceName) {
       msgServiceName = messagingService?.id;
     }
+    const showMessagingServiceName =
+      organization.messagingServicesCount > 1 &&
+      campaign.isStarted &&
+      msgServiceName;
 
     return (
       <div>
