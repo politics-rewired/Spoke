@@ -21,12 +21,17 @@ query getCampaign($campaignId: String!) {
     title
     dueBy
     isArchived
+    isStarted
     useDynamicAssignment
     pendingJobs {
       id
       jobType
       assigned
       status
+    }
+    messagingService {
+      name
+      id
     }
   }
 }
@@ -54,6 +59,7 @@ query getOrganizationData($organizationId: String!) {
         createdAt
       }
     }
+    messagingServicesCount
   }
 }
 
