@@ -849,7 +849,7 @@ export const resolvers = {
       const {
         organization_id: orgId,
         messaging_service_sid: msgServiceId
-      } = campaign.messaging_service_sid;
+      } = campaign;
 
       if (!msgServiceId) {
         return null;
