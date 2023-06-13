@@ -56,11 +56,11 @@ export const StartCampaignButton: React.FC<StartCampaignButtonProps> = (
     setWarningConfirmed(true);
     setConfirmDialogOpen(false);
     startCampaign({ variables: { campaignId } });
-  }, [startCampaign, campaignId, setWarningConfirmed, setConfirmDialogOpen]);
+  }, [startCampaign, campaignId]);
 
-  const handleCloseDialog = useCallback(() => {
+  const handleCloseDialog = () => {
     setConfirmDialogOpen(false);
-  }, [setConfirmDialogOpen]);
+  };
 
   const handleClick = useCallback(() => {
     if (disabled) return;
@@ -70,13 +70,7 @@ export const StartCampaignButton: React.FC<StartCampaignButtonProps> = (
     }
 
     startCampaign({ variables: { campaignId } });
-  }, [
-    startCampaign,
-    campaignId,
-    campaignHasSurveyResponses,
-    warningConfirmed,
-    setConfirmDialogOpen
-  ]);
+  }, [startCampaign, campaignId, campaignHasSurveyResponses, warningConfirmed]);
 
   const startText = data?.campaign?.isStarted
     ? "Already started"
