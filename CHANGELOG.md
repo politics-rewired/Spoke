@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [6.3.3](https://github.com/politics-rewired/spoke/compare/v6.3.2...v6.3.3) (2023-06-13)
+
+
+### Features
+
+* first draft of conventions doc ([#1615](https://github.com/politics-rewired/spoke/issues/1615)) ([ee9e38e](https://github.com/politics-rewired/spoke/commit/ee9e38e796c89e20c12f6da8ece9e0b37293e93d))
+
+
+### Backend Changes
+
+* **10dlc:** mid june notification update ([#1621](https://github.com/politics-rewired/spoke/issues/1621)) ([9884de0](https://github.com/politics-rewired/spoke/commit/9884de098b17b29424ce4deed5b8a5f8712e9abb))
+
 ### [6.3.2](https://github.com/politics-rewired/spoke/compare/v6.3.1...v6.3.2) (2023-06-08)
 
 
