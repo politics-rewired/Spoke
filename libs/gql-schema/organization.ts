@@ -54,6 +54,7 @@ export const schema = `
     teams: [Team]!
     externalSystems(after: Cursor, first: Int): ExternalSystemPage!
     messagingServices(after: Cursor, first: Int, active: Boolean): MessagingServicePage
+    messagingServicesCount(active: Boolean): Int
     campaignGroups(after: Cursor, first: Int): CampaignGroupPage!
     templateCampaigns(after: Cursor, first: Int): CampaignPage!
     deletedAt: String
