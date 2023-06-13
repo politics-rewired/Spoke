@@ -3502,9 +3502,10 @@ const rootMutations = {
                 const switchboard = config.SWITCHBOARD_BASE_URL ?? "[default]";
 
                 const text = [
-                  "This is an automated org shutdown request triggered through the superadmin.",
+                  "This is an automated org shutdown request triggered by a superadmin.",
                   `Organization id: ${organizationId}, name: ${org.name}, from instance hosted at ${config.BASE_URL}.`,
-                  `Switchboard ${switchboard}, profiles:\n${messagingServiceSids}`
+                  `Switchboard ${switchboard}, profiles:\n${messagingServiceSids}`,
+                  "Note: This is NOT necessarily an instance shutdown request."
                 ].join("\n\n");
 
                 await sendEmail({
