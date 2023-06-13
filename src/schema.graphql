@@ -1,4 +1,3 @@
-
 enum AutosendingControlsMode {
   BASIC
   DETAILED
@@ -116,13 +115,13 @@ input FetchCampaignOverlapInput {
 }
 
 type FetchCampaignOverlapResult {
-  campaign: Campaign!,
+  campaign: Campaign!
   overlapCount: Int!
   lastActivity: Date!
 }
 
 type DeleteCampaignOverlapResult {
-  campaign: Campaign,
+  campaign: Campaign
   deletedRowCount: Int!
   remainingCount: Int!
 }
@@ -204,30 +203,78 @@ type OptOutByCampaign {
 
 type RootQuery {
   currentUser: User
-  organization(id:String!, utc:String): Organization
-  campaign(id:String!): Campaign
-  inviteByHash(hash:String!): [Invite]
-  contact(id:String!): CampaignContact
-  assignment(id:String!): Assignment
+  organization(id: String!, utc: String): Organization
+  campaign(id: String!): Campaign
+  inviteByHash(hash: String!): [Invite]
+  contact(id: String!): CampaignContact
+  assignment(id: String!): Assignment
   team(id: String!): Team!
   organizations(active: Boolean): [Organization]
-  availableActions(organizationId:String!): [Action]
-  conversations(cursor:OffsetLimitCursor!, organizationId:String!, campaignsFilter:CampaignsFilter, assignmentsFilter:AssignmentsFilter, tagsFilter: TagsFilter, contactsFilter:ContactsFilter, contactNameFilter:ContactNameFilter): PaginatedConversations
-  campaigns(organizationId:String!, cursor:OffsetLimitCursor, campaignsFilter: CampaignsFilter): CampaignsReturn
-  people(organizationId:String, cursor:OffsetLimitCursor, campaignsFilter:CampaignsFilter, role: String, userIds:[String]): UsersReturn
-  peopleByUserIds(userIds:[String], organizationId:String!): UsersList
-  fetchCampaignOverlaps(input: FetchCampaignOverlapInput!): [FetchCampaignOverlapResult]!
-  assignmentRequests(organizationId: String!, status: String): [AssignmentRequest]
-  trollAlarms(organizationId: String!, limit: Int!, offset: Int!, token: String, dismissed: Boolean!): TrollAlarmPage!
-  trollAlarmsCount(organizationId: String!, dismissed: Boolean!): TrollAlarmCount!,
+  availableActions(organizationId: String!): [Action]
+  conversations(
+    cursor: OffsetLimitCursor!
+    organizationId: String!
+    campaignsFilter: CampaignsFilter
+    assignmentsFilter: AssignmentsFilter
+    tagsFilter: TagsFilter
+    contactsFilter: ContactsFilter
+    contactNameFilter: ContactNameFilter
+  ): PaginatedConversations
+  campaigns(
+    organizationId: String!
+    cursor: OffsetLimitCursor
+    campaignsFilter: CampaignsFilter
+  ): CampaignsReturn
+  people(
+    organizationId: String
+    cursor: OffsetLimitCursor
+    campaignsFilter: CampaignsFilter
+    role: String
+    userIds: [String]
+  ): UsersReturn
+  peopleByUserIds(userIds: [String], organizationId: String!): UsersList
+  fetchCampaignOverlaps(
+    input: FetchCampaignOverlapInput!
+  ): [FetchCampaignOverlapResult]!
+  assignmentRequests(
+    organizationId: String!
+    status: String
+  ): [AssignmentRequest]
+  trollAlarms(
+    organizationId: String!
+    limit: Int!
+    offset: Int!
+    token: String
+    dismissed: Boolean!
+  ): TrollAlarmPage!
+  trollAlarmsCount(
+    organizationId: String!
+    dismissed: Boolean!
+  ): TrollAlarmCount!
   trollTokens(organizationId: String!): [TrollTrigger]
   externalSystem(systemId: String!): ExternalSystem!
-  externalSystems(organizationId: String!, after: Cursor, first: Int): ExternalSystemPage!
-  externalLists(organizationId: String!, systemId: String!, after: Cursor, first: Int): ExternalListPage!
+  externalSystems(
+    organizationId: String!
+    after: Cursor
+    first: Int
+  ): ExternalSystemPage!
+  externalLists(
+    organizationId: String!
+    systemId: String!
+    after: Cursor
+    first: Int
+  ): ExternalListPage!
   notices(organizationId: String): NoticePage!
-  campaignGroups(organizationId: String! after: Cursor, first: Int): CampaignGroupPage!
+  campaignGroups(
+    organizationId: String!
+    after: Cursor
+    first: Int
+  ): CampaignGroupPage!
   campaignNavigation(campaignId: String!): CampaignNavigation!
-  bulkUpdateScriptChanges(organizationId: String!, findAndReplace: BulkUpdateScriptInput!): [ScriptUpdateChange!]!
+  bulkUpdateScriptChanges(
+    organizationId: String!
+    findAndReplace: BulkUpdateScriptInput!
+  ): [ScriptUpdateChange!]!
   superadmins: [User!]
   optOuts(organizationId: String!): [OptOutByCampaign!]!
   isValidAttachment(fileUrl: String!): Boolean!
@@ -239,78 +286,188 @@ input SecondPassInput {
 }
 
 type RootMutation {
-  createInvite(invite:InviteInput!): Invite
-  createCampaign(campaign:CampaignInput!): Campaign
+  createInvite(invite: InviteInput!): Invite
+  createCampaign(campaign: CampaignInput!): Campaign
   createTemplateCampaign(organizationId: String!): Campaign!
   deleteTemplateCampaign(organizationId: String!, campaignId: String!): Boolean!
   cloneTemplateCampaign(organizationId: String!, campaignId: String!): Campaign!
-  editCampaign(id:String!, campaign:CampaignInput!): Campaign
-  saveCampaignGroups(organizationId: String!, campaignGroups: [CampaignGroupInput!]!): [CampaignGroup!]!
-  deleteCampaignGroup(organizationId: String!, campaignGroupId: String!): Boolean!
-  filterLandlines(id:String!): Campaign
-  bulkUpdateScript(organizationId:String!, findAndReplace: BulkUpdateScriptInput!): [ScriptUpdateResult]
-  deleteJob(campaignId:String!, id:String!): JobRequest
+  editCampaign(id: String!, campaign: CampaignInput!): Campaign
+  saveCampaignGroups(
+    organizationId: String!
+    campaignGroups: [CampaignGroupInput!]!
+  ): [CampaignGroup!]!
+  deleteCampaignGroup(
+    organizationId: String!
+    campaignGroupId: String!
+  ): Boolean!
+  filterLandlines(id: String!): Campaign
+  bulkUpdateScript(
+    organizationId: String!
+    findAndReplace: BulkUpdateScriptInput!
+  ): [ScriptUpdateResult]
+  deleteJob(campaignId: String!, id: String!): JobRequest
   copyCampaign(id: String!): Campaign
-  copyCampaigns(sourceCampaignId: String!, quantity: Int!, targetOrgId: String): [Campaign!]!
+  copyCampaigns(
+    sourceCampaignId: String!
+    quantity: Int!
+    targetOrgId: String
+  ): [Campaign!]!
   exportCampaign(options: CampaignExportInput!): JobRequest
-  createCannedResponse(cannedResponse:CannedResponseInput!): CannedResponse
-  createOrganization(name: String!, userId: String!, inviteId: String!): Organization
-  editOrganization(id: String! input: EditOrganizationInput!): Organization!
+  createCannedResponse(cannedResponse: CannedResponseInput!): CannedResponse
+  createOrganization(
+    name: String!
+    userId: String!
+    inviteId: String!
+  ): Organization
+  editOrganization(id: String!, input: EditOrganizationInput!): Organization!
   joinOrganization(organizationUuid: String!): Organization!
-  editOrganizationMembership(id: String!, level: RequestAutoApprove, role: String): OrganizationMembership!
-  editOrganizationSettings(id: String!, input: OrganizationSettingsInput!): OrganizationSettings!
+  editOrganizationMembership(
+    id: String!
+    level: RequestAutoApprove
+    role: String
+  ): OrganizationMembership!
+  editOrganizationSettings(
+    id: String!
+    input: OrganizationSettingsInput!
+  ): OrganizationSettings!
   purgeOrganizationUsers(organizationId: String!): Int!
-  editUser(organizationId: String!, userId: String!, userData:UserInput): User
+  editUser(organizationId: String!, userId: String!, userData: UserInput): User
   resetUserPassword(organizationId: String!, userId: String!): String!
   changeUserPassword(userId: String!, formData: UserPasswordChange): User
   setUserSuspended(userId: String!, isSuspended: Boolean!): User!
   clearUserSessions(userId: String!): User!
-  updateDefaultTextingTimezone(organizationId: String!, defaultTextingTz: String!): Organization!
-  updateTextingHours( organizationId: String!, textingHoursStart: Int!, textingHoursEnd: Int!): Organization
-  updateTextingHoursEnforcement( organizationId: String!, textingHoursEnforced: Boolean!): Organization
-  updateTextRequestFormSettings(organizationId: String!, textRequestFormEnabled: Boolean!, textRequestType: String!, textRequestMaxCount: Int!): Organization
+  updateDefaultTextingTimezone(
+    organizationId: String!
+    defaultTextingTz: String!
+  ): Organization!
+  updateTextingHours(
+    organizationId: String!
+    textingHoursStart: Int!
+    textingHoursEnd: Int!
+  ): Organization
+  updateTextingHoursEnforcement(
+    organizationId: String!
+    textingHoursEnforced: Boolean!
+  ): Organization
+  updateTextRequestFormSettings(
+    organizationId: String!
+    textRequestFormEnabled: Boolean!
+    textRequestType: String!
+    textRequestMaxCount: Int!
+  ): Organization
   bulkSendMessages(assignmentId: String!): [CampaignContact]
-  sendMessage(message:MessageInput!, campaignContactId:String!): CampaignContact,
-  tagConversation(campaignContactId: String!, tag: ContactTagActionInput!): CampaignContact
-  createOptOut(optOut:ContactActionInput!, campaignContactId:String!):CampaignContact,
-  removeOptOut(cell:Phone!):[CampaignContact],
-  editCampaignContactMessageStatus(messageStatus: String!, campaignContactId:String!): CampaignContact,
-  deleteQuestionResponses(interactionStepIds:[String], campaignContactId:String!): CampaignContact,
-  updateQuestionResponses(questionResponses:[QuestionResponseInput], campaignContactId:String!): CampaignContact,
+  sendMessage(
+    message: MessageInput!
+    campaignContactId: String!
+  ): CampaignContact
+  tagConversation(
+    campaignContactId: String!
+    tag: ContactTagActionInput!
+  ): CampaignContact
+  createOptOut(
+    optOut: ContactActionInput!
+    campaignContactId: String!
+  ): CampaignContact
+  removeOptOut(cell: Phone!): [CampaignContact]
+  editCampaignContactMessageStatus(
+    messageStatus: String!
+    campaignContactId: String!
+  ): CampaignContact
+  deleteQuestionResponses(
+    interactionStepIds: [String]
+    campaignContactId: String!
+  ): CampaignContact
+  updateQuestionResponses(
+    questionResponses: [QuestionResponseInput]
+    campaignContactId: String!
+  ): CampaignContact
   handleConversation(
-    campaignContactId: String!,
-    message:MessageInput,
-    questionResponses: [QuestionResponseInput],
-    interactionStepIdsForDeletedQuestionResponses: [String],
-    optOut: ContactActionInput,
+    campaignContactId: String!
+    message: MessageInput
+    questionResponses: [QuestionResponseInput]
+    interactionStepIdsForDeletedQuestionResponses: [String]
+    optOut: ContactActionInput
     closeConversation: Boolean
-  ): CampaignContact,
-  setCampaignApproved(id: String!, approved: Boolean!): Campaign!,
-  startCampaign(id:String!): Campaign,
-  archiveCampaign(id:String!): Campaign,
-  unarchiveCampaign(id:String!): Campaign,
+  ): CampaignContact
+  setCampaignApproved(id: String!, approved: Boolean!): Campaign!
+  startCampaign(id: String!): Campaign
+  archiveCampaign(id: String!): Campaign
+  unarchiveCampaign(id: String!): Campaign
   sendReply(id: String!, message: String!): CampaignContact
-  getAssignmentContacts(assignmentId: String!, contactIds: [String], findNew: Boolean): [CampaignContact],
-  findNewCampaignContact(assignmentId: String!, numberContacts: Int!): FoundContact,
+  getAssignmentContacts(
+    assignmentId: String!
+    contactIds: [String]
+    findNew: Boolean
+  ): [CampaignContact]
+  findNewCampaignContact(
+    assignmentId: String!
+    numberContacts: Int!
+  ): FoundContact
   assignUserToCampaign(organizationUuid: String!, campaignId: String!): Campaign
   userAgreeTerms(userId: String!): User
-  megaReassignCampaignContacts(organizationId:String!, campaignIdsContactIds:[CampaignIdContactId]!, newTexterUserIds:[String]): Boolean!
-  megaBulkReassignCampaignContacts(organizationId:String!, campaignsFilter:CampaignsFilter, assignmentsFilter:AssignmentsFilter, tagsFilter: TagsFilter, contactsFilter:ContactsFilter, contactNameFilter: ContactNameFilter, newTexterUserIds:[String]): Boolean!
-  requestTexts(count: Int!, email: String!, organizationId: String!, preferredTeamId: String!): String!
-  releaseMessages(campaignId: String!, target: ReleaseActionTarget!, ageInHours: Float): String!
-  releaseAllUnhandledReplies(organizationId: String!, ageInHours: Float, releaseOnRestricted: Boolean, limitToCurrentlyTextableContacts: Boolean): ReleaseAllUnhandledRepliesResult!
+  megaReassignCampaignContacts(
+    organizationId: String!
+    campaignIdsContactIds: [CampaignIdContactId]!
+    newTexterUserIds: [String]
+  ): Boolean!
+  megaBulkReassignCampaignContacts(
+    organizationId: String!
+    campaignsFilter: CampaignsFilter
+    assignmentsFilter: AssignmentsFilter
+    tagsFilter: TagsFilter
+    contactsFilter: ContactsFilter
+    contactNameFilter: ContactNameFilter
+    newTexterUserIds: [String]
+  ): Boolean!
+  requestTexts(
+    count: Int!
+    email: String!
+    organizationId: String!
+    preferredTeamId: String!
+  ): String!
+  releaseMessages(
+    campaignId: String!
+    target: ReleaseActionTarget!
+    ageInHours: Float
+  ): String!
+  releaseAllUnhandledReplies(
+    organizationId: String!
+    ageInHours: Float
+    releaseOnRestricted: Boolean
+    limitToCurrentlyTextableContacts: Boolean
+  ): ReleaseAllUnhandledRepliesResult!
   markForSecondPass(campaignId: String!, input: SecondPassInput!): String!
   startAutosending(campaignId: String!): Campaign!
   pauseAutosending(campaignId: String!): Campaign!
   updateCampaignAutosendingLimit(campaignId: String!, limit: Int): Campaign!
   unMarkForSecondPass(campaignId: String!): String!
   deleteNeedsMessage(campaignId: String!): String!
-  insertLinkDomain(organizationId: String!, domain: String!, maxUsageCount: Int!): LinkDomain!
-  updateLinkDomain(organizationId: String!, domainId: String!, payload: UpdateLinkDomain!): LinkDomain!
+  insertLinkDomain(
+    organizationId: String!
+    domain: String!
+    maxUsageCount: Int!
+  ): LinkDomain!
+  updateLinkDomain(
+    organizationId: String!
+    domainId: String!
+    payload: UpdateLinkDomain!
+  ): LinkDomain!
   deleteLinkDomain(organizationId: String!, domainId: String!): Boolean!
-  deleteCampaignOverlap(organizationId: String!, campaignId: String!, overlappingCampaignId: String!): DeleteCampaignOverlapResult!
-  deleteManyCampaignOverlap(organizationId: String!, campaignId: String!, overlappingCampaignIds: [String]!): Int!
-  resolveAssignmentRequest(assignmentRequestId: String!, approved: Boolean!, autoApproveLevel: RequestAutoApprove): Int!
+  deleteCampaignOverlap(
+    organizationId: String!
+    campaignId: String!
+    overlappingCampaignId: String!
+  ): DeleteCampaignOverlapResult!
+  deleteManyCampaignOverlap(
+    organizationId: String!
+    campaignId: String!
+    overlappingCampaignIds: [String]!
+  ): Int!
+  resolveAssignmentRequest(
+    assignmentRequestId: String!
+    approved: Boolean!
+    autoApproveLevel: RequestAutoApprove
+  ): Int!
   saveTag(organizationId: String!, tag: TagInput!): Tag!
   deleteTag(organizationId: String!, tagId: String!): Boolean!
   saveTeams(organizationId: String!, teams: [TeamInput]!): [Team]!
@@ -322,19 +479,42 @@ type RootMutation {
   dismissAlarms(messageIds: [String!]!, organizationId: String!): Boolean!
   addToken(organizationId: String!, input: TrollTriggerInput!): Boolean!
   removeToken(token: String!, organizationId: String!): Boolean!
-  createExternalSystem(organizationId: String!, externalSystem: ExternalSystemInput!): ExternalSystem!
-  editExternalSystem(id: String!, externalSystem: ExternalSystemInput!): ExternalSystem!
+  createExternalSystem(
+    organizationId: String!
+    externalSystem: ExternalSystemInput!
+  ): ExternalSystem!
+  editExternalSystem(
+    id: String!
+    externalSystem: ExternalSystemInput!
+  ): ExternalSystem!
   refreshExternalSystem(externalSystemId: String!): Boolean!
-  createQuestionResponseSyncConfig(input: QuestionResponseSyncConfigInput!): ExternalSyncQuestionResponseConfig!
-  deleteQuestionResponseSyncConfig(input: QuestionResponseSyncConfigInput!): ExternalSyncQuestionResponseConfig!
-  createQuestionResponseSyncTarget(input: QuestionResponseSyncTargetInput!): ExternalSyncConfigTarget!
+  createQuestionResponseSyncConfig(
+    input: QuestionResponseSyncConfigInput!
+  ): ExternalSyncQuestionResponseConfig!
+  deleteQuestionResponseSyncConfig(
+    input: QuestionResponseSyncConfigInput!
+  ): ExternalSyncQuestionResponseConfig!
+  createQuestionResponseSyncTarget(
+    input: QuestionResponseSyncTargetInput!
+  ): ExternalSyncConfigTarget!
   deleteQuestionResponseSyncTarget(targetId: String!): String!
   syncCampaignToSystem(input: SyncCampaignToSystemInput!): Boolean!
-  editExternalOptOutSyncConfig(systemId: String!, targetId: String): ExternalSystem!
+  editExternalOptOutSyncConfig(
+    systemId: String!
+    targetId: String
+  ): ExternalSystem!
   unassignTextsFromUser(membershipId: String!): Boolean!
   editSuperAdminStatus(userEmail: String!, superAdminStatus: Boolean!): Boolean!
-  editOrganizationActive(organizationId: String!, active: Boolean!, deactivateMode: DeactivateMode): Boolean!
-  bulkOptOut(organizationId: String!, csvFile: Upload, numbersList: String): Int!
+  editOrganizationActive(
+    organizationId: String!
+    active: Boolean!
+    deactivateMode: DeactivateMode
+  ): Boolean!
+  bulkOptOut(
+    organizationId: String!
+    csvFile: Upload
+    numbersList: String
+  ): Int!
   bulkOptIn(organizationId: String!, csvFile: Upload, numbersList: String): Int!
   exportOptOuts(organizationId: String!, campaignIds: [String!]): Boolean!
 }
@@ -344,8 +524,6 @@ schema {
   mutation: RootMutation
 }
 
-
-
 type User {
   id: ID
   firstName: String
@@ -353,7 +531,11 @@ type User {
   displayName: String!
   email: String
   cell: String
-  memberships(organizationId: String, after: Cursor, first: Int): OrganizationMembershipPage
+  memberships(
+    organizationId: String
+    after: Cursor
+    first: Int
+  ): OrganizationMembershipPage
   organizations(active: Boolean, role: String): [Organization]
   todos(organizationId: String): [Assignment]
   roles(organizationId: String!): [UserRole!]!
@@ -377,8 +559,6 @@ type PaginatedUsers {
 }
 
 union UsersReturn = PaginatedUsers | UsersList
-
-
 
 enum TextRequestType {
   UNSENT
@@ -405,9 +585,20 @@ type Organization {
   id: ID
   uuid: String
   name: String
-  campaigns(cursor:OffsetLimitCursor, campaignsFilter: CampaignsFilter): PaginatedCampaigns!
-  campaignsRelay(after: Cursor, first: Int, filter: CampaignsFilter): CampaignPage!
-  memberships(after: Cursor, first: Int, filter: MembershipFilter): OrganizationMembershipPage
+  campaigns(
+    cursor: OffsetLimitCursor
+    campaignsFilter: CampaignsFilter
+  ): PaginatedCampaigns!
+  campaignsRelay(
+    after: Cursor
+    first: Int
+    filter: CampaignsFilter
+  ): CampaignPage!
+  memberships(
+    after: Cursor
+    first: Int
+    filter: MembershipFilter
+  ): OrganizationMembershipPage
   people(role: String, campaignId: String, offset: Int): [User]
   peopleCount: Int
   optOuts: [OptOut]
@@ -434,7 +625,11 @@ type Organization {
   escalationTagList: [Tag!]!
   teams: [Team]!
   externalSystems(after: Cursor, first: Int): ExternalSystemPage!
-  messagingServices(after: Cursor, first: Int, active: Boolean): MessagingServicePage
+  messagingServices(
+    after: Cursor
+    first: Int
+    active: Boolean
+  ): MessagingServicePage
   campaignGroups(after: Cursor, first: Int): CampaignGroupPage!
   templateCampaigns(after: Cursor, first: Int): CampaignPage!
   deletedAt: String
@@ -446,8 +641,6 @@ input EditOrganizationInput {
   name: String
 }
 
-
-
 scalar Cursor
 
 type RelayPageInfo {
@@ -458,7 +651,6 @@ type RelayPageInfo {
   endCursor: Cursor
 }
 
-
 scalar Upload
 
 scalar Date
@@ -466,7 +658,6 @@ scalar Date
 scalar JSON
 
 scalar Phone
-
 
 input OrganizationSettingsInput {
   # Owner
@@ -512,8 +703,6 @@ type OrganizationSettings {
   trollbotWebhookUrl: String
 }
 
-
-
 enum UserRole {
   SUSPENDED
   TEXTER
@@ -553,8 +742,6 @@ type OrganizationMembershipPage {
   edges: [OrganizationMembershipEdge!]!
   pageInfo: RelayPageInfo!
 }
-
-
 
 input CampaignsFilter {
   isArchived: Boolean
@@ -653,7 +840,7 @@ type Campaign {
   hasUnhandledMessages: Boolean
   customFields: [String]
   cannedResponses(userId: String): [CannedResponse!]!
-  stats: CampaignStats,
+  stats: CampaignStats
   pendingJobs(jobTypes: [String]): [JobRequest]!
   datawarehouseAvailable: Boolean
   useDynamicAssignment: Boolean
@@ -675,12 +862,18 @@ type Campaign {
   landlinesFiltered: Boolean!
   externalSystem: ExternalSystem
   syncReadiness: ExternalSyncReadinessState!
-  externalSyncConfigurations(after: Cursor, first: Int): ExternalSyncQuestionResponseConfigPage!
-  deliverabilityStats(filter: CampaignDeliverabilityStatsFilter): CampaignDeliverabilityStats!
+  externalSyncConfigurations(
+    after: Cursor
+    first: Int
+  ): ExternalSyncQuestionResponseConfigPage!
+  deliverabilityStats(
+    filter: CampaignDeliverabilityStatsFilter
+  ): CampaignDeliverabilityStats!
   autosendStatus: String!
   messagingServiceSid: String
   autosendLimit: Int
   columnMapping: [CsvColumnMapping!]
+  messagingService: MessagingService
 }
 
 type CampaignEdge {
@@ -757,8 +950,6 @@ input CampaignInput {
   columnMapping: [CsvColumnMappingInput!]
 }
 
-
-
 input AssignmentsFilter {
   texterId: Int
   includeEscalated: Boolean
@@ -774,8 +965,6 @@ type Assignment {
   campaignCannedResponses: [CannedResponse!]!
   maxContacts: Int
 }
-
-
 
 type InteractionStep {
   id: ID!
@@ -802,16 +991,12 @@ input InteractionStepInput {
   interactionSteps: [InteractionStepInput]
 }
 
-
-
 type OptOut {
   id: ID
   cell: String
   assignment: Assignment
   createdAt: Date
 }
-
-
 
 type Message {
   id: ID
@@ -826,8 +1011,6 @@ type Message {
   sendStatus: String
   errorCodes: [String!]
 }
-
-
 
 enum MessagingServiceType {
   TWILIO
@@ -854,8 +1037,6 @@ type MessagingServicePage {
   edges: [MessagingServiceEdge!]!
   pageInfo: RelayPageInfo!
 }
-
-
 
 interface Register10DlcNotice {
   id: ID!
@@ -888,7 +1069,12 @@ type PricingTollFreeNotice implements PricingNotice {
   id: ID!
 }
 
-union Notice = Register10DlcBrandNotice | Register10DlcCampaignNotice | Pending10DlcCampaignNotice | Pricing10DlcNotice | PricingTollFreeNotice
+union Notice =
+    Register10DlcBrandNotice
+  | Register10DlcCampaignNotice
+  | Pending10DlcCampaignNotice
+  | Pricing10DlcNotice
+  | PricingTollFreeNotice
 
 type NoticeEdge {
   cursor: Cursor!
@@ -899,8 +1085,6 @@ type NoticePage {
   edges: [NoticeEdge!]!
   pageInfo: RelayPageInfo!
 }
-
-
 
 input ContactsFilter {
   messageStatus: String
@@ -951,8 +1135,6 @@ input CampaignContactInput {
   customFields: String
 }
 
-
-
 type CampaignContactTag {
   id: String!
   tag: Tag!
@@ -960,8 +1142,6 @@ type CampaignContactTag {
   createdAt: String!
   updatedAt: String!
 }
-
-
 
 input CampaignGroupInput {
   id: String
@@ -989,8 +1169,6 @@ type CampaignGroupPage {
   pageInfo: RelayPageInfo!
 }
 
-
-
 input CampaignVariableInput {
   displayOrder: Int!
   name: String!
@@ -1016,8 +1194,6 @@ type CampaignVariablePage {
   pageInfo: RelayPageInfo!
 }
 
-
-
 input CannedResponseInput {
   id: String
   title: String
@@ -1035,15 +1211,11 @@ type CannedResponse {
   displayOrder: Int!
 }
 
-
-
 type QuestionResponse {
   id: String
   value: String
   question: Question
 }
-
-
 
 type Question {
   text: String
@@ -1061,15 +1233,11 @@ type AnswerOption {
   question: Question
 }
 
-
-
 type Invite {
   id: ID
   isValid: Boolean
   hash: String
 }
-
-
 
 type LinkDomain {
   id: ID!
@@ -1089,8 +1257,6 @@ type UnhealthyLinkDomain {
   healthyAgainAt: Date
 }
 
-
-
 type AssignmentRequest {
   id: ID!
   amount: Int!
@@ -1100,8 +1266,6 @@ type AssignmentRequest {
   user: User!
   status: String!
 }
-
-
 
 input ConversationFilter {
   assignmentsFilter: AssignmentsFilter
@@ -1120,8 +1284,6 @@ type PaginatedConversations {
   pageInfo: PageInfo
 }
 
-
-
 type Tag {
   id: ID!
   title: String!
@@ -1137,7 +1299,10 @@ type Tag {
   createdAt: Date!
 
   contacts(campaignId: String): [CampaignContact]!
-  externalSyncConfigurations(after: Cursor, first: Int): ExternalSyncTagConfigPage!
+  externalSyncConfigurations(
+    after: Cursor
+    first: Int
+  ): ExternalSyncTagConfigPage!
 }
 
 input TagInput {
@@ -1157,8 +1322,6 @@ input TagsFilter {
   escalatedConvosOnly: Boolean
   specificTagIds: [String]
 }
-
-
 
 type Team {
   id: ID!
@@ -1190,8 +1353,6 @@ input TeamInput {
   maxRequestCount: Int
   escalationTagIds: [String!]
 }
-
-
 
 type TrollAlarm {
   id: ID!
@@ -1230,8 +1391,6 @@ type TrollTrigger {
 type TrollAlarmCount {
   totalCount: Int!
 }
-
-
 
 enum ExternalSystemType {
   VAN
@@ -1276,8 +1435,16 @@ type ExternalSystem {
   syncedAt: Date
   operationMode: VanOperationMode!
   lists(after: Cursor, first: Int): ExternalListPage!
-  surveyQuestions(filter: ExternalSurveyQuestionFilter, after: Cursor, first: Int): ExternalSurveyQuestionPage!
-  activistCodes(filter: ExternalActivistCodeFilter, after: Cursor, first: Int): ExternalActivistCodePage!
+  surveyQuestions(
+    filter: ExternalSurveyQuestionFilter
+    after: Cursor
+    first: Int
+  ): ExternalSurveyQuestionPage!
+  activistCodes(
+    filter: ExternalActivistCodeFilter
+    after: Cursor
+    first: Int
+  ): ExternalActivistCodePage!
   resultCodes(after: Cursor, first: Int): ExternalResultCodePage!
   optOutSyncConfig: ExternalResultCodeTarget
 }
@@ -1291,8 +1458,6 @@ type ExternalSystemPage {
   edges: [ExternalSystemEdge!]!
   pageInfo: RelayPageInfo!
 }
-
-
 
 type ExternalList {
   systemId: String!
@@ -1315,8 +1480,6 @@ type ExternalListPage {
   pageInfo: RelayPageInfo!
 }
 
-
-
 type ExternalSurveyQuestion {
   id: String!
   systemId: String!
@@ -1330,7 +1493,10 @@ type ExternalSurveyQuestion {
   status: ExternalDataCollectionStatus!
   createdAt: Date!
   updatedAt: Date!
-  responseOptions(after: Cursor, first: Int): ExternalSurveyQuestionResponseOptionPage!
+  responseOptions(
+    after: Cursor
+    first: Int
+  ): ExternalSurveyQuestionResponseOptionPage!
 }
 
 type ExternalSurveyQuestionEdge {
@@ -1342,8 +1508,6 @@ type ExternalSurveyQuestionPage {
   edges: [ExternalSurveyQuestionEdge!]!
   pageInfo: RelayPageInfo!
 }
-
-
 
 type ExternalSurveyQuestionResponseOption {
   id: String!
@@ -1365,8 +1529,6 @@ type ExternalSurveyQuestionResponseOptionPage {
   edges: [ExternalSurveyQuestionResponseOptionEdge!]!
   pageInfo: RelayPageInfo!
 }
-
-
 
 type ExternalActivistCode {
   id: String!
@@ -1393,8 +1555,6 @@ type ExternalActivistCodePage {
   pageInfo: RelayPageInfo!
 }
 
-
-
 type ExternalResultCode {
   id: String!
   systemId: String!
@@ -1416,8 +1576,6 @@ type ExternalResultCodePage {
   pageInfo: RelayPageInfo!
 }
 
-
-
 type ExternalResultCodeTarget {
   id: String!
   resultCode: ExternalResultCode!
@@ -1433,7 +1591,10 @@ type ExternalSurveyQuestionResponseOptionTarget {
   responseOption: ExternalSurveyQuestionResponseOption!
 }
 
-union ExternalSyncConfigTarget = ExternalResultCodeTarget | ExternalActivistCodeTarget | ExternalSurveyQuestionResponseOptionTarget
+union ExternalSyncConfigTarget =
+    ExternalResultCodeTarget
+  | ExternalActivistCodeTarget
+  | ExternalSurveyQuestionResponseOptionTarget
 
 type ExternalSyncConfigTargetEdge {
   cursor: Cursor!

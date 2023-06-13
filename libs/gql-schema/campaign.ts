@@ -124,6 +124,7 @@ export const schema = `
     messagingServiceSid: String
     autosendLimit: Int
     columnMapping: [CsvColumnMapping!]
+    messagingService: MessagingService
   }
 
   type CampaignEdge {
