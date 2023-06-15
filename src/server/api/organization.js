@@ -460,25 +460,6 @@ export const resolvers = {
         primaryColumn: "messaging_service_sid"
       });
     },
-    messagingServicesCount: async (organization, { active }, { user }) => {
-      const organizationId = parseInt(organization.id, 10);
-      try {
-        await accessRequired(user, organizationId, UserRoleType.ADMIN, true);
-      } catch {
-        return null;
-      }
-
-      let query = r
-        .reader("messaging_service")
-        .where({ organization_id: organizationId });
-
-      if (active) {
-        query = query.where({ active });
-      }
-
-      const count = await r.getCount(query);
-      return count;
-    },
     campaignGroups: async (organization, { after, first }, { user }) => {
       const organizationId = parseInt(organization.id, 10);
       await accessRequired(user, organizationId, UserRoleType.ADMIN);
