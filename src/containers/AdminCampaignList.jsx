@@ -311,7 +311,7 @@ class AdminCampaignList extends React.Component {
 
         {isAdmin ? (
           <SpeedDial
-            ariaLabel="SpeedDial example"
+            ariaLabel="Open create campaign actions"
             style={theme.components.floatingButton}
             icon={<SpeedDialIcon />}
             onClick={this.handleClickSpeedDial}
@@ -321,12 +321,12 @@ class AdminCampaignList extends React.Component {
           >
             <SpeedDialAction
               icon={<CreateIcon />}
-              tooltipTitle="Create Blank"
+              tooltipTitle="Create Blank Campaign"
               onClick={this.handleClickNewButton}
             />
             <SpeedDialAction
               icon={<FileCopyIcon />}
-              tooltipTitle="Create from Template"
+              tooltipTitle="Create Campaign from Template"
               onClick={() => this.setState({ createFromTemplateOpen: true })}
             />
           </SpeedDial>
