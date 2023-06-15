@@ -799,7 +799,7 @@ export const resolvers = {
     },
     campaignGroups: async (campaign, { after, first }, { user }) => {
       const organizationId = parseInt(campaign.organization_id, 10);
-      await accessRequired(user, organizationId, "ADMIN");
+      await accessRequired(user, organizationId, UserRoleType.ADMIN);
 
       const query = r
         .reader("campaign_group")
@@ -856,7 +856,7 @@ export const resolvers = {
       }
 
       try {
-        await accessRequired(user, orgId, "ADMIN", true);
+        await accessRequired(user, orgId, UserRoleType.ADMIN, true);
       } catch {
         return null;
       }
