@@ -59,7 +59,11 @@ query getOrganizationData($organizationId: String!) {
         createdAt
       }
     }
-    messagingServicesCount
+    messagingServices {
+      pageInfo {
+        totalCount
+      }
+    }
   }
 }
 

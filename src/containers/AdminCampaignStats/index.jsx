@@ -266,7 +266,7 @@ class AdminCampaignStats extends React.Component {
       msgServiceName = messagingService?.id;
     }
     const showMessagingServiceName =
-      organization.messagingServicesCount > 1 &&
+      organization.messagingServices.pageInfo.totalCount > 1 &&
       campaign.isStarted &&
       msgServiceName;
 
