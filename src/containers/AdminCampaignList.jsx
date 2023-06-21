@@ -1,10 +1,14 @@
 import { gql } from "@apollo/client";
+import { withStyles } from "@material-ui/core";
+import Box from "@material-ui/core/Box";
 import Button from "@material-ui/core/Button";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import Snackbar from "@material-ui/core/Snackbar";
+import Typography from "@material-ui/core/Typography";
+import ClearIcon from "@material-ui/icons/Clear";
 import CreateIcon from "@material-ui/icons/Create";
 import FileCopyIcon from "@material-ui/icons/FileCopyOutlined";
 import MuiAlert from "@material-ui/lab/Alert";
@@ -36,27 +40,54 @@ const styles = {
   }
 };
 
+const AdminCampaignListSpeedDialAction = withStyles(() => ({
+  staticTooltipLabel: {
+    display: "inline-block",
+    width: "max-content"
+  }
+}))(SpeedDialAction);
+
+const AdminCampaignListSpeedDial = withStyles(() => ({
+  root: {
+    "align-items": "flex-end"
+  }
+}))(SpeedDial);
+
+const AdminCampaignListSpeedDialIcon = withStyles(() => ({
+  root: {
+    display: "inline-box",
+    position: "relative",
+    width: "100%"
+  },
+  openIcon: {
+    width: "100%"
+  }
+}))(SpeedDialIcon);
+
 // The campaign list uses infinite scrolling now so we fix the page size
 const DEFAULT_PAGE_SIZE = 10;
 
 class AdminCampaignList extends React.Component {
-  state = {
-    speedDialOpen: false,
-    createFromTemplateOpen: false,
-    // created from template state
-    showCreatedFromTemplateSnackbar: false,
-    createdFromTemplateIds: [],
-    createdFromTemplateTitle: "",
-    // end created from template state
-    isCreating: false,
-    campaignsFilter: {
-      isArchived: false
-    },
-    releasingInProgress: false,
-    releasingAllReplies: false,
-    releaseAllRepliesError: undefined,
-    releaseAllRepliesResult: undefined
-  };
+  constructor(props) {
+    super(props);
+    this.state = {
+      speedDialOpen: false,
+      createFromTemplateOpen: false,
+      // created from template state
+      showCreatedFromTemplateSnackbar: false,
+      createdFromTemplateIds: [],
+      createdFromTemplateTitle: "",
+      // end created from template state
+      isCreating: false,
+      campaignsFilter: {
+        isArchived: false
+      },
+      releasingInProgress: false,
+      releasingAllReplies: false,
+      releaseAllRepliesError: undefined,
+      releaseAllRepliesResult: undefined
+    };
+  }
 
   handleClickNewButton = async () => {
     const { history, match } = this.props;
@@ -133,6 +164,36 @@ class AdminCampaignList extends React.Component {
 
   startReleasingAllReplies = () => {
     this.setState({ releasingAllReplies: true });
+  };
+
+  handleOnCreateClickFromTemplate = () => {
+    this.setState({
+      createFromTemplateOpen: true,
+      speedDialOpen: false
+    });
+  };
+
+  handleSpeedDialOnKeyDown = (event) => {
+    /* "toggle", "blur", "mouseLeave", "escapeKeyDown" are the possible close events,
+      so we're handling escapeKeyDown here * */
+    if (event.key === "Escape") {
+      this.setState({ speedDialOpen: false });
+    }
+  };
+
+  handleSpeedDialOnFocus = () => {
+    this.setState({ speedDialOpen: true });
+  };
+
+  handleSpeedDialOnBlur = () => {
+    this.setState({ speedDialOpen: false });
+  };
+
+  /**
+   * We listen to mouse down because we don't close the speed dial menu right after opening it in the focus event
+   */
+  handleSpeedDialOnMouseDown = () => {
+    this.setState({ speedDialOpen: !this.state.speedDialOpen });
   };
 
   releaseAllReplies = () => {
@@ -269,7 +330,7 @@ class AdminCampaignList extends React.Component {
               {releasingInProgress
                 ? []
                 : doneReleasingReplies
-                ? [
+                  ? [
                     <Button
                       key="done"
                       variant="contained"
@@ -278,7 +339,7 @@ class AdminCampaignList extends React.Component {
                       Done
                     </Button>
                   ]
-                : [
+                  : [
                     <Button
                       key="cancel"
                       variant="contained"
@@ -310,26 +371,61 @@ class AdminCampaignList extends React.Component {
         )}
 
         {isAdmin ? (
-          <SpeedDial
+          <AdminCampaignListSpeedDial
+            id="adminCampaignListSpeedDial"
             ariaLabel="Open create campaign actions"
             style={theme.components.floatingButton}
-            icon={<SpeedDialIcon />}
-            onClick={this.handleClickSpeedDial}
-            onOpen={() => this.setState({ speedDialOpen: true })}
-            open={speedDialOpen}
+            onFocus={this.handleSpeedDialOnFocus}
+            onMouseDown={this.handleSpeedDialOnMouseDown}
+            onBlur={this.handleSpeedDialOnBlur}
+            onKeyDown={this.handleSpeedDialOnKeyDown}
+            open={this.state.speedDialOpen}
             direction="up"
+            FabProps={{ variant: "extended" }}
+            icon={
+              <AdminCampaignListSpeedDialIcon
+                icon={
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignContent: "center",
+                      justifyContent: "center"
+                    }}
+                  >
+                    <SpeedDialIcon />
+                    <Typography variant="button">
+                      {" "}
+                      Create a campaign{" "}
+                    </Typography>
+                  </Box>
+                }
+                openIcon={
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignContent: "center",
+                      justifyContent: "center"
+                    }}
+                  >
+                    <ClearIcon />
+                  </Box>
+                }
+              />
+            }
           >
-            <SpeedDialAction
+            <AdminCampaignListSpeedDialAction
               icon={<CreateIcon />}
-              tooltipTitle="Create Blank Campaign"
+              tooltipOpen
+              tooltipTitle="Create new campaign"
               onClick={this.handleClickNewButton}
             />
-            <SpeedDialAction
+            <AdminCampaignListSpeedDialAction
               icon={<FileCopyIcon />}
-              tooltipTitle="Create Campaign from Template"
-              onClick={() => this.setState({ createFromTemplateOpen: true })}
+              tooltipOpen
+              tooltipTitle="Create campaign from template"
+              onClick={this.handleOnCreateClickFromTemplate}
             />
-          </SpeedDial>
+          </AdminCampaignListSpeedDial>
         ) : null}
         <CreateCampaignFromTemplateDialog
           organizationId={organizationId}
