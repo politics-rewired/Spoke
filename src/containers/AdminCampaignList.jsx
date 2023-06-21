@@ -372,7 +372,6 @@ class AdminCampaignList extends React.Component {
 
         {isAdmin ? (
           <AdminCampaignListSpeedDial
-            id="adminCampaignListSpeedDial"
             ariaLabel="Open create campaign actions"
             style={theme.components.floatingButton}
             onFocus={this.handleSpeedDialOnFocus}
