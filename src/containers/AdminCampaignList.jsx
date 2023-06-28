@@ -149,11 +149,16 @@ class AdminCampaignList extends React.Component {
     const {
       campaignsFilter,
       releasingAllReplies,
-      releasingInProgress
+      releasingInProgress,
+      releaseAllRepliesResult,
+      releaseAllRepliesError,
+      createFromTemplateOpen,
+      speedDialOpen,
+      isCreating
     } = this.state;
 
     const doneReleasingReplies =
-      this.state.releaseAllRepliesResult || this.state.releaseAllRepliesError;
+      releaseAllRepliesResult || releaseAllRepliesError;
 
     const { organizationId } = this.props.match.params;
     const { isAdmin } = this.props;
@@ -175,15 +180,12 @@ class AdminCampaignList extends React.Component {
             <DialogContent>
               {releasingInProgress ? (
                 <LoadingIndicator />
-              ) : this.state.releaseAllRepliesError ? (
+              ) : releaseAllRepliesError ? (
+                <span>Error: {JSON.stringify(releaseAllRepliesError)}</span>
+              ) : releaseAllRepliesResult ? (
                 <span>
-                  Error: {JSON.stringify(this.state.releaseAllRepliesError)}
-                </span>
-              ) : this.state.releaseAllRepliesResult ? (
-                <span>
-                  Released {this.state.releaseAllRepliesResult.contactCount}{" "}
-                  replies on {this.state.releaseAllRepliesResult.campaignCount}{" "}
-                  campaigns
+                  Released {releaseAllRepliesResult.contactCount} replies on{" "}
+                  {releaseAllRepliesResult.campaignCount} campaigns
                 </span>
               ) : !doneReleasingReplies ? (
                 <div>
@@ -258,7 +260,7 @@ class AdminCampaignList extends React.Component {
             </DialogActions>
           </Dialog>
         )}
-        {this.state.isCreating ? (
+        {isCreating ? (
           <LoadingIndicator />
         ) : (
           <CampaignList
@@ -276,7 +278,7 @@ class AdminCampaignList extends React.Component {
             icon={<SpeedDialIcon />}
             onClick={this.handleClickSpeedDial}
             onOpen={() => this.setState({ speedDialOpen: true })}
-            open={this.state.speedDialOpen}
+            open={speedDialOpen}
             direction="up"
           >
             <SpeedDialAction
@@ -293,7 +295,7 @@ class AdminCampaignList extends React.Component {
         ) : null}
         <CreateCampaignFromTemplateDialog
           organizationId={organizationId}
-          open={this.state.createFromTemplateOpen}
+          open={createFromTemplateOpen}
           onClose={() => this.setState({ createFromTemplateOpen: false })}
         />
       </div>
