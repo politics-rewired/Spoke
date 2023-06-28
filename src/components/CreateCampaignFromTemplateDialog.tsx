@@ -1,3 +1,4 @@
+import type { MutationResult } from "@apollo/client/react/types/types";
 import Button from "@material-ui/core/Button";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
@@ -6,7 +7,10 @@ import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import TextField from "@material-ui/core/TextField";
 import Autocomplete from "@material-ui/lab/Autocomplete";
-import type { TemplateCampaignFragment } from "@spoke/spoke-codegen";
+import type {
+  CreateCampaignFromTemplateMutation,
+  TemplateCampaignFragment
+} from "@spoke/spoke-codegen";
 import {
   GetAdminCampaignsDocument,
   useCreateCampaignFromTemplateMutation,
@@ -17,6 +21,10 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 export interface CreateCampaignFromTemplateDialogProps {
   organizationId: string;
   open: boolean;
+  onCreateTemplateCompleted: (
+    data: MutationResult<CreateCampaignFromTemplateMutation>["data"],
+    selectedTemplateTitle?: string
+  ) => void;
   onClose?: () => Promise<void> | void;
   defaultTemplate?: TemplateCampaignFragment;
 }
@@ -38,7 +46,9 @@ export const CreateCampaignFromTemplateDialog: React.FC<CreateCampaignFromTempla
     createFromTemplate,
     { loading: working }
   ] = useCreateCampaignFromTemplateMutation({
-    refetchQueries: [GetAdminCampaignsDocument]
+    refetchQueries: [GetAdminCampaignsDocument],
+    onCompleted: (onCompletedData) =>
+      props.onCreateTemplateCompleted(onCompletedData, selectedTemplate?.title)
   });
 
   // Reset state when dialog is closed
