@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [6.4.0-rc.0](https://github.com/politics-rewired/spoke/compare/v6.3.3...v6.4.0-rc.0) (2023-06-28)
+
+
+### Features
+
+* use new API to check if organization has a 10dlc service ([#1628](https://github.com/politics-rewired/spoke/issues/1628)) ([687be34](https://github.com/politics-rewired/spoke/commit/687be34f6c386472adfb168d80d7f692c7c40ed9))
+
+
+### Backend Changes
+
+* add july copy updates ([#1620](https://github.com/politics-rewired/spoke/issues/1620)) ([bc5d7eb](https://github.com/politics-rewired/spoke/commit/bc5d7ebcc8701c33347def434a497ae06d3aeaf4))
+* **people:** update remove users warning ([#1605](https://github.com/politics-rewired/spoke/issues/1605)) ([7a59705](https://github.com/politics-rewired/spoke/commit/7a59705ed853bbf58665a2fb4125e952e523fa79))
+* clarify shutdown email copy ([#1624](https://github.com/politics-rewired/spoke/issues/1624)) ([5c45c3e](https://github.com/politics-rewired/spoke/commit/5c45c3e97eb6f02778834e28f359666626c1d6f1))
+
 ### [6.3.3](https://github.com/politics-rewired/spoke/compare/v6.3.2...v6.3.3) (2023-06-13)
 
 
