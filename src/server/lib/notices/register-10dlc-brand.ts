@@ -100,9 +100,9 @@ export const get10DlcBrandNotices: OrgLevelNotificationGetter = async (
     })
   );
 
-  console.log(registeredProfiles);
-
-  if (registeredProfiles.some((registered) => !registered)) {
+  // Check if there are no registered profiles
+  // .some(Boolean) will return true if any value in array is true
+  if (!registeredProfiles.some(Boolean)) {
     const { messaging_service_sid: messagingServiceSid } = ownedProfiles[0];
     return [
       {
