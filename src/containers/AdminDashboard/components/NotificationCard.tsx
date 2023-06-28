@@ -20,6 +20,7 @@ import { withOperations } from "../../hoc/with-operations";
 
 interface InnerProps {
   organizationId: string;
+  loading: boolean;
   data: {
     error?: any;
     notices: NoticePage;
@@ -64,6 +65,9 @@ const Register10DlcBrandNoticeCard: React.FC<Register10DlcBrandNotice> = (
 };
 
 export const NotificationCard: React.FC<InnerProps> = (props) => {
+  if (props.loading) {
+    return null;
+  }
   if (props.data.error || !props.data.notices) {
     return (
       <Card style={{ marginBottom: "2em" }}>
