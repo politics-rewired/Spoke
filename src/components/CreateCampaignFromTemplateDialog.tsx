@@ -12,7 +12,7 @@ import {
   useCreateCampaignFromTemplateMutation,
   useGetTemplateCampaignsQuery
 } from "@spoke/spoke-codegen";
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 
 export interface CreateCampaignFromTemplateDialogProps {
   organizationId: string;
@@ -24,11 +24,13 @@ export interface CreateCampaignFromTemplateDialogProps {
 export const CreateCampaignFromTemplateDialog: React.FC<CreateCampaignFromTemplateDialogProps> = (
   props
 ) => {
+  const defaultTemplate = props.defaultTemplate ?? null;
+  const defaultCopyCount = 1;
   const [
     selectedTemplate,
     setSelectedTemplate
-  ] = useState<TemplateCampaignFragment | null>(props.defaultTemplate ?? null);
-  const [quantity, setQuantity] = useState<number | null>(1);
+  ] = useState<TemplateCampaignFragment | null>(defaultTemplate);
+  const [quantity, setQuantity] = useState<number | null>(defaultCopyCount);
   const { data, error } = useGetTemplateCampaignsQuery({
     variables: { organizationId: props.organizationId }
   });
@@ -38,6 +40,14 @@ export const CreateCampaignFromTemplateDialog: React.FC<CreateCampaignFromTempla
   ] = useCreateCampaignFromTemplateMutation({
     refetchQueries: [GetAdminCampaignsDocument]
   });
+
+  // Reset state when dialog is closed
+  useEffect(() => {
+    if (!props.open) {
+      setSelectedTemplate(defaultTemplate);
+      setQuantity(defaultCopyCount);
+    }
+  }, [props.open]);
 
   const templates =
     data?.organization?.templateCampaigns?.edges?.map(({ node }) => node) ?? [];
