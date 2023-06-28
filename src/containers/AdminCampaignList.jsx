@@ -4,8 +4,11 @@ import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogTitle from "@material-ui/core/DialogTitle";
+import Snackbar from "@material-ui/core/Snackbar";
 import CreateIcon from "@material-ui/icons/Create";
 import FileCopyIcon from "@material-ui/icons/FileCopyOutlined";
+import MuiAlert from "@material-ui/lab/Alert";
+import AlertTitle from "@material-ui/lab/AlertTitle";
 import SpeedDial from "@material-ui/lab/SpeedDial";
 import SpeedDialAction from "@material-ui/lab/SpeedDialAction";
 import SpeedDialIcon from "@material-ui/lab/SpeedDialIcon";
@@ -40,6 +43,11 @@ class AdminCampaignList extends React.Component {
   state = {
     speedDialOpen: false,
     createFromTemplateOpen: false,
+    // created from template state
+    showCreatedFromTemplateSnackbar: false,
+    createdFromTemplateIds: [],
+    createdFromTemplateTitle: null,
+    // end created from template state
     isCreating: false,
     campaignsFilter: {
       isArchived: false
@@ -82,8 +90,21 @@ class AdminCampaignList extends React.Component {
     });
   };
 
-  startReleasingAllReplies = () => {
-    this.setState({ releasingAllReplies: true });
+  handleClickSpeedDial = () => {
+    const { speedDialOpen } = this.state;
+    this.setState({ speedDialOpen: !speedDialOpen });
+  };
+
+  handleCreatedFromTemplateSnackbarClose = (_event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+
+    this.setState({
+      showCreatedFromTemplateSnackbar: false,
+      createdFromTemplateIds: [],
+      createdFromTemplateTitle: null
+    });
   };
 
   closeReleasingAllReplies = () => {
@@ -95,9 +116,18 @@ class AdminCampaignList extends React.Component {
     });
   };
 
-  handleClickSpeedDial = () => {
-    const { speedDialOpen } = this.state;
-    this.setState({ speedDialOpen: !speedDialOpen });
+  onCreateTemplateCompleted = (data, selectedTemplateTitle) => {
+    this.setState({
+      showCreatedFromTemplateSnackbar: true,
+      createdFromTemplateIds: (data.copyCampaigns ?? []).map(
+        (campaign) => campaign.id
+      ),
+      createdFromTemplateTitle: selectedTemplateTitle ?? null
+    });
+  };
+
+  startReleasingAllReplies = () => {
+    this.setState({ releasingAllReplies: true });
   };
 
   releaseAllReplies = () => {
@@ -153,6 +183,9 @@ class AdminCampaignList extends React.Component {
       releaseAllRepliesResult,
       releaseAllRepliesError,
       createFromTemplateOpen,
+      createdFromTemplateIds,
+      createdFromTemplateTitle,
+      showCreatedFromTemplateSnackbar,
       speedDialOpen,
       isCreating
     } = this.state;
@@ -297,7 +330,45 @@ class AdminCampaignList extends React.Component {
           organizationId={organizationId}
           open={createFromTemplateOpen}
           onClose={() => this.setState({ createFromTemplateOpen: false })}
+          onCreateTemplateCompleted={this.onCreateTemplateCompleted}
         />
+        <Snackbar
+          open={showCreatedFromTemplateSnackbar}
+          onClose={this.handleCreatedFromTemplateSnackbarClose}
+          anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+        >
+          <MuiAlert
+            elevation={6}
+            variant="filled"
+            severity="success"
+            onClose={this.handleCreatedFromTemplateSnackbarClose}
+          >
+            <AlertTitle>
+              Campaign{createdFromTemplateIds.length > 1 ? "s" : ""}{" "}
+              successfully created from template{" "}
+              {createdFromTemplateTitle ? `"${createdFromTemplateTitle}"` : ""}
+            </AlertTitle>
+            <p>
+              Created campaign
+              {createdFromTemplateIds.length > 1 ? "s" : ""}:{" "}
+              {createdFromTemplateIds.map((id, i) => {
+                return (
+                  <span key={id}>
+                    {i > 0 && ", "}
+                    <a
+                      key={id}
+                      target="_blank"
+                      href={`${window.BASE_URL}/admin/${organizationId}/campaigns/${id}`}
+                      rel="noreferrer"
+                    >
+                      Campaign {id}
+                    </a>
+                  </span>
+                );
+              })}
+            </p>
+          </MuiAlert>
+        </Snackbar>
       </div>
     );
   }
