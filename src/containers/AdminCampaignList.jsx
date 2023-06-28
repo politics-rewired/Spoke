@@ -46,7 +46,7 @@ class AdminCampaignList extends React.Component {
     // created from template state
     showCreatedFromTemplateSnackbar: false,
     createdFromTemplateIds: [],
-    createdFromTemplateTitle: null,
+    createdFromTemplateTitle: "",
     // end created from template state
     isCreating: false,
     campaignsFilter: {
@@ -122,7 +122,7 @@ class AdminCampaignList extends React.Component {
       createdFromTemplateIds: (data.copyCampaigns ?? []).map(
         (campaign) => campaign.id
       ),
-      createdFromTemplateTitle: selectedTemplateTitle ?? null
+      createdFromTemplateTitle: selectedTemplateTitle ?? ""
     });
   };
 
@@ -345,8 +345,7 @@ class AdminCampaignList extends React.Component {
           >
             <AlertTitle>
               Campaign{createdFromTemplateIds.length > 1 ? "s" : ""}{" "}
-              successfully created from template{" "}
-              {createdFromTemplateTitle ? `"${createdFromTemplateTitle}"` : ""}
+              successfully created from template {createdFromTemplateTitle}
             </AlertTitle>
             <p>
               Created campaign
