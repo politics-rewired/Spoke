@@ -2,6 +2,8 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [6.4.0](https://github.com/politics-rewired/spoke/compare/v6.4.0-rc.0...v6.4.0) (2023-07-04)
+
 ## [6.4.0-rc.0](https://github.com/politics-rewired/spoke/compare/v6.3.3...v6.4.0-rc.0) (2023-06-28)
 
 
