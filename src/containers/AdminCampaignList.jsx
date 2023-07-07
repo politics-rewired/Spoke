@@ -116,14 +116,16 @@ class AdminCampaignList extends React.Component {
     });
   };
 
-  onCreateTemplateCompleted = (data, selectedTemplateTitle) => {
+  handleCreateTemplateCompleted = (copyCampaigns, selectedTemplateTitle) => {
     this.setState({
       showCreatedFromTemplateSnackbar: true,
-      createdFromTemplateIds: (data.copyCampaigns ?? []).map(
-        (campaign) => campaign.id
-      ),
-      createdFromTemplateTitle: selectedTemplateTitle ?? ""
+      createdFromTemplateIds: copyCampaigns.map((campaign) => campaign.id),
+      createdFromTemplateTitle: selectedTemplateTitle
     });
+  };
+
+  handleCreateTemplateDialogClose = () => {
+    this.setState({ createFromTemplateOpen: false });
   };
 
   startReleasingAllReplies = () => {
@@ -329,8 +331,8 @@ class AdminCampaignList extends React.Component {
         <CreateCampaignFromTemplateDialog
           organizationId={organizationId}
           open={createFromTemplateOpen}
-          onClose={() => this.setState({ createFromTemplateOpen: false })}
-          onCreateTemplateCompleted={this.onCreateTemplateCompleted}
+          onClose={this.handleCreateTemplateDialogClose}
+          onCreateTemplateCompleted={this.handleCreateTemplateCompleted}
         />
         <Snackbar
           open={showCreatedFromTemplateSnackbar}

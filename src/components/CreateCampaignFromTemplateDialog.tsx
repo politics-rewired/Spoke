@@ -22,8 +22,10 @@ export interface CreateCampaignFromTemplateDialogProps {
   organizationId: string;
   open: boolean;
   onCreateTemplateCompleted: (
-    data: MutationResult<CreateCampaignFromTemplateMutation>["data"],
-    selectedTemplateTitle?: string
+    copiedCampaigns: NonNullable<
+      MutationResult<CreateCampaignFromTemplateMutation>["data"]
+    >["copyCampaigns"],
+    selectedTemplateTitle: string
   ) => void;
   onClose?: () => Promise<void> | void;
   defaultTemplate?: TemplateCampaignFragment;
@@ -48,7 +50,10 @@ export const CreateCampaignFromTemplateDialog: React.FC<CreateCampaignFromTempla
   ] = useCreateCampaignFromTemplateMutation({
     refetchQueries: [GetAdminCampaignsDocument],
     onCompleted: (onCompletedData) =>
-      props.onCreateTemplateCompleted(onCompletedData, selectedTemplate?.title)
+      props.onCreateTemplateCompleted(
+        onCompletedData?.copyCampaigns ?? [],
+        selectedTemplate?.title ?? ""
+      )
   });
 
   // Reset state when dialog is closed
