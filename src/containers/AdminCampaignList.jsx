@@ -117,6 +117,9 @@ class AdminCampaignList extends React.Component {
   };
 
   handleCreateTemplateCompleted = (copyCampaigns, selectedTemplateTitle) => {
+    if (copyCampaigns.length === 0) {
+      return;
+    }
     this.setState({
       showCreatedFromTemplateSnackbar: true,
       createdFromTemplateIds: copyCampaigns.map((campaign) => campaign.id),
@@ -347,7 +350,7 @@ class AdminCampaignList extends React.Component {
           >
             <AlertTitle>
               Campaign{createdFromTemplateIds.length > 1 ? "s" : ""}{" "}
-              successfully created from template {createdFromTemplateTitle}
+              successfully created from template "{createdFromTemplateTitle}"
             </AlertTitle>
             <p>
               Created campaign
