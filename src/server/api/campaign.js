@@ -489,7 +489,8 @@ export const resolvers = {
       "createdAt",
       "landlinesFiltered",
       "messagingServiceSid",
-      "autosendLimit"
+      "autosendLimit",
+      "columnMapping"
     ]),
     isApproved: (campaign) =>
       isNil(campaign.is_approved) ? false : campaign.is_approved,

@@ -68,6 +68,11 @@ export const schema = `
     INCLUDES_NOT_ACTIVE_TARGETS
   }
 
+  type CsvColumnMapping {
+    column: String!
+    remap: String!
+  }
+
   type Campaign {
     id: ID!
     organization: Organization!
@@ -118,6 +123,7 @@ export const schema = `
     autosendStatus: String!
     messagingServiceSid: String
     autosendLimit: Int
+    columnMapping: [CsvColumnMapping!]
   }
 
   type CampaignEdge {
@@ -156,6 +162,11 @@ export const schema = `
     ignoreAfterDate: Date!
   }
 
+  input CsvColumnMappingInput {
+    column: String!
+    remap: String!
+  }
+
   input CampaignInput {
     title: String
     description: String
@@ -186,6 +197,7 @@ export const schema = `
     repliesStaleAfter: Int
     messagingServiceSid: String
     autosendLimit: Int
+    columnMapping: [CsvColumnMappingInput!]
   }
 `;
 export default schema;

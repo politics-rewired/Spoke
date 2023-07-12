@@ -434,7 +434,8 @@ export const editCampaign = async (
     repliesStaleAfter,
     timezone,
     externalSystemId,
-    messagingServiceSid
+    messagingServiceSid,
+    columnMapping
   } = campaign;
 
   const organizationId = origCampaignRecord.organization_id;
@@ -485,9 +486,26 @@ export const editCampaign = async (
     Object.prototype.hasOwnProperty.call(campaign, "contactsFile") &&
     campaign.contactsFile
   ) {
-    const processedContacts = await processContactsFile(campaign.contactsFile);
+    const processedContacts = await processContactsFile({
+      file: campaign.contactsFile,
+      columnMapping
+    });
     campaign.contacts = processedContacts.contacts;
     validationStats = processedContacts.validationStats;
+
+    await r.knex.raw(
+      `
+        ? ON CONFLICT (campaign_id)
+        DO UPDATE SET column_mapping = EXCLUDED.column_mapping, updated_at = CURRENT_TIMESTAMP 
+        RETURNING *;
+      `,
+      [
+        r.knex("campaign_contact_upload").insert({
+          campaign_id: id,
+          column_mapping: JSON.stringify(columnMapping)
+        })
+      ]
+    );
   }
 
   if (
