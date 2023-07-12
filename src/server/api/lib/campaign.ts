@@ -756,8 +756,13 @@ export const editCampaign = async (
 
     // Ignore the mocked `id` automatically created on the input by GraphQL
     const convertedResponses = campaign.cannedResponses.map(
-      ({ id: _cannedResponseId, ...response }: { id: number } | any) => ({
+      ({
+        id: _cannedResponseId,
+        displayOrder,
+        ...response
+      }: { id: number } | any) => ({
         ...response,
+        display_order: displayOrder,
         campaign_id: id
       })
     );
