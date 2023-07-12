@@ -14,11 +14,33 @@ that goal. See [`HOWTO_migrate-from-moveon-main.md`](./docs/HOWTO_migrate-from-m
 
 ## Getting Started
 
-Prerequisites:
+### Prerequisites
 
-- Node (>= 16.14) -- See [How to Install Node](https://nodejs.dev/learn/how-to-install-nodejs)
-- Yarn (>= 1.19.1) -- See [Installing Yarn](https://classic.yarnpkg.com/en/docs/install)
-- Postgres (>= 11) -- See [install](https://postgresql.org/download) and [start](https://www.postgresql.org/docs/current/server-start.html) documentation
+Runtimes and package managers:
+
+- Node (^16.14)
+- Yarn (>= 1.19.1)
+
+External services:
+
+- Postgres (>= 11)
+  - [Install](https://postgresql.org/download) and [start](https://www.postgresql.org/docs/current/server-start.html) documentation
+
+### Setting up a development environment
+
+Install Node and Yarn. We recommend using the [asdf version manager](https://github.com/asdf-vm/asdf).
+
+```sh
+# Example using `asdf` (https://github.com/asdf-vm/asdf)
+asdf plugin add nodejs https://github.com/asdf-vm/asdf-nodejs.git
+asdf plugin add yarn https://github.com/twuni/asdf-yarn
+asdf install
+```
+
+You can also install the prereqs manually:
+
+- [Node install documentation](https://nodejs.dev/learn/how-to-install-nodejs)
+- [Yarn install documentation](https://classic.yarnpkg.com/en/docs/install)
 
 Clone the repo:
 
@@ -34,11 +56,16 @@ Install Node dependencies:
 yarn install
 ```
 
-Copy the example environment. The only change you may need to make is updating the database connection string.
+Copy the example environment. You will need to update the database connection
+string: it should contain the correct host, port, and username/password
+credentials to your development Postgres server.
 
 ```sh
 cp .env.example .env
 vi .env
+
+# in this case, the server is running at port 5432 (the default Postgres port)
+# DATABASE_URL=postgres://spoke:spoke@localhost:5432/spokedev
 ```
 
 Create the `spokedev` database (if it doesn't yet exist)
@@ -47,11 +74,17 @@ Create the `spokedev` database (if it doesn't yet exist)
 psql -c "create database spokedev;"
 ```
 
-Run the migrations
+Run the migrations:
 
 ```sh
 yarn migrate:worker
 yarn knex migrate:latest
+```
+
+Run codegen:
+
+```sh
+yarn codegen
 ```
 
 Run in development mode:
@@ -59,6 +92,14 @@ Run in development mode:
 ```sh
 yarn dev
 ```
+
+If you plan to build container images locally for use in production you may want to set the default architecture by adding the following to your shell config (e.g. `~/.bash_profile`):
+
+```sh
+export DOCKER_DEFAULT_PLATFORM=linux/amd64
+```
+
+or pass `--platform=linux/amd64` to all `docker buildx` commands.
 
 ### SMS
 

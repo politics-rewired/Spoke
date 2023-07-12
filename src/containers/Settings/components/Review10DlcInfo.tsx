@@ -6,6 +6,7 @@ import CardHeader from "@material-ui/core/CardHeader";
 import OpenInNew from "@material-ui/icons/OpenInNew";
 import React from "react";
 import { compose } from "recompose";
+import Registration10DLCWarningText from "src/components/Registration10DLCWarningText";
 
 import type { QueryMap } from "../../../network/types";
 import { loadData } from "../../hoc/with-operations";
@@ -42,25 +43,7 @@ const Review10DlcInfo: React.FC<InnerProps> = (props) => {
     <Card style={style}>
       <CardHeader title="10DLC Registration Information" />
       <CardContent>
-        <p>
-          You must provide details required for us to register a 10DLC brand on
-          your behalf by February 22nd, 2022! If you do not provide this
-          information by then, you may not be able to send messages starting on
-          March 1st, 2022 until 3-5 business days after you provide this
-          information.
-        </p>
-
-        <p>
-          To learn more about this change, please see our{" "}
-          <a
-            href="https://docs.spokerewired.com/article/124-10dlc"
-            target="_blank"
-            rel="noreferrer"
-          >
-            10DLC knowledge base article
-          </a>
-          .
-        </p>
+        <Registration10DLCWarningText />
       </CardContent>
       <CardActions disableSpacing>
         <Button

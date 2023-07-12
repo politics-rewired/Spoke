@@ -7,13 +7,13 @@ import React from "react";
 import { withRouter } from "react-router-dom";
 import { compose } from "recompose";
 
-import SuperAdminLogin from "../../components/SuperAdminLogin";
 import type { MutationMap, QueryMap } from "../../network/types";
 import { useSpokeTheme } from "../../styles/spoke-theme-context";
 import theme from "../../styles/theme";
 import type { MuiThemeProviderProps } from "../../styles/types";
 import { loadData } from "../hoc/with-operations";
 import OrganizationList from "./components/OrganizationList";
+import SuperAdminLogin from "./components/SuperAdminLogin";
 
 const styles = StyleSheet.create({
   container: {

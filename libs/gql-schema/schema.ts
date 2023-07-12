@@ -2,6 +2,7 @@ import { schema as assignmentSchema } from "./assignment";
 import { schema as assignmentRequestSchema } from "./assignment-request";
 import { schema as campaignSchema } from "./campaign";
 import { schema as campaignContactSchema } from "./campaign-contact";
+import { schema as campaignContactTagSchema } from "./campaign-contact-tag";
 import { schema as campaignGroupSchema } from "./campaign-group";
 import { schema as campaignVariableSchema } from "./campaign-variable";
 import { schema as cannedResponseSchema } from "./canned-response";
@@ -275,6 +276,8 @@ const rootSchema = `
     createInvite(invite:InviteInput!): Invite
     createCampaign(campaign:CampaignInput!): Campaign
     createTemplateCampaign(organizationId: String!): Campaign!
+    deleteTemplateCampaign(organizationId: String!, campaignId: String!): Boolean!
+    cloneTemplateCampaign(organizationId: String!, campaignId: String!): Campaign!
     editCampaign(id:String!, campaign:CampaignInput!): Campaign
     saveCampaignGroups(organizationId: String!, campaignGroups: [CampaignGroupInput!]!): [CampaignGroup!]!
     deleteCampaignGroup(organizationId: String!, campaignGroupId: String!): Boolean!
@@ -282,7 +285,7 @@ const rootSchema = `
     bulkUpdateScript(organizationId:String!, findAndReplace: BulkUpdateScriptInput!): [ScriptUpdateResult]
     deleteJob(campaignId:String!, id:String!): JobRequest
     copyCampaign(id: String!): Campaign
-    copyCampaigns(sourceCampaignId: String!, quantity: Int!): [Campaign!]!
+    copyCampaigns(sourceCampaignId: String!, quantity: Int!, targetOrgId: String): [Campaign!]!
     exportCampaign(options: CampaignExportInput!): JobRequest
     createCannedResponse(cannedResponse:CannedResponseInput!): CannedResponse
     createOrganization(name: String!, userId: String!, inviteId: String!): Organization
@@ -395,6 +398,7 @@ export const schema = [
   messagingServiceSchema,
   noticeSchema,
   campaignContactSchema,
+  campaignContactTagSchema,
   campaignGroupSchema,
   campaignVariableSchema,
   cannedResponseSchema,

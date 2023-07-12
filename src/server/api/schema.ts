@@ -6,6 +6,7 @@ import { resolvers as assignmentResolvers } from "./assignment";
 import { resolvers as assignmentRequestResolvers } from "./assignment-request";
 import { resolvers as campaignResolvers } from "./campaign";
 import { resolvers as campaignContactResolvers } from "./campaign-contact";
+import { resolvers as campaignContactTagResolvers } from "./campaign-contact-tag";
 import { resolvers as campaignGroupResolvers } from "./campaign-group";
 import { resolvers as campaignVariableResolvers } from "./campaign-variable";
 import { resolvers as cannedResponseResolvers } from "./canned-response";
@@ -54,6 +55,7 @@ export const resolvers = {
   ...campaignGroupResolvers,
   ...campaignVariableResolvers,
   ...campaignContactResolvers,
+  ...campaignContactTagResolvers,
   ...cannedResponseResolvers,
   ...questionResponseResolvers,
   ...inviteResolvers,

@@ -242,6 +242,8 @@ type RootMutation {
   createInvite(invite:InviteInput!): Invite
   createCampaign(campaign:CampaignInput!): Campaign
   createTemplateCampaign(organizationId: String!): Campaign!
+  deleteTemplateCampaign(organizationId: String!, campaignId: String!): Boolean!
+  cloneTemplateCampaign(organizationId: String!, campaignId: String!): Campaign!
   editCampaign(id:String!, campaign:CampaignInput!): Campaign
   saveCampaignGroups(organizationId: String!, campaignGroups: [CampaignGroupInput!]!): [CampaignGroup!]!
   deleteCampaignGroup(organizationId: String!, campaignGroupId: String!): Boolean!
@@ -249,7 +251,7 @@ type RootMutation {
   bulkUpdateScript(organizationId:String!, findAndReplace: BulkUpdateScriptInput!): [ScriptUpdateResult]
   deleteJob(campaignId:String!, id:String!): JobRequest
   copyCampaign(id: String!): Campaign
-  copyCampaigns(sourceCampaignId: String!, quantity: Int!): [Campaign!]!
+  copyCampaigns(sourceCampaignId: String!, quantity: Int!, targetOrgId: String): [Campaign!]!
   exportCampaign(options: CampaignExportInput!): JobRequest
   createCannedResponse(cannedResponse:CannedResponseInput!): CannedResponse
   createOrganization(name: String!, userId: String!, inviteId: String!): Organization
@@ -428,8 +430,8 @@ type Organization {
   unhealthyLinkDomains: [UnhealthyLinkDomain]!
   numbersApiKey: String
   settings: OrganizationSettings!
-  tagList: [Tag]
-  escalationTagList: [Tag]
+  tagList: [Tag!]!
+  escalationTagList: [Tag!]!
   teams: [Team]!
   externalSystems(after: Cursor, first: Int): ExternalSystemPage!
   messagingServices(after: Cursor, first: Int, active: Boolean): MessagingServicePage
@@ -623,6 +625,11 @@ enum ExternalSyncReadinessState {
   INCLUDES_NOT_ACTIVE_TARGETS
 }
 
+type CsvColumnMapping {
+  column: String!
+  remap: String!
+}
+
 type Campaign {
   id: ID!
   organization: Organization!
@@ -673,6 +680,7 @@ type Campaign {
   autosendStatus: String!
   messagingServiceSid: String
   autosendLimit: Int
+  columnMapping: [CsvColumnMapping!]
 }
 
 type CampaignEdge {
@@ -711,6 +719,11 @@ input TexterInput {
   ignoreAfterDate: Date!
 }
 
+input CsvColumnMappingInput {
+  column: String!
+  remap: String!
+}
+
 input CampaignInput {
   title: String
   description: String
@@ -741,6 +754,7 @@ input CampaignInput {
   repliesStaleAfter: Int
   messagingServiceSid: String
   autosendLimit: Int
+  columnMapping: [CsvColumnMappingInput!]
 }
 
 
@@ -899,8 +913,7 @@ type CampaignContact {
   messageStatus: String!
   assignmentId: String
   updatedAt: Date!
-
-  contactTags: [Tag]
+  tags: [CampaignContactTag!]!
 }
 
 input CampaignContactInput {
@@ -910,6 +923,16 @@ input CampaignContactInput {
   zip: String
   external_id: String
   customFields: String
+}
+
+
+
+type CampaignContactTag {
+  id: String!
+  tag: Tag!
+  tagger: User!
+  createdAt: String!
+  updatedAt: String!
 }
 
 
@@ -975,6 +998,7 @@ input CannedResponseInput {
   text: String
   campaignId: String
   userId: String
+  displayOrder: Int
 }
 
 type CannedResponse {
@@ -982,6 +1006,7 @@ type CannedResponse {
   title: String!
   text: String!
   isUserCreated: Boolean
+  displayOrder: Int!
 }
 
 

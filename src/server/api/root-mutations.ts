@@ -16,6 +16,7 @@ import { hasRole } from "../../lib/permissions";
 import { applyScript } from "../../lib/scripts";
 import { replaceAll } from "../../lib/utils";
 import logger from "../../logger";
+import type { SpokeRequestContext } from "../contexts/types";
 import pgPool from "../db";
 import { eventBus, EventType } from "../event-bus";
 import {
@@ -56,7 +57,12 @@ import {
   notifyOnTagConversation
 } from "./lib/alerts";
 import { getStepsToUpdate } from "./lib/bulk-script-editor";
-import { copyCampaign, editCampaign } from "./lib/campaign";
+import {
+  copyCampaign,
+  editCampaign,
+  markAutosendingPaused,
+  unqueueAutosending
+} from "./lib/campaign";
 import { saveNewIncomingMessage } from "./lib/message-sending";
 import { processNumbers } from "./lib/opt-out";
 import { sendMessage } from "./lib/send-message";
@@ -877,6 +883,35 @@ const rootMutations = {
       return templateCampaign;
     },
 
+    deleteTemplateCampaign: async (
+      _root: any,
+      { organizationId, campaignId }: Record<string, any>,
+      { user }: SpokeRequestContext
+    ) => {
+      await accessRequired(user, organizationId, "ADMIN");
+
+      await deleteCampaign(campaignId);
+
+      return true;
+    },
+
+    cloneTemplateCampaign: async (
+      _root: any,
+      { organizationId, campaignId }: Record<string, any>,
+      { user, db }: SpokeRequestContext
+    ) => {
+      await accessRequired(user, organizationId, "ADMIN");
+
+      const [result] = await copyCampaign({
+        db,
+        campaignId,
+        userId: parseInt(user.id, 10),
+        template: true
+      });
+
+      return result;
+    },
+
     copyCampaign: async (_root, { id }, { user, loaders, db }) => {
       const campaignId = parseInt(id, 10);
       const campaign = await loaders.campaign.load(campaignId);
@@ -898,7 +933,7 @@ const rootMutations = {
 
     copyCampaigns: async (
       _root,
-      { sourceCampaignId, quantity },
+      { sourceCampaignId, quantity, targetOrgId = null },
       { user, loaders, db }
     ) => {
       const campaignId = parseInt(sourceCampaignId, 10);
@@ -909,7 +944,8 @@ const rootMutations = {
         db,
         campaignId,
         userId: parseInt(user.id, 10),
-        quantity
+        quantity,
+        targetOrgId
       });
 
       const memoizer = await MemoizeHelper.getMemoizer();
@@ -1272,6 +1308,12 @@ const rootMutations = {
               service_type: service.service_type
             }))
           );
+        } else if (config.DEFAULT_SERVICE === "fakeservice") {
+          await trx("messaging_service").insert({
+            messaging_service_sid: `fakeservice${newOrganization.id}`,
+            organization_id: newOrganization.id,
+            service_type: "assemble-numbers"
+          });
         }
 
         return newOrganization;
@@ -1945,45 +1987,24 @@ const rootMutations = {
       return result;
     },
 
-    pauseAutosending: async (_ignore, { campaignId }, { user }) => {
+    pauseAutosending: async (
+      _ignore: any,
+      { campaignId }: { campaignId: string },
+      { user }: any
+    ) => {
       const id = parseInt(campaignId, 10);
 
       const campaign = await r
         .knex("campaign")
         .where({ id })
-        .first(["organization_id", "is_archived", "autosend_status"]);
+        .first(["id", "organization_id", "is_archived", "autosend_status"]);
 
       const organizationId = campaign.organization_id;
 
       await accessRequired(user, organizationId, "ADMIN", true);
 
-      let updatedCampaign;
-
-      if (campaign.autosend_status === "sending") {
-        const [updatedCampaignResult] = await r
-          .knex("campaign")
-          .update({ autosend_status: "paused" })
-          .where({ id })
-          .returning("*");
-
-        updatedCampaign = updatedCampaignResult;
-
-        await r.knex.raw(
-          `
-            select count(*)
-            from (
-              select graphile_worker.remove_job(key)
-              from graphile_worker.jobs
-              where task_identifier = 'retry-interaction-step'
-                and payload->>'campaignId' = ?
-            ) deleted_jobs
-          `,
-          [id]
-        );
-      }
-
-      const result = updatedCampaign || campaign;
-      return result;
+      await unqueueAutosending(campaign);
+      return markAutosendingPaused(campaign);
     },
 
     updateCampaignAutosendingLimit: async (
@@ -2887,18 +2908,22 @@ const rootMutations = {
 
             // Update team_escalation_tags
             if (team.escalationTagIds) {
-              await trx("team_escalation_tags")
-                .where({ team_id: teamToReturn.id })
-                .del();
-
               teamToReturn.escalationTags = await trx("team_escalation_tags")
-                .insert(
-                  team.escalationTagIds.map((tagId) => ({
-                    team_id: teamToReturn.id,
-                    tag_id: tagId
-                  }))
-                )
+                .where({ team_id: teamToReturn.id })
+                .del()
                 .returning("*");
+
+              // knex disallows empty array inserts
+              if (team.escalationTagIds.length !== 0) {
+                teamToReturn.escalationTags = await trx("team_escalation_tags")
+                  .insert(
+                    team.escalationTagIds.map((tagId) => ({
+                      team_id: teamToReturn.id,
+                      tag_id: tagId
+                    }))
+                  )
+                  .returning("*");
+              }
             }
 
             return teamToReturn;
@@ -3477,9 +3502,10 @@ const rootMutations = {
                 const switchboard = config.SWITCHBOARD_BASE_URL ?? "[default]";
 
                 const text = [
-                  "This is an automated org shutdown request triggered through the superadmin.",
+                  "This is an automated org shutdown request triggered by a superadmin.",
                   `Organization id: ${organizationId}, name: ${org.name}, from instance hosted at ${config.BASE_URL}.`,
-                  `Switchboard ${switchboard}, profiles:\n${messagingServiceSids}`
+                  `Switchboard ${switchboard}, profiles:\n${messagingServiceSids}`,
+                  "Note: This is NOT necessarily an instance shutdown request."
                 ].join("\n\n");
 
                 await sendEmail({

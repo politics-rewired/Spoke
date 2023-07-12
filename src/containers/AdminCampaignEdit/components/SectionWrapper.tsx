@@ -19,11 +19,11 @@ import isNil from "lodash/isNil";
 import React from "react";
 import { compose, withProps } from "recompose";
 
-import type { AuthzContextType } from "../../../components/AuthzProvider";
-import { withAuthzContext } from "../../../components/AuthzProvider";
 import { camelCase, dataTest } from "../../../lib/attributes";
 import assemblePalette from "../../../styles/assemble-palette";
 import type { MuiThemeProviderProps } from "../../../styles/types";
+import type { AuthzContextType } from "../../AuthzProvider";
+import { withAuthzContext } from "../../AuthzProvider";
 import { loadData } from "../../hoc/with-operations";
 import type { CampaignReadinessType } from "../types";
 

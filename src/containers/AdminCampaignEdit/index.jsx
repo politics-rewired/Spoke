@@ -23,11 +23,11 @@ import { Helmet } from "react-helmet";
 import { compose } from "recompose";
 
 import { withSpokeContext } from "../../client/spoke-context";
-import { withAuthzContext } from "../../components/AuthzProvider";
 import CampaignNavigation from "../../components/CampaignNavigation";
 import { dataTest } from "../../lib/attributes";
 import { DateTime } from "../../lib/datetime";
 import theme from "../../styles/theme";
+import { withAuthzContext } from "../AuthzProvider";
 import { loadData } from "../hoc/with-operations";
 import ApproveCampaignButton from "./components/ApproveCampaignButton";
 import { SectionWrapper } from "./components/SectionWrapper";
@@ -399,7 +399,8 @@ class AdminCampaignEdit extends React.Component {
           "customFields",
           "contactsFile",
           "contactSql",
-          "excludeCampaignIds"
+          "excludeCampaignIds",
+          "columnMapping"
         ],
         checkCompleted: () => this.state.campaignFormValues.contactsCount > 0,
         checkSaved: () => {

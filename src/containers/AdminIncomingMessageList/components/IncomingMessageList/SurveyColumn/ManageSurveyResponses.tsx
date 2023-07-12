@@ -222,7 +222,7 @@ const ManageSurveyResponsesWrapper: React.FC<WrapperProps> = (props) => {
   const { surveyQuestions, mutations, contact } = props;
   return (
     <div>
-      <h4>Survey Responses</h4>
+      <h2>Survey Responses</h2>
       {surveyQuestions.loading && <LoadingIndicator />}
       {surveyQuestions.errors && (
         <PrettyErrors errors={surveyQuestions.errors} />

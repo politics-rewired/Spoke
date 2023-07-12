@@ -6,15 +6,14 @@ import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
+import type { Organization, TeamInput } from "@spoke/spoke-codegen";
 import { Card, CardActions, CardHeader, CardText } from "material-ui/Card";
 import React, { useState } from "react";
 import type { match } from "react-router-dom";
 
-import type { Organization } from "../../api/organization";
-import type { TeamInput } from "../../api/team";
 import type { MutationMap, QueryMap } from "../../network/types";
 import { loadData } from "../hoc/with-operations";
-import AssignmentRow from "./AssignmentRow";
+import AssignmentRow from "./components/AssignmentRow";
 import type {
   TagWithTitle,
   TeamForAssignment,
@@ -47,7 +46,11 @@ interface InnerProps extends OuterProps {
 }
 
 const AdminAssignmentControl: React.FC<InnerProps> = (props) => {
-  const { className = "", containerStyle = {}, style = {} } = props;
+  const {
+    className = "",
+    containerStyle = {},
+    style = { padding: "15px" }
+  } = props;
   const [changes, setChanges] = useState<Record<string, TeamInputWithTags>>({});
   const [working, setWorking] = useState(false);
   const [error, setError] = useState<string | undefined>(undefined);

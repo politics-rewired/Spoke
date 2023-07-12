@@ -15,7 +15,7 @@ import { sleep } from "../../lib/utils";
 import { loadData } from "../hoc/with-operations";
 import AssignmentRequestTable, {
   RowWorkStatus
-} from "./AssignmentRequestTable";
+} from "./components/AssignmentRequestTable";
 
 class AdminAssignmentRequest extends Component {
   state = {

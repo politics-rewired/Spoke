@@ -5,6 +5,8 @@ import DialogContent from "@material-ui/core/DialogContent";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import React from "react";
 
+// dialogs stack on top of each other when all are open as:
+// opt out language warning > link warning > script editor
 const styles = {
   dialog: {
     zIndex: 10002
@@ -76,16 +78,19 @@ const DialogContentWrapper = (props: ContentProps) => {
   }
 };
 
-interface WarningProps {
+export interface WarningProps {
   open: boolean;
   warningContext: ScriptWarningContext;
   handleConfirm: () => void;
   handleClose: () => void;
 }
 
-const ScriptLinkWarningDialog = (props: WarningProps) => {
-  const { warningContext, handleClose, handleConfirm, open } = props;
-
+const ScriptLinkWarningDialog = ({
+  warningContext,
+  handleClose,
+  handleConfirm,
+  open
+}: WarningProps) => {
   const title =
     (warningContext === ScriptWarningContext.GenericLink && "Confirm Script") ||
     (warningContext === ScriptWarningContext.ShortLink && "Short Link Warning");

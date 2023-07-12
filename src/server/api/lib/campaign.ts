@@ -1,15 +1,15 @@
 /* eslint-disable import/prefer-default-export */
+import type {
+  Campaign,
+  CampaignInput,
+  CampaignsFilter
+} from "@spoke/spoke-codegen";
 import isEmpty from "lodash/isEmpty";
 import isEqual from "lodash/isEqual";
 import isNil from "lodash/isNil";
 import type { QueryResult } from "pg";
 import MemoizeHelper, { Buckets, cacheOpts } from "src/server/memoredis";
 
-import type {
-  Campaign,
-  CampaignInput,
-  CampaignsFilter
-} from "../../../api/campaign";
 import type { RelayPaginatedResponse } from "../../../api/pagination";
 import { config } from "../../../config";
 import { gzip, makeTree } from "../../../lib";
@@ -169,10 +169,19 @@ export interface CopyCampaignOptions {
   campaignId: number;
   userId: number;
   quantity?: number;
+  template?: boolean;
+  targetOrgId?: number | null;
 }
 
 export const copyCampaign = async (options: CopyCampaignOptions) => {
-  const { db, campaignId, userId, quantity = 1 } = options;
+  const {
+    db,
+    campaignId,
+    userId,
+    quantity = 1,
+    template,
+    targetOrgId = null
+  } = options;
 
   const result = await db.primary.transaction(async (trx) => {
     const cloneSingle = async (count: number) => {
@@ -202,7 +211,7 @@ export const copyCampaign = async (options: CopyCampaignOptions) => {
             external_system_id
           )
           select
-            organization_id,
+            coalesce(?, organization_id),
             (case
               when is_template then replace(concat('COPY - ', title), '#', ?::text)
               else 'COPY - ' || title
@@ -227,27 +236,35 @@ export const copyCampaign = async (options: CopyCampaignOptions) => {
           where id = ?
           returning *
         `,
-        [count, userId, campaignId]
+        [targetOrgId, count, userId, campaignId]
       );
 
-      // Copy Messaging Service OR use active one
-      const messagingServices = await r
-        .knex("messaging_service")
-        .where({
-          organization_id: newCampaign.organization_id,
-          active: true
-        })
-        .orderByRaw(`is_default desc nulls last`);
-
-      if (messagingServices.length === 0) {
-        throw new Error("No active messaging services found");
+      if (template) {
+        await trx("all_campaign")
+          .update({ is_template: true })
+          .where({ id: newCampaign.id });
       }
 
-      await trx("campaign")
-        .update({
-          messaging_service_sid: messagingServices[0].messaging_service_sid
-        })
-        .where({ id: newCampaign.id });
+      if (!template) {
+        // Copy Messaging Service OR use active one
+        const messagingServices = await r
+          .knex("messaging_service")
+          .where({
+            organization_id: newCampaign.organization_id,
+            active: true
+          })
+          .orderByRaw(`is_default desc nulls last`);
+
+        if (messagingServices.length === 0) {
+          throw new Error("No active messaging services found");
+        }
+
+        await trx("campaign")
+          .update({
+            messaging_service_sid: messagingServices[0].messaging_service_sid
+          })
+          .where({ id: newCampaign.id });
+      }
 
       // Copy interactions
       const interactions = await trx<InteractionStepRecord>("interaction_step")
@@ -298,28 +315,36 @@ export const copyCampaign = async (options: CopyCampaignOptions) => {
       // Copy Teams
       await trx.raw(
         `
+          with target_org as (select ?::int as id)
           insert into campaign_team (campaign_id, team_id)
           select
             ? as campaign_id,
             team_id
-          from campaign_team
-          where campaign_id = ?
+          from campaign_team ct
+          join team t on ct.team_id = t.id
+          where campaign_id = ? 
+          and exists (-- don't copy teams from another organization
+            select 1 from target_org where target_org.id is null 
+            or target_org.id = t.organization_id
+          )
         `,
-        [newCampaign.id, campaignId]
+        [targetOrgId, newCampaign.id, campaignId]
       );
 
-      // Copy Campaign Groups
-      await trx.raw(
-        `
-          insert into campaign_group_campaign (campaign_id, campaign_group_id)
-          select
-            ? as campaign_id,
-            campaign_group_id
-          from campaign_group_campaign
-          where campaign_id = ?
+      if (!template) {
+        // Copy Campaign Groups
+        await trx.raw(
+          `
+            insert into campaign_group_campaign (campaign_id, campaign_group_id)
+            select
+              ? as campaign_id,
+              campaign_group_id
+            from campaign_group_campaign
+            where campaign_id = ?
         `,
-        [newCampaign.id, campaignId]
-      );
+          [newCampaign.id, campaignId]
+        );
+      }
 
       // Copy Campaign Variables
       await trx.raw(
@@ -409,7 +434,8 @@ export const editCampaign = async (
     repliesStaleAfter,
     timezone,
     externalSystemId,
-    messagingServiceSid
+    messagingServiceSid,
+    columnMapping
   } = campaign;
 
   const organizationId = origCampaignRecord.organization_id;
@@ -460,9 +486,26 @@ export const editCampaign = async (
     Object.prototype.hasOwnProperty.call(campaign, "contactsFile") &&
     campaign.contactsFile
   ) {
-    const processedContacts = await processContactsFile(campaign.contactsFile);
+    const processedContacts = await processContactsFile({
+      file: campaign.contactsFile,
+      columnMapping
+    });
     campaign.contacts = processedContacts.contacts;
     validationStats = processedContacts.validationStats;
+
+    await r.knex.raw(
+      `
+        ? ON CONFLICT (campaign_id)
+        DO UPDATE SET column_mapping = EXCLUDED.column_mapping, updated_at = CURRENT_TIMESTAMP 
+        RETURNING *;
+      `,
+      [
+        r.knex("campaign_contact_upload").insert({
+          campaign_id: id,
+          column_mapping: JSON.stringify(columnMapping)
+        })
+      ]
+    );
   }
 
   if (
@@ -713,8 +756,13 @@ export const editCampaign = async (
 
     // Ignore the mocked `id` automatically created on the input by GraphQL
     const convertedResponses = campaign.cannedResponses.map(
-      ({ id: _cannedResponseId, ...response }: { id: number } | any) => ({
+      ({
+        id: _cannedResponseId,
+        displayOrder,
+        ...response
+      }: { id: number } | any) => ({
         ...response,
+        display_order: displayOrder,
         campaign_id: id
       })
     );
@@ -781,4 +829,63 @@ WHERE campaign_id = ?`,
   );
 
   return invalidFields;
+};
+
+export const unqueueAutosending = async (campaign: CampaignRecord) => {
+  if (campaign.autosend_status === "sending") {
+    await r.knex.raw(
+      `
+        select count(*)
+        from (
+          select graphile_worker.remove_job(key)
+          from graphile_worker.jobs
+          where task_identifier = 'retry-interaction-step'
+            and payload->>'campaignId' = ?
+        ) deleted_jobs
+      `,
+      [campaign.id]
+    );
+  }
+
+  return campaign;
+};
+
+export const markAutosendingPaused = async (campaign: CampaignRecord) => {
+  if (campaign.autosend_status === "sending") {
+    const [updatedCampaignResult] = await r
+      .knex("campaign")
+      .update({ autosend_status: "paused" })
+      .where({ id: campaign.id })
+      .returning("*");
+
+    return updatedCampaignResult;
+  }
+
+  return campaign;
+};
+
+export const deleteCampaign = async (campaignId: string) => {
+  const campaign = await r
+    .reader("all_campaign")
+    .where({ id: campaignId })
+    .first();
+
+  if (campaign.is_template) {
+    // In reverse order of copy campaign
+    await r
+      .knex("campaign_variable")
+      .where({ campaign_id: campaignId })
+      .delete();
+
+    await r.knex("campaign_team").where({ campaign_id: campaignId }).delete();
+
+    await r.knex("canned_response").where({ campaign_id: campaignId }).delete();
+
+    await r
+      .knex("interaction_step")
+      .where({ campaign_id: campaignId })
+      .delete();
+
+    await r.knex("all_campaign").where({ id: campaignId }).delete();
+  }
 };

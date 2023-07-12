@@ -1,0 +1,49 @@
+fragment TagInfo on Tag {
+  id
+  title
+  description
+  confirmationSteps
+  onApplyScript
+  isSystem
+  isAssignable
+  textColor
+  backgroundColor
+  createdAt
+}
+
+fragment ContactTagInfo on CampaignContactTag {
+  id
+  tag {
+    ...TagInfo
+  }
+}
+
+query GetOrganizationTags($organizationId: String!) {
+  organization(id: $organizationId) {
+    id
+    tagList {
+      ...TagInfo
+    }
+  }
+}
+
+query GetContactTags($contactId: String!) {
+  contact(id: $contactId) {
+    id
+    tags {
+      ...ContactTagInfo
+    }
+  }
+}
+
+# Mutations
+
+mutation TagConversation(
+  $campaignContactId: String!
+  $tag: ContactTagActionInput!
+) {
+  tagConversation(campaignContactId: $campaignContactId, tag: $tag) {
+    id
+    assignmentId
+  }
+}

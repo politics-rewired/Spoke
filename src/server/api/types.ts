@@ -122,6 +122,7 @@ export interface CampaignRecord {
   autosend_status: AutosendStatus;
   autosend_user_id: number;
   messaging_service_sid: string | null;
+  column_mapping: string | null;
 }
 
 export interface AssignmentRecord {
@@ -275,6 +276,24 @@ export interface LogRecord {
   created_at: string;
   updated_at: string;
   service_type: MessagingServiceType | null;
+}
+
+export interface TagRecord {
+  id: number;
+  organization_id: number;
+  title: string;
+  description: string;
+  text_color: string;
+  background_color: string;
+  author_id: string;
+  confirmation_steps: Array<string>;
+  on_apply_script: string;
+  webhook_url: string;
+  is_assignable: string;
+  is_system: string;
+  created_at: string;
+  updated_at: string;
+  deleted_at: string;
 }
 
 export enum NotificationTypes {

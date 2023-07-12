@@ -1,41 +1,35 @@
 import request from "superagent";
 
-import type { Register10DlcBrandNotice } from "../../../api/notice";
 import { r } from "../../models";
 import type { OrgLevelNotificationGetter } from "./types";
 
-const graphqlQuery = `
-  query AnonGetTcr10DlcSurvey($switchboardProfileId: String!) {
-    billingAccountId: billingAccountIdBySwitchboardProfileId(
-      switchboardProfileId: $switchboardProfileId
-    )
-    billingAccountName: billingAccountNameBySwitchboardProfileId(
-      switchboardProfileId: $switchboardProfileId
-    )
-    survey: tcr10DlcSurveyBySwitchboardProfileId(
+const PORTAL_API_URL = "https://portal-api.spokerewired.com/graphql";
+
+const fetchBillingAccountQuery = `
+  query GetBillingAccountBySwitchboardProfileId($switchboardProfileId: UUID!) {
+    billingAccount: billingAccountBySwitchboardProfileId(
       switchboardProfileId: $switchboardProfileId
     ) {
-      ...Tcr10DlcSurveyInfo
+      id
       __typename
     }
   }
+`;
 
-  fragment Tcr10DlcSurveyInfo on Tcr10DlcSurvey {
+const fetchBrandQuery = `
+  query AnonGetTcr10DlcBrandByBillingAccountId($billingAccountId: UUID!) {
+    brand: brandByBillingAccountId(billingAccountId: $billingAccountId) {
     id
-    nodeId
-    legalCompanyName
-    dba
-    entityForm
-    industry
-    website
-    usFein
-    address
-    city
     state
-    postalCode
-    email
-    phoneNumber
+    campaigns: tcr10DlcCampaignsByBrandId {
+      nodes {
+        id
+        state
+        __typename
+      }
+    }
     __typename
+    }
   }
 `;
 
@@ -43,8 +37,6 @@ export const get10DlcBrandNotices: OrgLevelNotificationGetter = async (
   userId,
   organizationId
 ) => {
-  return [];
-
   const query = r
     .knex("messaging_service")
     .join(
@@ -56,7 +48,8 @@ export const get10DlcBrandNotices: OrgLevelNotificationGetter = async (
     .groupBy("messaging_service_sid")
     .where({
       service_type: "assemble-numbers",
-      user_id: userId
+      user_id: userId,
+      active: true
     })
     .whereIn("role", ["OWNER", "ADMIN"]);
   if (organizationId !== undefined) {
@@ -67,42 +60,59 @@ export const get10DlcBrandNotices: OrgLevelNotificationGetter = async (
     messaging_service_sid: string;
     roles: string[];
   }[] = await query;
-  const notifications: (
-    | Register10DlcBrandNotice
-    | undefined
-  )[] = await Promise.all(
-    profiles.map(async ({ messaging_service_sid, roles }) => {
+  const ownedProfiles = profiles.filter(({ roles }) => roles.includes("OWNER"));
+
+  const registeredProfiles: Array<boolean> = await Promise.all(
+    ownedProfiles.map(async ({ messaging_service_sid }) => {
       const payload = {
-        operationName: "AnonGetTcr10DlcSurvey",
-        query: graphqlQuery,
+        operationName: "GetBillingAccountBySwitchboardProfileId",
+        query: fetchBillingAccountQuery,
         variables: {
           switchboardProfileId: messaging_service_sid
         }
       };
-      const response = await request
-        .post(`https://portal-api.spokerewired.com/graphql`)
+
+      const billingAccountResponse = await request
+        .post(PORTAL_API_URL)
         .send(payload);
 
-      if (!response.body.data.survey) {
-        return {
-          __typename: "Register10DlcBrandNotice",
-          id: messaging_service_sid,
-          tcrBrandRegistrationUrl: roles.includes("OWNER")
-            ? `https://portal.spokerewired.com/10dlc-registration/${messaging_service_sid}`
-            : null
+      if (billingAccountResponse.body?.data?.billingAccount?.id) {
+        const brandPayload = {
+          operationName: "AnonGetTcr10DlcBrandByBillingAccountId",
+          query: fetchBrandQuery,
+          variables: {
+            billingAccountId: billingAccountResponse.body.data.billingAccount.id
+          }
         };
+
+        const brandResponse = await request
+          .post(PORTAL_API_URL)
+          .send(brandPayload);
+
+        if (brandResponse.body.data?.brand?.campaigns?.nodes) {
+          return brandResponse.body.data?.brand?.campaigns?.nodes.some(
+            ({ state }: { state: string }) => state === "REGISTERED"
+          );
+        }
       }
-      return undefined;
+
+      return false;
     })
   );
 
-  const result = notifications.reduce<Register10DlcBrandNotice[]>(
-    (acc, notification) =>
-      notification !== undefined ? [...acc, notification] : acc,
-    []
-  );
+  // Check if there are no registered profiles
+  if (registeredProfiles.every((registered) => !registered)) {
+    const { messaging_service_sid: messagingServiceSid } = ownedProfiles[0];
+    return [
+      {
+        __typename: "Register10DlcBrandNotice",
+        id: messagingServiceSid,
+        tcrBrandRegistrationUrl: `https://portal.spokerewired.com/10dlc-registration/${messagingServiceSid}`
+      }
+    ];
+  }
 
-  return result;
+  return [];
 };
 
 export default get10DlcBrandNotices;

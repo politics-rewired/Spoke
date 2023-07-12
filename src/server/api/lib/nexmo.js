@@ -206,7 +206,7 @@ async function handleIncomingMessage(message) {
     logger.info(`Incoming message part from ${contactNumber} to ${userNumber}`);
   }
 
-  const [partId] = await r
+  const [{ id: partId }] = await r
     .knex("pending_message_part")
     .insert({
       service: "nexmo",
