@@ -31,7 +31,7 @@ export const errorCodeDescriptions: Record<string, string> = {
   "4750": "Unknown AT&T Error (block can be contested)",
   "4770": "Blocked as spam (block can be contested)",
   "4780": "Carrier rejected (sending rates exceeded)",
-  "4781": "Unknown AT&T Error (block can be contested)"
+  "4781": "Unknown AT&T Error (block can be contested)",
   "5106": "Unroutable (can be retried)",
   "5620": "Carrier outage",
   "9902": "Delivery receipt expired",
