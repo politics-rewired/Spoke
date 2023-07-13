@@ -128,6 +128,7 @@ yarn knex migrate:latest
 ```
 
 To create a new knex migration, run
+
 ```sh
 yarn knex migrate:make my-migration
 ```
