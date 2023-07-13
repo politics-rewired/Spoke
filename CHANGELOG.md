@@ -2,6 +2,32 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [7.0.0-rc.0](https://github.com/politics-rewired/spoke/compare/v6.4.0...v7.0.0-rc.0) (2023-07-13)
+
+
+### ⚠ BREAKING CHANGES
+
+* allow uploading arbitrary csvs (#1540)
+
+### Features
+
+* add apollo graphql armor ([#1535](https://github.com/politics-rewired/spoke/issues/1535)) ([36a79c9](https://github.com/politics-rewired/spoke/commit/36a79c95547a816b7b97fabed79ce48758833b65))
+* **canned responses:** allow reordering display order ([#1551](https://github.com/politics-rewired/spoke/issues/1551)) ([9312d5f](https://github.com/politics-rewired/spoke/commit/9312d5f178226a39c95ca47fa3f017f271e40a51))
+* **canned responses:** clarify instructional copy ([#1571](https://github.com/politics-rewired/spoke/issues/1571)) ([862a354](https://github.com/politics-rewired/spoke/commit/862a35450fd280c882690b13880ae3d3f63da20d))
+* allow uploading arbitrary csvs ([#1540](https://github.com/politics-rewired/spoke/issues/1540)) ([9266776](https://github.com/politics-rewired/spoke/commit/926677621cbead5856032e93351cad0b7e3e410f))
+
+
+### Bug Fixes
+
+* **messaging services:** add org id to fakeservice sid ([#1607](https://github.com/politics-rewired/spoke/issues/1607)) ([3cee1d8](https://github.com/politics-rewired/spoke/commit/3cee1d82323a6131ca7251a5a0224d963dfe33b9))
+
+
+### Backend Changes
+
+* use more accurate variable naming ([#1576](https://github.com/politics-rewired/spoke/issues/1576)) ([21c7138](https://github.com/politics-rewired/spoke/commit/21c71386866de9f06516207c1dc1fb86c3834b8a))
+* **notification frequency:** update default to DAILY ([#1585](https://github.com/politics-rewired/spoke/issues/1585)) ([e76ade3](https://github.com/politics-rewired/spoke/commit/e76ade34444337d18e1aee56bc063dbcd702bf28))
+* **telco errors:** update with latest known descriptions ([#1635](https://github.com/politics-rewired/spoke/issues/1635)) ([e3b9e78](https://github.com/politics-rewired/spoke/commit/e3b9e7886f530c3c92101503f46a0c9f773b8916))
+
 ## [6.4.0](https://github.com/politics-rewired/spoke/compare/v6.4.0-rc.0...v6.4.0) (2023-07-04)
 
 ## [6.4.0-rc.0](https://github.com/politics-rewired/spoke/compare/v6.3.3...v6.4.0-rc.0) (2023-06-28)
