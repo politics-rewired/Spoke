@@ -12,6 +12,7 @@ import AdminCampaignGroupEditor from "./containers/AdminCampaignGroupEditor";
 import AdminCampaignList from "./containers/AdminCampaignList";
 import AdminCampaignStats from "./containers/AdminCampaignStats";
 import AdminDashboard from "./containers/AdminDashboard";
+import AdminExportCampaigns from "./containers/AdminExportCampaigns";
 import AdminExternalSystemDetail from "./containers/AdminExternalSystemDetail";
 import AdminExternalSystems from "./containers/AdminExternalSystems";
 import AdminIncomingMessageList from "./containers/AdminIncomingMessageList";
@@ -220,6 +221,10 @@ const AdminOrganizationRoutes = (props) => {
           <Route
             path={`${organizationPath}/integrations/:systemId`}
             component={AdminExternalSystemDetail}
+          />
+          <Route
+            path={`${organizationPath}/export-campaigns`}
+            component={AdminExportCampaigns}
           />
           <Redirect
             exact

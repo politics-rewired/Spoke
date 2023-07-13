@@ -18,6 +18,9 @@ export const CampaignList: React.FC<Props> = (props) => {
     return <Empty title="No campaigns" icon={<SpeakerNotesIcon />} />;
   }
 
+  // TODO: make verboseList = true?
+  // then can reuse in new component
+
   return (
     <List>
       {props.campaigns.map((campaign) => (
