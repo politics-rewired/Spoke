@@ -474,8 +474,8 @@ export class AssignmentTexterContact extends React.Component {
     }
   };
 
-  handleApplyTagsAndMoveOn = (addedTags, removedTags) => {
-    this.handleApplyTags(addedTags, removedTags, async () => {
+  handleApplyTagsAndMoveOn = (addedContactTags, removedContactTags) => {
+    this.handleApplyTags(addedContactTags, removedContactTags, async () => {
       const { contact } = this.props;
       const payload = this.gatherSurveyChanges();
       await this.props.sendMessage(contact.id, payload);
