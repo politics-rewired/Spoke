@@ -127,6 +127,12 @@ The knex migrations need to be run any time a new release has made changes to th
 yarn knex migrate:latest
 ```
 
+To create a new knex migration, run
+
+```sh
+yarn knex migrate:make my-migration
+```
+
 ### Next Steps
 
 All configuration environment variables are documented in [config.js](./src/config.js).
