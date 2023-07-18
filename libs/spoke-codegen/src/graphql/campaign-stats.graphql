@@ -63,8 +63,22 @@ mutation ExportCampaign($options: CampaignExportInput!) {
   }
 }
 
-mutation CopyCampaigns($templateId: String!, $quantity: Int!, $targetOrgId: String) {
-  copyCampaigns(sourceCampaignId: $templateId, quantity: $quantity, targetOrgId: $targetOrgId) {
+mutation ExportCampaigns($options: MultipleCampaignExportInput!) {
+  exportCampaigns(options: $options) {
+    id
+  }
+}
+
+mutation CopyCampaigns(
+  $templateId: String!
+  $quantity: Int!
+  $targetOrgId: String
+) {
+  copyCampaigns(
+    sourceCampaignId: $templateId
+    quantity: $quantity
+    targetOrgId: $targetOrgId
+  ) {
     id
   }
 }
@@ -81,7 +95,6 @@ query GetCampaignSyncConfigs($campaignId: String!) {
     }
   }
 }
-
 
 query GetSyncTargets($campaignId: String!) {
   campaign(id: $campaignId) {
