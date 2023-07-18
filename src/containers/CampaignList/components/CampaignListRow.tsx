@@ -35,12 +35,13 @@ interface Props extends CampaignOperations {
   organizationId: string;
   isAdmin: boolean;
   campaign: CampaignListEntryFragment;
+  campaignIdsForExport: string[];
 }
 
 export const CampaignListRow: React.FC<Props> = (props) => {
   const theme = useTheme();
   const history = useHistory();
-  const { organizationId, isAdmin, campaign } = props;
+  const { organizationId, isAdmin, campaign, campaignIdsForExport } = props;
   const {
     isStarted,
     isArchived,
@@ -107,6 +108,10 @@ export const CampaignListRow: React.FC<Props> = (props) => {
     tags.push({ title: "Autoassign eligible" });
   }
 
+  if (campaignIdsForExport.includes(campaign.id)) {
+    tags.push({ title: "Selected for export" });
+  }
+
   tags = tags.concat(teams.map(({ title }) => ({ title })));
   if (campaignGroups) {
     tags = tags.concat(
@@ -169,6 +174,7 @@ export const CampaignListRow: React.FC<Props> = (props) => {
             startOperation={props.startOperation}
             archiveCampaign={props.archiveCampaign}
             unarchiveCampaign={props.unarchiveCampaign}
+            selectForExport={props.selectForExport}
           />
         </ListItemSecondaryAction>
       )}

@@ -18,6 +18,7 @@ export interface CampaignOperations {
   ) => ClickHandler;
   archiveCampaign: (campaignId: string) => ClickHandler;
   unarchiveCampaign: (campaignId: string) => ClickHandler;
+  selectForExport: (campaignId: string) => void;
 }
 
 interface Props extends CampaignOperations {
@@ -31,7 +32,8 @@ export const CampaignListMenu: React.FC<Props> = (props) => {
     startOperation,
     archiveCampaign,
     unarchiveCampaign,
-    campaign
+    campaign,
+    selectForExport
   } = props;
 
   const handleClickMenu = useCallback(
@@ -108,6 +110,9 @@ export const CampaignListMenu: React.FC<Props> = (props) => {
           {campaign.isAutoassignEnabled
             ? "Turn auto-assign OFF"
             : "Turn auto-assign ON"}
+        </MenuItem>
+        <MenuItem onClick={() => selectForExport(campaign.id)}>
+          Select for export
         </MenuItem>
       </Menu>
     </div>

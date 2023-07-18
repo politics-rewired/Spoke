@@ -50,7 +50,9 @@ export class CampaignList extends React.Component {
       campaignsFilter,
       isAdmin,
       data,
-      mutations
+      mutations,
+      selectForExport,
+      campaignIdsForExport
     } = this.props;
     const { currentAssignmentTargets } = data.organization;
     const { archiveCampaign, unarchiveCampaign } = mutations;
@@ -77,6 +79,8 @@ export class CampaignList extends React.Component {
           startOperation={this.start}
           archiveCampaign={archiveCampaign}
           unarchiveCampaign={unarchiveCampaign}
+          selectForExport={selectForExport}
+          campaignIdsForExport={campaignIdsForExport}
         />
       </div>
     );

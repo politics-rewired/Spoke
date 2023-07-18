@@ -11,15 +11,13 @@ interface Props extends CampaignOperations {
   organizationId: string;
   campaigns: CampaignListEntryFragment[];
   isAdmin: boolean;
+  campaignIdsForExport: string[];
 }
 
 export const CampaignList: React.FC<Props> = (props) => {
   if (props.campaigns.length === 0) {
     return <Empty title="No campaigns" icon={<SpeakerNotesIcon />} />;
   }
-
-  // TODO: make verboseList = true?
-  // then can reuse in new component
 
   return (
     <List>
@@ -32,6 +30,8 @@ export const CampaignList: React.FC<Props> = (props) => {
           startOperation={props.startOperation}
           archiveCampaign={props.archiveCampaign}
           unarchiveCampaign={props.unarchiveCampaign}
+          selectForExport={props.selectForExport}
+          campaignIdsForExport={props.campaignIdsForExport}
         />
       ))}
     </List>

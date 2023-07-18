@@ -6,6 +6,9 @@ import DialogContent from "@material-ui/core/DialogContent";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import CreateIcon from "@material-ui/icons/Create";
 import FileCopyIcon from "@material-ui/icons/FileCopyOutlined";
+// import UpgradeIcon from "@material-ui/icons/Upgrade";
+// TODO - icon
+import OpenInNewIcon from "@material-ui/icons/OpenInNew";
 import SpeedDial from "@material-ui/lab/SpeedDial";
 import SpeedDialAction from "@material-ui/lab/SpeedDialAction";
 import SpeedDialIcon from "@material-ui/lab/SpeedDialIcon";
@@ -18,6 +21,7 @@ import { withRouter } from "react-router-dom";
 import { compose } from "recompose";
 
 import CreateCampaignFromTemplateDialog from "../components/CreateCampaignFromTemplateDialog";
+import ExportMultipleCampaignDataDialog from "../components/ExportMultipleCampaignDataDialog";
 import LoadingIndicator from "../components/LoadingIndicator";
 import theme from "../styles/theme";
 import { withAuthzContext } from "./AuthzProvider";
@@ -47,7 +51,9 @@ class AdminCampaignList extends React.Component {
     releasingInProgress: false,
     releasingAllReplies: false,
     releaseAllRepliesError: undefined,
-    releaseAllRepliesResult: undefined
+    releaseAllRepliesResult: undefined,
+    campaignIdsForExport: [],
+    isExportCampaignData: false
   };
 
   handleClickNewButton = async () => {
@@ -133,6 +139,14 @@ class AdminCampaignList extends React.Component {
       });
   };
 
+  handleSelectForExport = (id) => {
+    const currentIds = this.state.campaignIdsForExport;
+    this.setState({
+      ...this.state,
+      campaignIdsForExport: currentIds.concat(id)
+    });
+  };
+
   renderFilters() {
     return (
       <DropDownMenu
@@ -149,7 +163,8 @@ class AdminCampaignList extends React.Component {
     const {
       campaignsFilter,
       releasingAllReplies,
-      releasingInProgress
+      releasingInProgress,
+      campaignIdsForExport
     } = this.state;
 
     const doneReleasingReplies =
@@ -266,6 +281,8 @@ class AdminCampaignList extends React.Component {
             campaignsFilter={campaignsFilter}
             pageSize={DEFAULT_PAGE_SIZE}
             isAdmin={isAdmin}
+            selectForExport={this.handleSelectForExport}
+            campaignIdsForExport={campaignIdsForExport}
           />
         )}
 
@@ -289,12 +306,23 @@ class AdminCampaignList extends React.Component {
               tooltipTitle="Create from Template"
               onClick={() => this.setState({ createFromTemplateOpen: true })}
             />
+            <SpeedDialAction
+              icon={<OpenInNewIcon />}
+              tooltipTitle="Export Campaign Data"
+              onClick={() => this.setState({ isExportCampaignData: true })}
+              disabled={campaignIdsForExport.length < 1}
+            />
           </SpeedDial>
         ) : null}
         <CreateCampaignFromTemplateDialog
           organizationId={organizationId}
           open={this.state.createFromTemplateOpen}
           onClose={() => this.setState({ createFromTemplateOpen: false })}
+        />
+        <ExportMultipleCampaignDataDialog
+          campaignIds={campaignIdsForExport}
+          open={this.state.isExportCampaignData}
+          onClose={() => this.setState({ isExportCampaignData: false })}
         />
       </div>
     );
