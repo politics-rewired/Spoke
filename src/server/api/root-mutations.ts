@@ -331,12 +331,9 @@ const rootMutations = {
     exportCampaigns: async (_root, { options }, { user, loaders }) => {
       const { campaignIds, spokeOptions } = options;
 
-      // TOOD - implement for VAN ?
-
       if (!spokeOptions) {
         throw new Error("Input must include valid spokeOptions when exporting");
       }
-      // TODO - is this a safe assumption? could different orgs be part of same export action?
       const campaignId = campaignIds[0];
       const campaign = await loaders.campaign.load(campaignId);
       const organizationId = campaign.organization_id;
