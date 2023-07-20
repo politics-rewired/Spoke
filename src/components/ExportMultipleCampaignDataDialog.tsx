@@ -4,28 +4,36 @@ import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
-import FormControlLabel from "@material-ui/core/FormControlLabel";
-import Switch from "@material-ui/core/Switch";
 import {
   CampaignExportType,
   useExportCampaignsMutation
 } from "@spoke/spoke-codegen";
 import React, { useState } from "react";
 
+import { CampaignExportModalContent } from "../containers/AdminCampaignStats/components/CampaignExportModal";
+
 interface Props {
   campaignIds: string[];
   open: boolean;
   onClose: () => void;
+  onError: (errorMessage: string) => void;
+  onComplete(): void;
 }
 
-const ExportMultipleCampaignDataDialog = (props: Props) => {
-  const { campaignIds, open, onClose } = props;
+const ExportMultipleCampaignDataDialog: React.FC<Props> = (props) => {
+  const { campaignIds, open, onClose, onError, onComplete } = props;
   const [exportCampaign, setExportCampaign] = useState<boolean>(true);
   const [exportMessages, setExportMessages] = useState<boolean>(true);
   const [exportOptOut, setExportOptOut] = useState<boolean>(false);
   const [exportFiltered, setExportFiltered] = useState<boolean>(false);
 
   const [exportCampaignsMutation] = useExportCampaignsMutation();
+
+  const handleChange = (setStateFunction: any) => (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    setStateFunction(event.target.checked);
+  };
 
   const handleExportClick = async () => {
     const result = await exportCampaignsMutation({
@@ -44,12 +52,10 @@ const ExportMultipleCampaignDataDialog = (props: Props) => {
     });
     if (result.errors) {
       const message = result.errors.map((e) => e.message).join(", ");
-      console.log("MESSAGE", message);
-      // onError(message);
-      // return;
+      onError(message);
+      return;
     }
-    console.log("finished", result);
-    // onComplete();
+    onComplete();
   };
 
   return (
@@ -59,57 +65,21 @@ const ExportMultipleCampaignDataDialog = (props: Props) => {
       open={open}
     >
       <DialogTitle id="export-multiple-campaign-data">
-        Export Multiple Campaign Data
+        Export Multiple Campaigns Data
       </DialogTitle>
+      <CampaignExportModalContent
+        exportCampaign={exportCampaign}
+        exportMessages={exportMessages}
+        exportOptOut={exportOptOut}
+        exportFiltered={exportFiltered}
+        handleChange={handleChange}
+        setExportCampaign={setExportCampaign}
+        setExportMessages={setExportMessages}
+        setExportOptOut={setExportOptOut}
+        setExportFiltered={setExportFiltered}
+      />
       <DialogContent>
-        <div>
-          <FormControlLabel
-            label="Export Campaign Data"
-            control={
-              <Switch
-                checked={exportCampaign}
-                onChange={() => setExportCampaign(!exportCampaign)}
-              />
-            }
-          />
-        </div>
-        <div>
-          <FormControlLabel
-            label="Export Messages"
-            control={
-              <Switch
-                checked={exportMessages}
-                onChange={() => setExportMessages(!exportMessages)}
-              />
-            }
-          />
-        </div>
-        <FormControlLabel
-          label="Export Opt Outs Only"
-          control={
-            <Switch
-              checked={exportOptOut}
-              onChange={() => setExportOptOut(!exportOptOut)}
-            />
-          }
-        />
-        <div>
-          <FormControlLabel
-            label="Export Filtered Contacts"
-            control={
-              <Switch
-                checked={exportFiltered}
-                onChange={() => setExportFiltered(!exportFiltered)}
-              />
-            }
-          />
-        </div>
         <DialogContentText>Exporting data for:</DialogContentText>
-        {/* {error && (
-          <DialogContentText>
-            Error fetching templates: {error.message}
-          </DialogContentText>
-        )} */}
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose}>Cancel</Button>
