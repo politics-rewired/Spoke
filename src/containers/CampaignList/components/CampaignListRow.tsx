@@ -175,6 +175,7 @@ export const CampaignListRow: React.FC<Props> = (props) => {
             archiveCampaign={props.archiveCampaign}
             unarchiveCampaign={props.unarchiveCampaign}
             selectForExport={props.selectForExport}
+            campaignIdsForExport={props.campaignIdsForExport}
           />
         </ListItemSecondaryAction>
       )}

@@ -140,9 +140,15 @@ class AdminCampaignList extends React.Component {
       });
   };
 
+  // handle selecting and de-selecting campaigns via CampaignListMenu
   handleSelectForExport = (id) => {
     const currentIds = this.state.campaignIdsForExport;
-    this.setState({
+    const isDeSelecting = currentIds.includes(id);
+    if (isDeSelecting) {
+      const filteredIds = currentIds.filter((selectedId) => selectedId !== id);
+      return this.setState({ campaignIdsForExport: filteredIds });
+    }
+    return this.setState({
       campaignIdsForExport: currentIds.concat(id)
     });
   };
