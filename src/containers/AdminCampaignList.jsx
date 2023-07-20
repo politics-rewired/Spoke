@@ -348,6 +348,7 @@ class AdminCampaignList extends React.Component {
           onError={this.handleErrorCampaignExport}
           onComplete={() =>
             this.setState({
+              campaignIdsForExport: [],
               shouldShowExportModal: false,
               shouldShowExportSnackbar: true
             })
