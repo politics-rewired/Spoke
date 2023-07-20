@@ -1,6 +1,6 @@
 import Avatar from "@material-ui/core/Avatar";
 import Chip from "@material-ui/core/Chip";
-import blue from "@material-ui/core/colors/blue";
+import { blue, green } from "@material-ui/core/colors";
 import ListItem from "@material-ui/core/ListItem";
 import ListItemAvatar from "@material-ui/core/ListItemAvatar";
 import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
@@ -109,7 +109,7 @@ export const CampaignListRow: React.FC<Props> = (props) => {
   }
 
   if (campaignIdsForExport.includes(campaign.id)) {
-    tags.push({ title: "Selected for export" });
+    tags.push({ title: "Selected for export", backgroundColor: green[300] });
   }
 
   tags = tags.concat(teams.map(({ title }) => ({ title })));
