@@ -4,10 +4,9 @@ import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogTitle from "@material-ui/core/DialogTitle";
+import Snackbar from "@material-ui/core/Snackbar";
 import CreateIcon from "@material-ui/icons/Create";
 import FileCopyIcon from "@material-ui/icons/FileCopyOutlined";
-// import UpgradeIcon from "@material-ui/icons/Upgrade";
-// TODO - icon
 import OpenInNewIcon from "@material-ui/icons/OpenInNew";
 import SpeedDial from "@material-ui/lab/SpeedDial";
 import SpeedDialAction from "@material-ui/lab/SpeedDialAction";
@@ -53,7 +52,8 @@ class AdminCampaignList extends React.Component {
     releaseAllRepliesError: undefined,
     releaseAllRepliesResult: undefined,
     campaignIdsForExport: [],
-    isExportCampaignData: false
+    isExportingCampaignData: false,
+    shouldShowExportMessage: false
   };
 
   handleClickNewButton = async () => {
@@ -164,7 +164,9 @@ class AdminCampaignList extends React.Component {
       campaignsFilter,
       releasingAllReplies,
       releasingInProgress,
-      campaignIdsForExport
+      campaignIdsForExport,
+      isExportingCampaignData,
+      shouldShowExportMessage
     } = this.state;
 
     const doneReleasingReplies =
@@ -309,7 +311,7 @@ class AdminCampaignList extends React.Component {
             <SpeedDialAction
               icon={<OpenInNewIcon />}
               tooltipTitle="Export Campaign Data"
-              onClick={() => this.setState({ isExportCampaignData: true })}
+              onClick={() => this.setState({ isExportingCampaignData: true })}
               disabled={campaignIdsForExport.length < 1}
             />
           </SpeedDial>
@@ -321,8 +323,23 @@ class AdminCampaignList extends React.Component {
         />
         <ExportMultipleCampaignDataDialog
           campaignIds={campaignIdsForExport}
-          open={this.state.isExportCampaignData}
-          onClose={() => this.setState({ isExportCampaignData: false })}
+          open={isExportingCampaignData}
+          onClose={() => this.setState({ isExportingCampaignData: false })}
+          onError={() => console.log("ON ERROR")}
+          onComplete={() =>
+            this.setState({
+              isExportingCampaignData: false,
+              shouldShowExportMessage: true
+            })
+          }
+        />
+        <Snackbar
+          open={shouldShowExportMessage}
+          message="Exports started - we'll e-mail you when they're done"
+          autoHideDuration={5000}
+          onClose={() => {
+            this.setState({ shouldShowExportMessage: false });
+          }}
         />
       </div>
     );
