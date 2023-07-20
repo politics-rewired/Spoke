@@ -52,8 +52,7 @@ const ExportMultipleCampaignDataDialog: React.FC<Props> = (props) => {
     });
     if (result.errors) {
       const message = result.errors.map((e) => e.message).join(", ");
-      onError(message);
-      return;
+      return onError(message);
     }
     onComplete();
   };

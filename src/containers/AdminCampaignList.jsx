@@ -4,7 +4,6 @@ import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogTitle from "@material-ui/core/DialogTitle";
-import Snackbar from "@material-ui/core/Snackbar";
 import CreateIcon from "@material-ui/icons/Create";
 import FileCopyIcon from "@material-ui/icons/FileCopyOutlined";
 import OpenInNewIcon from "@material-ui/icons/OpenInNew";
@@ -20,6 +19,7 @@ import { withRouter } from "react-router-dom";
 import { compose } from "recompose";
 
 import CreateCampaignFromTemplateDialog from "../components/CreateCampaignFromTemplateDialog";
+import ExportCampaignDataSnackbar from "../components/ExportCampaignDataSnackbar";
 import ExportMultipleCampaignDataDialog from "../components/ExportMultipleCampaignDataDialog";
 import LoadingIndicator from "../components/LoadingIndicator";
 import theme from "../styles/theme";
@@ -52,8 +52,9 @@ class AdminCampaignList extends React.Component {
     releaseAllRepliesError: undefined,
     releaseAllRepliesResult: undefined,
     campaignIdsForExport: [],
-    isExportingCampaignData: false,
-    shouldShowExportMessage: false
+    shouldShowExportModal: false,
+    shouldShowExportSnackbar: false,
+    exportErrorMessage: null
   };
 
   handleClickNewButton = async () => {
@@ -142,8 +143,15 @@ class AdminCampaignList extends React.Component {
   handleSelectForExport = (id) => {
     const currentIds = this.state.campaignIdsForExport;
     this.setState({
-      ...this.state,
       campaignIdsForExport: currentIds.concat(id)
+    });
+  };
+
+  handleErrorCampaignExport = (exportErrorMessage) => {
+    this.setState({
+      exportErrorMessage,
+      shouldShowExportModal: false,
+      shouldShowExportSnackbar: true
     });
   };
 
@@ -165,8 +173,9 @@ class AdminCampaignList extends React.Component {
       releasingAllReplies,
       releasingInProgress,
       campaignIdsForExport,
-      isExportingCampaignData,
-      shouldShowExportMessage
+      shouldShowExportModal,
+      shouldShowExportSnackbar,
+      exportErrorMessage
     } = this.state;
 
     const doneReleasingReplies =
@@ -311,7 +320,7 @@ class AdminCampaignList extends React.Component {
             <SpeedDialAction
               icon={<OpenInNewIcon />}
               tooltipTitle="Export Campaign Data"
-              onClick={() => this.setState({ isExportingCampaignData: true })}
+              onClick={() => this.setState({ shouldShowExportModal: true })}
               disabled={campaignIdsForExport.length < 1}
             />
           </SpeedDial>
@@ -323,22 +332,29 @@ class AdminCampaignList extends React.Component {
         />
         <ExportMultipleCampaignDataDialog
           campaignIds={campaignIdsForExport}
-          open={isExportingCampaignData}
-          onClose={() => this.setState({ isExportingCampaignData: false })}
-          onError={() => console.log("ON ERROR")}
+          open={shouldShowExportModal}
+          onClose={() =>
+            this.setState({
+              shouldShowExportModal: false,
+              campaignIdsForExport: []
+            })
+          }
+          onError={this.handleErrorCampaignExport}
           onComplete={() =>
             this.setState({
-              isExportingCampaignData: false,
-              shouldShowExportMessage: true
+              shouldShowExportModal: false,
+              shouldShowExportSnackbar: true
             })
           }
         />
-        <Snackbar
-          open={shouldShowExportMessage}
-          message="Exports started - we'll e-mail you when they're done"
-          autoHideDuration={5000}
+        <ExportCampaignDataSnackbar
+          open={shouldShowExportSnackbar}
+          errorMessage={exportErrorMessage}
           onClose={() => {
-            this.setState({ shouldShowExportMessage: false });
+            this.setState({
+              shouldShowExportSnackbar: false,
+              exportErrorMessage: null
+            });
           }}
         />
       </div>
