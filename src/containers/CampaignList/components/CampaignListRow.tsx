@@ -1,35 +1,21 @@
-import Avatar from "@material-ui/core/Avatar";
-import Chip from "@material-ui/core/Chip";
-import { blue, green } from "@material-ui/core/colors";
+import { Card } from "@material-ui/core";
+import Checkbox from "@material-ui/core/Checkbox";
 import ListItem from "@material-ui/core/ListItem";
-import ListItemAvatar from "@material-ui/core/ListItemAvatar";
+import ListItemIcon from "@material-ui/core/ListItemIcon";
 import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
 import ListItemText from "@material-ui/core/ListItemText";
 import { useTheme } from "@material-ui/core/styles";
-import WarningIcon from "@material-ui/icons/Warning";
 import type { CampaignListEntryFragment } from "@spoke/spoke-codegen";
 import React from "react";
 import { useHistory } from "react-router-dom";
 
 import { dataTest } from "../../../lib/attributes";
 import { DateTime } from "../../../lib/datetime";
+import { makeCampaignHeaderTags } from "../utils";
+import CampaignDetails from "./CampaignDetails";
+import CampaignHeader from "./CampaignHeader";
 import type { CampaignOperations } from "./CampaignListMenu";
 import CampaignListMenu from "./CampaignListMenu";
-
-const inlineStyles = {
-  chipWrapper: {
-    display: "flex",
-    flexWrap: "wrap",
-    alignItems: "center"
-  },
-  chip: { margin: "4px" },
-  past: {
-    opacity: 0.6
-  },
-  secondaryText: {
-    whiteSpace: "pre-wrap"
-  }
-};
 
 interface Props extends CampaignOperations {
   organizationId: string;
@@ -54,132 +40,74 @@ export const CampaignListRow: React.FC<Props> = (props) => {
     externalSystem
   } = campaign;
 
-  let listItemStyle = {};
-  let leftIcon;
-  if (isArchived) {
-    listItemStyle = inlineStyles.past;
-  } else if (!isStarted || hasUnassignedContacts) {
-    listItemStyle = {
-      color: theme.palette.warning.dark
-    };
-    leftIcon = <WarningIcon />;
-  } else if (hasUnsentInitialMessages) {
-    listItemStyle = {
-      color: theme.palette.info.dark
-    };
-  } else {
-    listItemStyle = {
-      color: theme.palette.success.dark
-    };
-  }
   const dueBy = DateTime.fromISO(campaign.dueBy || "");
   const creatorName = campaign.creator ? campaign.creator.displayName : null;
-  let tags = [];
-  if (DateTime.local() >= dueBy) {
-    tags.push({
-      title: "Overdue",
-      color: theme.palette.grey[900],
-      backgroundColor: theme.palette.error.main
-    });
-  }
 
-  if (externalSystem) {
-    const title = `${externalSystem.type}: ${externalSystem.name}`;
-    tags.push({ title, backgroundColor: blue[300] });
-  }
-
-  if (!isStarted) {
-    tags.push({ title: "Not started" });
-  }
-
-  if (hasUnassignedContacts) {
-    tags.push({ title: "Unassigned contacts" });
-  }
-
-  if (isStarted && hasUnsentInitialMessages) {
-    tags.push({ title: "Unsent initial messages" });
-  }
-
-  if (isStarted && hasUnhandledMessages) {
-    tags.push({ title: "Unhandled replies" });
-  }
-
-  if (isStarted && !isArchived && isAutoassignEnabled) {
-    tags.push({ title: "Autoassign eligible" });
-  }
-
-  if (campaignIdsForExport.includes(campaign.id)) {
-    tags.push({ title: "Selected for export", backgroundColor: green[300] });
-  }
-
-  tags = tags.concat(teams.map(({ title }) => ({ title })));
-  if (campaignGroups) {
-    tags = tags.concat(
-      campaignGroups.edges.map(({ node }) => ({ title: node.name }))
-    );
-  }
-
-  const primaryText = (
-    <div style={inlineStyles.chipWrapper}>
-      {campaign.title}
-      {tags.map((tag) => (
-        <Chip
-          key={tag.title}
-          label={tag.title}
-          style={{
-            ...inlineStyles.chip,
-            color: tag.color,
-            backgroundColor: tag.backgroundColor
-          }}
-        />
-      ))}
-    </div>
-  );
-  const secondaryText = (
-    <span style={inlineStyles.secondaryText}>
-      <span>
-        Campaign ID: {campaign.id}
-        <br />
-        {campaign.description}
-        {creatorName ? <span> &mdash; Created by {creatorName}</span> : null}
-        <br />
-        {dueBy.isValid ? dueBy.toFormat("DD") : "No due date set"}
-      </span>
-    </span>
-  );
+  const headerTags = makeCampaignHeaderTags({
+    isStarted,
+    hasUnassignedContacts,
+    hasUnsentInitialMessages,
+    hasUnhandledMessages,
+    theme
+  });
 
   const campaignUrl = `/admin/${organizationId}/campaigns/${campaign.id}${
     isStarted ? "" : "/edit"
   }`;
   return (
-    <ListItem
-      {...dataTest("campaignRow")}
-      style={listItemStyle}
-      onClick={() => history.push(campaignUrl)}
+    <Card
+      variant="outlined"
+      style={{ marginBottom: 16, ...(isArchived && { opacity: 0.6 }) }}
     >
-      {leftIcon && (
-        <ListItemAvatar>
-          <Avatar>{leftIcon}</Avatar>
-        </ListItemAvatar>
-      )}
-      <ListItemText
-        primary={primaryText}
-        secondary={secondaryText}
-        secondaryTypographyProps={{ color: "textPrimary" }}
-      />
-      {isAdmin && (
-        <ListItemSecondaryAction>
-          <CampaignListMenu
-            campaign={campaign}
-            startOperation={props.startOperation}
-            archiveCampaign={props.archiveCampaign}
-            unarchiveCampaign={props.unarchiveCampaign}
-            selectForExport={props.selectForExport}
-            campaignIdsForExport={props.campaignIdsForExport}
+      <ListItem {...dataTest("campaignRow")} alignItems="flex-start">
+        <ListItemIcon>
+          <Checkbox
+            edge="start"
+            checked={campaignIdsForExport.includes(campaign.id)}
+            tabIndex={-1}
+            disableRipple
+            onClick={() => console.log("TODO")}
           />
-        </ListItemSecondaryAction>
-      )}
-    </ListItem>
+        </ListItemIcon>
+        <ListItemText
+          primary={
+            <CampaignHeader
+              campaignTitle={campaign.title}
+              campaignId={campaign.id}
+              tags={headerTags}
+              onClick={() => history.push(campaignUrl)}
+            />
+          }
+          secondary={
+            <CampaignDetails
+              id={campaign.id}
+              description={campaign.description}
+              dueBy={dueBy}
+              creatorName={creatorName}
+              teams={teams}
+              campaignGroups={campaignGroups}
+              externalSystem={externalSystem}
+              isAutoAssignEligible={
+                isStarted && !isArchived && isAutoassignEnabled
+              }
+            />
+          }
+          secondaryTypographyProps={{ color: "textPrimary" }}
+        />
+        {isAdmin && (
+          <ListItemSecondaryAction>
+            <CampaignListMenu
+              campaign={campaign}
+              startOperation={props.startOperation}
+              archiveCampaign={props.archiveCampaign}
+              unarchiveCampaign={props.unarchiveCampaign}
+              selectForExport={props.selectForExport}
+              campaignIdsForExport={props.campaignIdsForExport}
+            />
+          </ListItemSecondaryAction>
+        )}
+      </ListItem>
+    </Card>
   );
 };
 

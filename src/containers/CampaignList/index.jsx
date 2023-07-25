@@ -4,6 +4,7 @@ import React from "react";
 
 import { loadData } from "../hoc/with-operations";
 import AssignmentHUD from "./components/AssignmentHUD";
+import CampaignListHeader from "./components/CampaignListHeader";
 import CampaignListLoader from "./components/CampaignListLoader";
 import { OperationDialog, operations } from "./components/OperationDialog";
 
@@ -71,6 +72,7 @@ export class CampaignList extends React.Component {
           />
         )}
         <AssignmentHUD assignmentTargets={currentAssignmentTargets} />
+        <CampaignListHeader />
         <CampaignListLoader
           organizationId={organizationId}
           campaignsFilter={campaignsFilter}
