@@ -173,7 +173,7 @@ const ConfigureColumnMappingDialog: React.FC<ConfigureColumnMappingDialogProps> 
           {parseComplete ? (
             <div>
               {" "}
-              Required Headers: First Name, Last Name, Cell <br /> <br />
+              Required Headers: First Name, Last Name, Cell Phone <br /> <br />
               Optional Headers: Zip, External ID
               {controlledFields.map((arrayField, index) => (
                 <Grid
