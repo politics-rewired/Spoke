@@ -301,11 +301,12 @@ export const copyCampaign = async (options: CopyCampaignOptions) => {
       // Copy canned responses
       await trx.raw(
         `
-          insert into canned_response (campaign_id, title, text)
+          insert into canned_response (campaign_id, title, text, display_order)
           select
             ? as campaign_id,
             title,
-            text
+            text,
+            display_order
           from canned_response
           where campaign_id = ?
         `,
