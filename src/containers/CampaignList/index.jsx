@@ -53,7 +53,8 @@ export class CampaignList extends React.Component {
       data,
       mutations,
       selectForExport,
-      campaignIdsForExport
+      campaignIdsForExport,
+      handleClickExportButton
     } = this.props;
     const { currentAssignmentTargets } = data.organization;
     const { archiveCampaign, unarchiveCampaign } = mutations;
@@ -72,7 +73,10 @@ export class CampaignList extends React.Component {
           />
         )}
         <AssignmentHUD assignmentTargets={currentAssignmentTargets} />
-        <CampaignListHeader />
+        <CampaignListHeader
+          campaignIdsForExport={campaignIdsForExport}
+          onClick={handleClickExportButton}
+        />
         <CampaignListLoader
           organizationId={organizationId}
           campaignsFilter={campaignsFilter}

@@ -22,12 +22,19 @@ interface Props extends CampaignOperations {
   isAdmin: boolean;
   campaign: CampaignListEntryFragment;
   campaignIdsForExport: string[];
+  selectForExport: (id: string) => void;
 }
 
 export const CampaignListRow: React.FC<Props> = (props) => {
   const theme = useTheme();
   const history = useHistory();
-  const { organizationId, isAdmin, campaign, campaignIdsForExport } = props;
+  const {
+    organizationId,
+    isAdmin,
+    campaign,
+    campaignIdsForExport,
+    selectForExport
+  } = props;
   const {
     isStarted,
     isArchived,
@@ -66,7 +73,7 @@ export const CampaignListRow: React.FC<Props> = (props) => {
             checked={campaignIdsForExport.includes(campaign.id)}
             tabIndex={-1}
             disableRipple
-            onClick={() => console.log("TODO")}
+            onClick={() => selectForExport(campaign.id)}
           />
         </ListItemIcon>
         <ListItemText

@@ -6,7 +6,6 @@ import DialogContent from "@material-ui/core/DialogContent";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import CreateIcon from "@material-ui/icons/Create";
 import FileCopyIcon from "@material-ui/icons/FileCopyOutlined";
-import OpenInNewIcon from "@material-ui/icons/OpenInNew";
 import SpeedDial from "@material-ui/lab/SpeedDial";
 import SpeedDialAction from "@material-ui/lab/SpeedDialAction";
 import SpeedDialIcon from "@material-ui/lab/SpeedDialIcon";
@@ -150,6 +149,12 @@ class AdminCampaignList extends React.Component {
     }
     return this.setState({
       campaignIdsForExport: currentIds.concat(id)
+    });
+  };
+
+  handleClickExportButton = () => {
+    this.setState({
+      shouldShowExportModal: true
     });
   };
 
@@ -298,8 +303,9 @@ class AdminCampaignList extends React.Component {
             campaignsFilter={campaignsFilter}
             pageSize={DEFAULT_PAGE_SIZE}
             isAdmin={isAdmin}
-            selectForExport={this.handleSelectForExport}
             campaignIdsForExport={campaignIdsForExport}
+            selectForExport={this.handleSelectForExport}
+            handleClickExportButton={this.handleClickExportButton}
           />
         )}
 
@@ -322,12 +328,6 @@ class AdminCampaignList extends React.Component {
               icon={<FileCopyIcon />}
               tooltipTitle="Create from Template"
               onClick={() => this.setState({ createFromTemplateOpen: true })}
-            />
-            <SpeedDialAction
-              icon={<OpenInNewIcon />}
-              tooltipTitle="Export Campaign Data"
-              onClick={() => this.setState({ shouldShowExportModal: true })}
-              disabled={campaignIdsForExport.length < 1}
             />
           </SpeedDial>
         ) : null}

@@ -1,20 +1,18 @@
 import Button from "@material-ui/core/Button";
 import Typography from "@material-ui/core/Typography";
+import LibraryAddCheckOutlinedIcon from "@material-ui/icons/LibraryAddCheckOutlined";
+import OpenInNewOutlinedIcon from "@material-ui/icons/OpenInNewOutlined";
 import React from "react";
 
-const CampaignListHeader = () => {
-  // const [anchorEl, setAnchorEl] = useState(null);
+interface Props {
+  campaignIdsForExport: string[];
+  onClick: () => void;
+}
 
-  const handleClick = (_event: Event) => {
-    // TODO
-    // setAnchorEl(event.currentTarget);
-  };
+const CampaignListHeader = (props: Props) => {
+  const { campaignIdsForExport, onClick } = props;
 
-  // TODO
-  // const handleClose = () => {
-  //   setAnchorEl(null);
-  // };
-
+  const isCampaignSelected = campaignIdsForExport.length > 0;
   return (
     <div
       style={{
@@ -26,14 +24,24 @@ const CampaignListHeader = () => {
       <Button
         aria-controls="simple-menu"
         aria-haspopup="true"
-        onClick={handleClick}
+        onClick={onClick}
         variant="outlined"
         color="primary"
         style={{
           margin: "16px 0px 16px 0px"
         }}
+        startIcon={
+          isCampaignSelected ? (
+            <OpenInNewOutlinedIcon />
+          ) : (
+            <LibraryAddCheckOutlinedIcon />
+          )
+        }
+        disabled={!isCampaignSelected}
       >
-        Export Campaign Data
+        {isCampaignSelected
+          ? `Export ${campaignIdsForExport.length} Campaign(s)`
+          : "Select Campaign(s)"}
       </Button>
     </div>
   );
