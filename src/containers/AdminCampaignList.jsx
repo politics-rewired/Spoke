@@ -4,6 +4,7 @@ import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogTitle from "@material-ui/core/DialogTitle";
+import Typography from "@material-ui/core/Typography";
 import CreateIcon from "@material-ui/icons/Create";
 import FileCopyIcon from "@material-ui/icons/FileCopyOutlined";
 import SpeedDial from "@material-ui/lab/SpeedDial";
@@ -32,6 +33,10 @@ const styles = {
     alignItems: "baseline",
     justifyContent: "space-between",
     padding: 5
+  },
+  filterWrapper: {
+    display: "flex",
+    alignIems: "baseline"
   }
 };
 
@@ -44,7 +49,8 @@ class AdminCampaignList extends React.Component {
     createFromTemplateOpen: false,
     isCreating: false,
     campaignsFilter: {
-      isArchived: false
+      isArchived: false,
+      campaignTitle: ""
     },
     releasingInProgress: false,
     releasingAllReplies: false,
@@ -80,10 +86,22 @@ class AdminCampaignList extends React.Component {
     );
   };
 
-  handleFilterChange = (event, index, value) => {
+  handleFilterChangeCurrentOrArchived = (_event, _index, value) => {
+    const { campaignTitle } = this.state.campaignsFilter;
     this.setState({
       campaignsFilter: {
-        isArchived: value
+        isArchived: value,
+        campaignTitle
+      }
+    });
+  };
+
+  handleFilterCampaignTitle = (campaignTitle) => {
+    const { isArchived } = this.state.campaignsFilter;
+    this.setState({
+      campaignsFilter: {
+        isArchived,
+        campaignTitle
       }
     });
   };
@@ -166,11 +184,11 @@ class AdminCampaignList extends React.Component {
     });
   };
 
-  renderFilters() {
+  renderCurrentCampaignFilter() {
     return (
       <DropDownMenu
         value={this.state.campaignsFilter.isArchived}
-        onChange={this.handleFilterChange}
+        onChange={this.handleFilterChangeCurrentOrArchived}
       >
         <MenuItem value={false} primaryText="Current" />
         <MenuItem value primaryText="Archived" />
@@ -197,7 +215,12 @@ class AdminCampaignList extends React.Component {
     return (
       <div>
         <div style={styles.flexContainer}>
-          {this.renderFilters()}
+          <div style={styles.filterWrapper}>
+            <Typography variant="h4" style={{ padding: "4px" }}>
+              Campaigns
+            </Typography>
+            {this.renderCurrentCampaignFilter()}
+          </div>
           <Button
             variant="contained"
             color="primary"
@@ -304,6 +327,7 @@ class AdminCampaignList extends React.Component {
             pageSize={DEFAULT_PAGE_SIZE}
             isAdmin={isAdmin}
             campaignIdsForExport={campaignIdsForExport}
+            filterByCampaignTitle={this.handleFilterCampaignTitle}
             selectForExport={this.handleSelectForExport}
             handleClickExportButton={this.handleClickExportButton}
           />
