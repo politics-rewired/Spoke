@@ -12,6 +12,8 @@ All notable changes to this project will be documented in this file. See [standa
 ## [7.0.0-rc.1](https://github.com/politics-rewired/spoke/compare/v7.0.0-rc.0...v7.0.0-rc.1) (2023-07-25)
 
 
+### Bug Fixes
+
 * **copy campaign:** copy display order for canned responses ([#1643](https://github.com/politics-rewired/spoke/issues/1643)) ([0cd4643](https://github.com/politics-rewired/spoke/commit/0cd46435567c789dca3cf4ebee0c6951a2519b60))
 
 ## [7.0.0-rc.0](https://github.com/politics-rewired/spoke/compare/v6.4.0...v7.0.0-rc.0) (2023-07-13)
