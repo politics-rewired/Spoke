@@ -145,6 +145,13 @@ All notable changes to this project will be documented in this file. See [standa
 * **knex:** resolve to v.2.3.0 ([#1539](https://github.com/politics-rewired/spoke/issues/1539)) ([4c68e7e](https://github.com/politics-rewired/spoke/commit/4c68e7ee46752af583d935a2d082078e8747d82d))
 * **message response:** convert to functional component ([#1541](https://github.com/politics-rewired/spoke/issues/1541)) ([b8b68dd](https://github.com/politics-rewired/spoke/commit/b8b68dd7f080114cf2a0babbe467e5f788c83d3b))
 
+### [6.1.3](https://github.com/politics-rewired/spoke/compare/v6.1.2...v6.1.3) (2023-04-21)
+
+
+### Bug Fixes
+
+* van configuration reading the wrong query ([3935821](https://github.com/politics-rewired/spoke/commit/3935821290124c3d28a5842ef439ce8a2ed8445c))
+
 ### [6.1.2](https://github.com/politics-rewired/spoke/compare/v6.1.1...v6.1.2) (2023-02-27)
 
 
