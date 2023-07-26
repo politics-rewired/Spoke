@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [7.0.0](https://github.com/politics-rewired/spoke/compare/v7.0.0-rc.1...v7.0.0) (2023-07-26)
+
+
+### Backend Changes
+
+* **csv mapping:** update required headers copy ([#1644](https://github.com/politics-rewired/spoke/issues/1644)) ([69a07ef](https://github.com/politics-rewired/spoke/commit/69a07efac9750b71164a0494d2b52463e13f3c23))
+
 ## [7.0.0-rc.1](https://github.com/politics-rewired/spoke/compare/v7.0.0-rc.0...v7.0.0-rc.1) (2023-07-25)
 
 
