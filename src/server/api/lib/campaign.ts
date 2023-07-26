@@ -52,7 +52,14 @@ type DoGetCampaigns = (
 export const doGetCampaigns: DoGetCampaigns = async (
   options: DoGetCampaignsOptions
 ) => {
-  const { after, first, organizationId, campaignId, isArchived } = options;
+  const {
+    after,
+    first,
+    organizationId,
+    campaignId,
+    isArchived,
+    campaignTitle
+  } = options;
 
   const query = r.reader("campaign").select("*");
 
@@ -67,6 +74,12 @@ export const doGetCampaigns: DoGetCampaigns = async (
 
   if (!isNil(isArchived)) {
     query.where({ is_archived: isArchived });
+  }
+
+  if (campaignTitle) {
+    query.whereRaw(`concat("id", ': ', "title") ilike ?`, [
+      `%${campaignTitle}%`
+    ]);
   }
 
   const pagerOptions = { first, after };

@@ -54,6 +54,7 @@ export class CampaignList extends React.Component {
       mutations,
       selectForExport,
       campaignIdsForExport,
+      filterByCampaignTitle,
       handleClickExportButton
     } = this.props;
     const { currentAssignmentTargets } = data.organization;
@@ -75,6 +76,7 @@ export class CampaignList extends React.Component {
         <AssignmentHUD assignmentTargets={currentAssignmentTargets} />
         <CampaignListHeader
           campaignIdsForExport={campaignIdsForExport}
+          filterByCampaignTitle={filterByCampaignTitle}
           onClick={handleClickExportButton}
         />
         <CampaignListLoader
@@ -98,6 +100,10 @@ CampaignList.propTypes = {
   campaignsFilter: PropTypes.object.isRequired,
   pageSize: PropTypes.number.isRequired,
   isAdmin: PropTypes.bool.isRequired,
+  campaignIdsForExport: PropTypes.array.isRequired,
+  filterByCampaignTitle: PropTypes.func.isRequired,
+  selectForExport: PropTypes.func.isRequired,
+  handleClickExportButton: PropTypes.func.isRequired,
   data: PropTypes.object.isRequired,
   mutations: PropTypes.object.isRequired
 };

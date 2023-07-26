@@ -19,9 +19,6 @@ interface Props extends CampaignOperations {
   campaignsFilter: CampaignsFilter;
   isAdmin: boolean;
   campaignIdsForExport: string[];
-  // startOperation: (...args: any[]) => any;
-  // archiveCampaign: (...args: any[]) => any;
-  // unarchiveCampaign: (...args: any[]) => any;
 }
 
 const CampaignListLoader: React.FC<Props> = (props) => {
