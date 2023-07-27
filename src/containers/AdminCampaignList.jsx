@@ -56,7 +56,7 @@ class AdminCampaignList extends React.Component {
     releasingAllReplies: false,
     releaseAllRepliesError: undefined,
     releaseAllRepliesResult: undefined,
-    campaignIdsForExport: [],
+    campaignDetailsForExport: [],
     shouldShowExportModal: false,
     shouldShowExportSnackbar: false,
     exportErrorMessage: null
@@ -158,15 +158,18 @@ class AdminCampaignList extends React.Component {
   };
 
   // handle selecting and de-selecting campaigns via CampaignListMenu
-  handleSelectForExport = (id) => {
-    const currentIds = this.state.campaignIdsForExport;
-    const isDeSelecting = currentIds.includes(id);
+  handleSelectForExport = (incomingCampaign) => {
+    const { campaignDetailsForExport: currentDetails } = this.state;
+    const currentIds = currentDetails.map((campaign) => campaign.id);
+    const isDeSelecting = currentIds.includes(incomingCampaign.id);
     if (isDeSelecting) {
-      const filteredIds = currentIds.filter((selectedId) => selectedId !== id);
-      return this.setState({ campaignIdsForExport: filteredIds });
+      const filteredCampaigns = currentDetails.filter(
+        (campaign) => campaign.id !== incomingCampaign.id
+      );
+      return this.setState({ campaignDetailsForExport: filteredCampaigns });
     }
     return this.setState({
-      campaignIdsForExport: currentIds.concat(id)
+      campaignDetailsForExport: currentDetails.concat(incomingCampaign)
     });
   };
 
@@ -201,7 +204,7 @@ class AdminCampaignList extends React.Component {
       campaignsFilter,
       releasingAllReplies,
       releasingInProgress,
-      campaignIdsForExport,
+      campaignDetailsForExport,
       shouldShowExportModal,
       shouldShowExportSnackbar,
       exportErrorMessage
@@ -326,7 +329,7 @@ class AdminCampaignList extends React.Component {
             campaignsFilter={campaignsFilter}
             pageSize={DEFAULT_PAGE_SIZE}
             isAdmin={isAdmin}
-            campaignIdsForExport={campaignIdsForExport}
+            campaignDetailsForExport={campaignDetailsForExport}
             filterByCampaignTitle={this.handleFilterCampaignTitle}
             selectForExport={this.handleSelectForExport}
             handleClickExportButton={this.handleClickExportButton}
@@ -361,18 +364,18 @@ class AdminCampaignList extends React.Component {
           onClose={() => this.setState({ createFromTemplateOpen: false })}
         />
         <ExportMultipleCampaignDataDialog
-          campaignIds={campaignIdsForExport}
+          campaignDetailsForExport={campaignDetailsForExport}
           open={shouldShowExportModal}
           onClose={() =>
             this.setState({
               shouldShowExportModal: false,
-              campaignIdsForExport: []
+              campaignDetailsForExport: []
             })
           }
           onError={this.handleErrorCampaignExport}
           onComplete={() =>
             this.setState({
-              campaignIdsForExport: [],
+              campaignDetailsForExport: [],
               shouldShowExportModal: false,
               shouldShowExportSnackbar: true
             })

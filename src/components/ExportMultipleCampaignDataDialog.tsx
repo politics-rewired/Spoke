@@ -4,6 +4,8 @@ import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
+import Typography from "@material-ui/core/Typography";
+import CheckBoxOutlinedIcon from "@material-ui/icons/CheckBoxOutlined";
 import {
   CampaignExportType,
   useExportCampaignsMutation
@@ -12,8 +14,12 @@ import React, { useState } from "react";
 
 import { CampaignExportModalContent } from "../containers/AdminCampaignStats/components/CampaignExportModal";
 
+export type CampaignDetailsForExport = {
+  id: string;
+  title: string;
+};
 interface Props {
-  campaignIds: string[];
+  campaignDetailsForExport: CampaignDetailsForExport[];
   open: boolean;
   onClose: () => void;
   onError: (errorMessage: string) => void;
@@ -21,7 +27,13 @@ interface Props {
 }
 
 const ExportMultipleCampaignDataDialog: React.FC<Props> = (props) => {
-  const { campaignIds, open, onClose, onError, onComplete } = props;
+  const {
+    campaignDetailsForExport,
+    open,
+    onClose,
+    onError,
+    onComplete
+  } = props;
   const [exportCampaign, setExportCampaign] = useState<boolean>(true);
   const [exportMessages, setExportMessages] = useState<boolean>(true);
   const [exportOptOut, setExportOptOut] = useState<boolean>(false);
@@ -36,6 +48,9 @@ const ExportMultipleCampaignDataDialog: React.FC<Props> = (props) => {
   };
 
   const handleExportClick = async () => {
+    const campaignIds = campaignDetailsForExport.map(
+      (campaign: CampaignDetailsForExport) => campaign.id
+    );
     const result = await exportCampaignsMutation({
       variables: {
         options: {
@@ -64,7 +79,9 @@ const ExportMultipleCampaignDataDialog: React.FC<Props> = (props) => {
       open={open}
     >
       <DialogTitle id="export-multiple-campaign-data">
-        Export Multiple Campaigns Data
+        <Typography variant="h6" style={{ margin: "4px", cursor: "pointer" }}>
+          Export Campaigns
+        </Typography>
       </DialogTitle>
       <CampaignExportModalContent
         exportCampaign={exportCampaign}
@@ -78,13 +95,34 @@ const ExportMultipleCampaignDataDialog: React.FC<Props> = (props) => {
         setExportFiltered={setExportFiltered}
       />
       <DialogContent>
-        <DialogContentText>Exporting data for:</DialogContentText>
+        <DialogContentText>
+          Exporting data for:
+          {campaignDetailsForExport.map((campaign) => {
+            return (
+              <div
+                key={campaign.id}
+                style={{ display: "flex", alignItems: "center", margin: "4px" }}
+              >
+                <CheckBoxOutlinedIcon />
+                <Typography
+                  variant="h6"
+                  style={{ margin: "4px", cursor: "pointer" }}
+                >
+                  {campaign.title}
+                </Typography>
+                <Typography variant="subtitle1" style={{ marginLeft: "8px" }}>
+                  id: {campaign.id}
+                </Typography>
+              </div>
+            );
+          })}
+        </DialogContentText>
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose}>Cancel</Button>
         <Button
           color="primary"
-          disabled={campaignIds.length < 1}
+          disabled={campaignDetailsForExport.length < 1}
           onClick={handleExportClick}
         >
           Export data

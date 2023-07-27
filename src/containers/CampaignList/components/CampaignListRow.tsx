@@ -9,6 +9,7 @@ import type { CampaignListEntryFragment } from "@spoke/spoke-codegen";
 import React from "react";
 import { useHistory } from "react-router-dom";
 
+import type { CampaignDetailsForExport } from "../../../components/ExportMultipleCampaignDataDialog";
 import { dataTest } from "../../../lib/attributes";
 import { DateTime } from "../../../lib/datetime";
 import { makeCampaignHeaderTags } from "../utils";
@@ -21,8 +22,8 @@ interface Props extends CampaignOperations {
   organizationId: string;
   isAdmin: boolean;
   campaign: CampaignListEntryFragment;
-  campaignIdsForExport: string[];
-  selectForExport: (id: string) => void;
+  campaignDetailsForExport: CampaignDetailsForExport[];
+  selectForExport: (details: CampaignDetailsForExport) => void;
 }
 
 export const CampaignListRow: React.FC<Props> = (props) => {
@@ -32,7 +33,7 @@ export const CampaignListRow: React.FC<Props> = (props) => {
     organizationId,
     isAdmin,
     campaign,
-    campaignIdsForExport,
+    campaignDetailsForExport,
     selectForExport
   } = props;
   const {
@@ -58,6 +59,11 @@ export const CampaignListRow: React.FC<Props> = (props) => {
     theme
   });
 
+  const isCampaignSelected = campaignDetailsForExport.find(
+    (selectedCampaign: CampaignDetailsForExport) =>
+      selectedCampaign.id === campaign.id
+  );
+
   const campaignUrl = `/admin/${organizationId}/campaigns/${campaign.id}${
     isStarted ? "" : "/edit"
   }`;
@@ -70,10 +76,12 @@ export const CampaignListRow: React.FC<Props> = (props) => {
         <ListItemIcon>
           <Checkbox
             edge="start"
-            checked={campaignIdsForExport.includes(campaign.id)}
+            checked={!!isCampaignSelected}
             tabIndex={-1}
             disableRipple
-            onClick={() => selectForExport(campaign.id)}
+            onClick={() =>
+              selectForExport({ id: campaign.id, title: campaign.title })
+            }
           />
         </ListItemIcon>
         <ListItemText
@@ -108,8 +116,6 @@ export const CampaignListRow: React.FC<Props> = (props) => {
               startOperation={props.startOperation}
               archiveCampaign={props.archiveCampaign}
               unarchiveCampaign={props.unarchiveCampaign}
-              selectForExport={props.selectForExport}
-              campaignIdsForExport={props.campaignIdsForExport}
             />
           </ListItemSecondaryAction>
         )}

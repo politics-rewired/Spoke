@@ -7,6 +7,7 @@ import type {
 import { useGetAdminCampaignsQuery } from "@spoke/spoke-codegen";
 import React from "react";
 
+import type { CampaignDetailsForExport } from "../../../components/ExportMultipleCampaignDataDialog";
 import LoadingIndicator from "../../../components/LoadingIndicator";
 import { useAuthzContext } from "../../AuthzProvider";
 import { isCampaignGroupsPermissionError } from "../utils";
@@ -18,7 +19,7 @@ interface Props extends CampaignOperations {
   pageSize: number;
   campaignsFilter: CampaignsFilter;
   isAdmin: boolean;
-  campaignIdsForExport: string[];
+  campaignDetailsForExport: CampaignDetailsForExport[];
 }
 
 const CampaignListLoader: React.FC<Props> = (props) => {
@@ -31,7 +32,7 @@ const CampaignListLoader: React.FC<Props> = (props) => {
     archiveCampaign,
     unarchiveCampaign,
     selectForExport,
-    campaignIdsForExport
+    campaignDetailsForExport
   } = props;
   const { data, loading, error, fetchMore } = useGetAdminCampaignsQuery({
     variables: { organizationId, limit: pageSize, filter: campaignsFilter },
@@ -107,7 +108,7 @@ const CampaignListLoader: React.FC<Props> = (props) => {
         archiveCampaign={archiveCampaign}
         unarchiveCampaign={unarchiveCampaign}
         selectForExport={selectForExport}
-        campaignIdsForExport={campaignIdsForExport}
+        campaignDetailsForExport={campaignDetailsForExport}
       />
       {loading && <LoadingIndicator />}
       <div ref={loadingRef} />

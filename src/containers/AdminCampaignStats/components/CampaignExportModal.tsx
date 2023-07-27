@@ -32,7 +32,6 @@ interface CampaignExportModalContentProps {
   setExportOptOut: React.Dispatch<React.SetStateAction<boolean>>;
   setExportFiltered: React.Dispatch<React.SetStateAction<boolean>>;
 }
-// console.log('TODO')
 export const CampaignExportModalContent: React.FC<CampaignExportModalContentProps> = (
   props: CampaignExportModalContentProps
 ) => {
