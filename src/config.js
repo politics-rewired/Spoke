@@ -445,8 +445,9 @@ const validators = {
       "A comma separated list of contact fields to not ship to the client. Can include 'external_id, cell, and lastName'",
     default: ""
   }),
-  SHOW_10DLC_REGISTRATION_WARNING: bool({
-    desc: "Whether the 10DLC Registration Warning is disabled for Admins",
+  SHOW_10DLC_REGISTRATION_NOTICES: bool({
+    desc:
+      "Whether the 10DLC Registration Notices are displayed to Admins and Owners",
     default: true,
     isClient: true
   }),
