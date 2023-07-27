@@ -37,7 +37,7 @@ export const get10DlcBrandNotices: OrgLevelNotificationGetter = async (
   userId,
   organizationId
 ) => {
-  const query = r
+  const profilesQuery = r
     .knex("messaging_service")
     .join(
       "user_organization",
@@ -51,15 +51,16 @@ export const get10DlcBrandNotices: OrgLevelNotificationGetter = async (
       user_id: userId,
       active: true
     })
-    .whereIn("role", ["OWNER", "ADMIN"]);
-  if (organizationId !== undefined) {
-    query.where({ "user_organization.organization_id": organizationId });
-  }
+    .whereIn("role", ["OWNER", "ADMIN"])
+    .where({
+      "user_organization.organization_id": organizationId
+    });
 
   const profiles: {
     messaging_service_sid: string;
     roles: string[];
-  }[] = await query;
+  }[] = await profilesQuery;
+
   const ownedProfiles = profiles.filter(({ roles }) => roles.includes("OWNER"));
 
   const registeredProfiles: Array<boolean> = await Promise.all(
