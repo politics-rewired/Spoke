@@ -1,5 +1,5 @@
 import Chip from "@material-ui/core/Chip";
-import { blue, yellow } from "@material-ui/core/colors";
+import { blue, orange } from "@material-ui/core/colors";
 import Divider from "@material-ui/core/Divider";
 import type { Theme } from "@material-ui/core/styles";
 import { useTheme } from "@material-ui/core/styles";
@@ -22,7 +22,11 @@ const inlineStyles = {
     whiteSpace: "pre-wrap",
     alignItems: "center"
   },
-  chip: { margin: "4px", padding: "4px" }
+  chip: {
+    margin: "4px",
+    padding: "4px",
+    border: "1px white"
+  }
 };
 
 interface CampaignDetailsProps {
@@ -41,29 +45,36 @@ interface DueByIconProps {
   theme: Theme;
 }
 
+const makeDueByLabel = (dueBy: DateTime, isPastDue: boolean): string => {
+  if (!dueBy.isValid) {
+    return "No due date set";
+  }
+  return isPastDue
+    ? `Past due ${dueBy.toFormat("DD")}`
+    : `Due ${dueBy.toFormat("DD")}`;
+};
+
 const DueByIcon: React.FC<DueByIconProps> = (props) => {
   const { dueBy, theme } = props;
-  const pastDue = DateTime.local() >= dueBy;
+  const isPastDue = DateTime.local() >= dueBy;
 
-  const label = dueBy.isValid
-    ? pastDue
-      ? `past due ${dueBy.toFormat("DD")}`
-      : `due ${dueBy.toFormat("DD")}`
-    : "No due date set";
-  const style = pastDue
+  const label = makeDueByLabel(dueBy, isPastDue);
+  const chipStyle = isPastDue
     ? {
         margin: "4px",
-        color: theme.palette.grey[900],
-        backgroundColor: yellow[300]
+        color: orange[300]
       }
     : { margin: "4px", color: theme.palette.grey[900] };
+  const iconStyle = isPastDue
+    ? { color: orange[300] }
+    : { color: theme.palette.grey[900] };
   return (
     <Chip
-      icon={<ScheduleIcon />}
+      icon={<ScheduleIcon style={iconStyle} />}
       label={label}
       style={{
         ...inlineStyles.chip,
-        ...style
+        ...chipStyle
       }}
       variant="outlined"
     />
@@ -82,6 +93,7 @@ const CampaignDetails: React.FC<CampaignDetailsProps> = (props) => {
   } = props;
   const theme = useTheme();
 
+  // display van configuration and auto assign eligible tags in divided section
   const shouldShowExtraTags = externalSystem || isAutoAssignEligible;
 
   return (

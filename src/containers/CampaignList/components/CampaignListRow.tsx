@@ -4,7 +4,6 @@ import ListItem from "@material-ui/core/ListItem";
 import ListItemIcon from "@material-ui/core/ListItemIcon";
 import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
 import ListItemText from "@material-ui/core/ListItemText";
-import { useTheme } from "@material-ui/core/styles";
 import type { CampaignListEntryFragment } from "@spoke/spoke-codegen";
 import React from "react";
 import { useHistory } from "react-router-dom";
@@ -27,7 +26,6 @@ interface Props extends CampaignOperations {
 }
 
 export const CampaignListRow: React.FC<Props> = (props) => {
-  const theme = useTheme();
   const history = useHistory();
   const {
     organizationId,
@@ -55,8 +53,7 @@ export const CampaignListRow: React.FC<Props> = (props) => {
     isStarted,
     hasUnassignedContacts,
     hasUnsentInitialMessages,
-    hasUnhandledMessages,
-    theme
+    hasUnhandledMessages
   });
 
   const isCampaignSelected = campaignDetailsForExport.find(

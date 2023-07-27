@@ -1,7 +1,8 @@
 import { Divider, Typography } from "@material-ui/core";
 import Chip from "@material-ui/core/Chip";
-import CheckIcon from "@material-ui/icons/Check";
-import WarningIcon from "@material-ui/icons/Warning";
+import { green, orange } from "@material-ui/core/colors";
+import CheckCircleOutlineRoundedIcon from "@material-ui/icons/CheckCircleOutlineRounded";
+import WarningRoundedIcon from "@material-ui/icons/WarningRounded";
 import React from "react";
 
 type IconMap = {
@@ -9,11 +10,17 @@ type IconMap = {
 };
 
 const CHIP_ICONS: IconMap = {
-  "Not started": <WarningIcon />,
-  "Unassigned contacts": <WarningIcon />,
-  "Unsent initial messages": <WarningIcon />,
-  "All contacts assigned": <CheckIcon />,
-  "All initials sent": <CheckIcon />
+  "Not Started": <WarningRoundedIcon style={{ color: orange[300] }} />,
+  "Unassigned Contacts": <WarningRoundedIcon style={{ color: orange[300] }} />,
+  "Unsent Initial Messages": (
+    <WarningRoundedIcon style={{ color: orange[300] }} />
+  ),
+  "All Contacts Assigned": (
+    <CheckCircleOutlineRoundedIcon style={{ color: green[500] }} />
+  ),
+  "All Initials Sent": (
+    <CheckCircleOutlineRoundedIcon style={{ color: green[500] }} />
+  )
 };
 
 const inlineStyles = {
@@ -22,7 +29,11 @@ const inlineStyles = {
     flexWrap: "wrap",
     alignItems: "center"
   },
-  chip: { margin: "4px", padding: "4px" }
+  chip: {
+    margin: "4px",
+    padding: "4px",
+    borderRadius: "2px"
+  }
 };
 
 export type Tag = {
@@ -59,6 +70,15 @@ const CampaignHeader = (props: CampaignHeaderProps) => {
       />
       {tags.map((tag) => {
         const Icon = CHIP_ICONS[tag.title] ?? null;
+        // "Started" tag should have green background
+        const tagStyle =
+          tag.title === "Started"
+            ? {
+                backgroundColor: green[100]
+              }
+            : {
+                border: "1px white"
+              };
         return (
           <Chip
             key={tag.title}
@@ -66,8 +86,7 @@ const CampaignHeader = (props: CampaignHeaderProps) => {
             icon={Icon}
             style={{
               ...inlineStyles.chip,
-              color: tag.color,
-              backgroundColor: tag.backgroundColor
+              ...tagStyle
             }}
             variant="outlined"
           />
