@@ -1,11 +1,11 @@
+import { renderToMjml } from "@faire/mjml-react/utils/renderToMjml";
+import mjml2html from "mjml";
 import React from "react";
-import ReactDOMServer from "react-dom/server";
 
 import assemblePalette from "../../../styles/assemble-palette";
 import type { CampaignRecord, OrganizationRecord } from "../../api/types";
 import { NotificationTypes } from "../../api/types";
-import Footer from "./footer";
-import Header from "./header";
+import TemplateWrapper from "./template-wrapper";
 
 interface NotificationProps {
   campaign: CampaignRecord;
@@ -13,12 +13,6 @@ interface NotificationProps {
   assignmentCount: string;
   settingsUrl: string;
   textingUrl: string;
-}
-
-interface NotificationWrapperProps {
-  children: React.ReactNode;
-  organizationName: string;
-  settingsUrl: string;
 }
 
 const styles = {
@@ -31,29 +25,12 @@ const styles = {
     padding: `12px 20px`,
     borderRadius: 4,
     cursor: "pointer",
-    marginBottom: 10,
-    "text-align": "center"
+    marginBottom: 10
   },
   buttonText: {
     color: "white",
     textDecoration: "none"
   }
-};
-
-const NotificationWrapper: React.FC<NotificationWrapperProps> = ({
-  children,
-  organizationName,
-  settingsUrl
-}) => {
-  return (
-    <html lang="en">
-      <Header />
-      <body style={styles.font}>
-        {children}
-        <Footer orgName={organizationName} settingsUrl={settingsUrl} />
-      </body>
-    </html>
-  );
 };
 
 const AssignmentCreated: React.FC<NotificationProps> = ({
@@ -65,7 +42,7 @@ const AssignmentCreated: React.FC<NotificationProps> = ({
 }) => {
   const orgName = organization.name;
   return (
-    <NotificationWrapper organizationName={orgName} settingsUrl={settingsUrl}>
+    <TemplateWrapper organizationName={orgName} settingsUrl={settingsUrl}>
       <p>Hello!</p>
       <p>
         You just got a new texting assignment from {orgName}: {campaign.title}.
@@ -77,7 +54,7 @@ const AssignmentCreated: React.FC<NotificationProps> = ({
         </a>
       </div>
       <br />
-    </NotificationWrapper>
+    </TemplateWrapper>
   );
 };
 
@@ -90,7 +67,7 @@ const AssignmentUpdated: React.FC<NotificationProps> = ({
 }) => {
   const orgName = organization.name;
   return (
-    <NotificationWrapper organizationName={orgName} settingsUrl={settingsUrl}>
+    <TemplateWrapper organizationName={orgName} settingsUrl={settingsUrl}>
       <p>Hello!</p>
       <p>
         Your texting assignment from {orgName}: {campaign.title} has been
@@ -107,7 +84,7 @@ const AssignmentUpdated: React.FC<NotificationProps> = ({
         </a>
       </div>
       <br />
-    </NotificationWrapper>
+    </TemplateWrapper>
   );
 };
 
@@ -119,7 +96,7 @@ const AssignmentMessageReceived: React.FC<NotificationProps> = ({
 }) => {
   const orgName = organization.name;
   return (
-    <NotificationWrapper organizationName={orgName} settingsUrl={settingsUrl}>
+    <TemplateWrapper organizationName={orgName} settingsUrl={settingsUrl}>
       <p>Hello!</p>
       <p>
         Someone responded to your message from {orgName} in {campaign.title}.
@@ -131,7 +108,7 @@ const AssignmentMessageReceived: React.FC<NotificationProps> = ({
         </a>
       </div>
       <br />
-    </NotificationWrapper>
+    </TemplateWrapper>
   );
 };
 
@@ -160,7 +137,7 @@ const getNotificationContent = (
       throw new Error(`Unrecognized notification type ${notificationType}`);
   }
 
-  const content = ReactDOMServer.renderToStaticMarkup(template);
+  const content = mjml2html(renderToMjml(template)).html;
 
   return {
     content,

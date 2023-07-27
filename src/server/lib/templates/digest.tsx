@@ -4,8 +4,7 @@ import assemblePalette from "src/styles/assemble-palette";
 
 import type { CampaignRecord, OrganizationRecord } from "../../api/types";
 import { NotificationTypes } from "../../api/types";
-import Footer from "./footer";
-import Header from "./header";
+import TemplateWrapper from "./template-wrapper";
 
 interface FormattedNotification {
   notificationType: NotificationTypes;
@@ -92,25 +91,21 @@ const Digest: React.FC<DigestProps> = ({
 }) => {
   const orgName = organization.name;
   return (
-    <html lang="en">
-      <Header />
-      <body style={styles.font}>
-        <p>Hello!</p>
-        <p>You have outstanding text assignments from {orgName}: </p>
-        {notifications.map((notification) => renderDigestRow(notification))}
-        <button
-          type="button"
-          style={styles.button}
-          onClick={() => {
-            window.open(textingUrl);
-          }}
-        >
-          Send Now
-        </button>
-        <br />
-        <Footer orgName={orgName} settingsUrl={settingsUrl} />
-      </body>
-    </html>
+    <TemplateWrapper organizationName={orgName} settingsUrl={settingsUrl}>
+      <p>Hello!</p>
+      <p>You have outstanding text assignments from {orgName}: </p>
+      {notifications.map((notification) => renderDigestRow(notification))}
+      <button
+        type="button"
+        style={styles.button}
+        onClick={() => {
+          window.open(textingUrl);
+        }}
+      >
+        Send Now
+      </button>
+      <br />
+    </TemplateWrapper>
   );
 };
 
