@@ -1,9 +1,9 @@
+import type { Notice } from "@spoke/spoke-codegen";
+
 export interface Register10DlcBrandNotice {
   id: string;
   tcrBrandRegistrationUrl: string | null;
 }
-
-export type Notice = Register10DlcBrandNotice;
 
 export function isRegister10DlcBrandNotice(
   obj: Notice
