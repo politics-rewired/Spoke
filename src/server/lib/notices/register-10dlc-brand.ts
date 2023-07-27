@@ -33,6 +33,15 @@ const fetchBrandQuery = `
   }
 `;
 
+const fetchProfileQuery = `
+  query GetSwitchboardProfile($profileId: UUID!) {
+    profile: switchboardProfileByProfileId(profileId: $profileId) {
+      id
+      channel
+    }
+  }
+`;
+
 export const get10DlcBrandNotices: OrgLevelNotificationGetter = async (
   userId,
   organizationId
@@ -63,57 +72,109 @@ export const get10DlcBrandNotices: OrgLevelNotificationGetter = async (
 
   const ownedProfiles = profiles.filter(({ roles }) => roles.includes("OWNER"));
 
-  const registeredProfiles: Array<boolean> = await Promise.all(
-    ownedProfiles.map(async ({ messaging_service_sid }) => {
+  const profilesWithChannels = await Promise.all(
+    profiles.map(async ({ messaging_service_sid }) => {
       const payload = {
-        operationName: "GetBillingAccountBySwitchboardProfileId",
-        query: fetchBillingAccountQuery,
+        operationName: "GetSwitchboardProfile",
+        query: fetchProfileQuery,
         variables: {
-          switchboardProfileId: messaging_service_sid
+          profileId: messaging_service_sid
         }
       };
 
-      const billingAccountResponse = await request
-        .post(PORTAL_API_URL)
-        .send(payload);
-
-      if (billingAccountResponse.body?.data?.billingAccount?.id) {
-        const brandPayload = {
-          operationName: "AnonGetTcr10DlcBrandByBillingAccountId",
-          query: fetchBrandQuery,
-          variables: {
-            billingAccountId: billingAccountResponse.body.data.billingAccount.id
-          }
-        };
-
-        const brandResponse = await request
-          .post(PORTAL_API_URL)
-          .send(brandPayload);
-
-        if (brandResponse.body.data?.brand?.campaigns?.nodes) {
-          return brandResponse.body.data?.brand?.campaigns?.nodes.some(
-            ({ state }: { state: string }) => state === "REGISTERED"
-          );
-        }
-      }
-
-      return false;
+      const profileResponse = await request.post(PORTAL_API_URL).send(payload);
+      return profileResponse.body.data?.profile;
     })
   );
 
-  // Check if there are no registered profiles
-  if (registeredProfiles.every((registered) => !registered)) {
-    const { messaging_service_sid: messagingServiceSid } = ownedProfiles[0];
+  // if a registered profile exists, show the notice for their lowest cost pricing plan
+
+  const profile10Dlc = profilesWithChannels.find((p) => p.channel === "_10DLC");
+  if (profile10Dlc !== undefined) {
     return [
       {
-        __typename: "Register10DlcBrandNotice",
-        id: messagingServiceSid,
-        tcrBrandRegistrationUrl: `https://portal.spokerewired.com/10dlc-registration/${messagingServiceSid}`
+        __typename: "Pricing10DlcNotice",
+        id: profile10Dlc.id
       }
     ];
   }
 
-  return [];
+  const profileTollFree = profilesWithChannels.find(
+    (p) => p.channel === "TOLL-FREE"
+  );
+  if (profileTollFree !== undefined)
+    return [
+      {
+        __typename: "PricingTollFreeNotice",
+        id: profileTollFree.id
+      }
+    ];
+
+  const { messaging_service_sid: messagingServiceSid } = ownedProfiles[0];
+  let brand: { campaigns: { nodes: { state: string }[] } } | undefined;
+
+  for (const profile of profiles) {
+    const payload = {
+      operationName: "GetBillingAccountBySwitchboardProfileId",
+      query: fetchBillingAccountQuery,
+      variables: {
+        switchboardProfileId: profile.messaging_service_sid
+      }
+    };
+
+    const billingAccountResponse = await request
+      .post(PORTAL_API_URL)
+      .send(payload);
+
+    if (billingAccountResponse.body?.data?.billingAccount?.id) {
+      const brandPayload = {
+        operationName: "AnonGetTcr10DlcBrandByBillingAccountId",
+        query: fetchBrandQuery,
+        variables: {
+          billingAccountId: billingAccountResponse.body.data.billingAccount.id
+        }
+      };
+
+      const brandResponse = await request
+        .post(PORTAL_API_URL)
+        .send(brandPayload);
+
+      const brandData = brandResponse.body.data?.brand;
+      if (brandData) brand = brandData;
+    }
+  }
+
+  if (brand === undefined)
+    // they haven't registered a brand yet
+    return [
+      {
+        __typename: "Register10DlcBrandNotice",
+        id: messagingServiceSid,
+        tcrRegistrationUrl: `https://portal.spokerewired.com/10dlc-registration/${messagingServiceSid}`
+      }
+    ];
+
+  const campaigns = brand?.campaigns?.nodes;
+  if (
+    campaigns === undefined ||
+    !campaigns.some(({ state }: { state: string }) => state === "REGISTERED")
+  )
+    // they haven't registered a campaign yet
+    return [
+      {
+        __typename: "Register10DlcCampaignNotice",
+        id: messagingServiceSid,
+        tcrRegistrationUrl: `https://portal.spokerewired.com/10dlc-registration/${messagingServiceSid}`
+      }
+    ];
+
+  // they registered a campaign and a 10DLC profile isn't added to spoke yet
+  return [
+    {
+      __typename: "Pending10DlcCampaignNotice",
+      id: messagingServiceSid
+    }
+  ];
 };
 
 export default get10DlcBrandNotices;
