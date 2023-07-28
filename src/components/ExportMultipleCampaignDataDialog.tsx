@@ -4,8 +4,9 @@ import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
+import Divider from "@material-ui/core/Divider";
 import Typography from "@material-ui/core/Typography";
-import CheckBoxOutlinedIcon from "@material-ui/icons/CheckBoxOutlined";
+import AssignmentRoundedIcon from "@material-ui/icons/AssignmentRounded";
 import {
   CampaignExportType,
   useExportCampaignsMutation
@@ -77,6 +78,8 @@ const ExportMultipleCampaignDataDialog: React.FC<Props> = (props) => {
       onClose={onClose}
       aria-labelledby="export-multiple-campaign-data"
       open={open}
+      fullWidth
+      maxWidth="sm"
     >
       <DialogTitle id="export-multiple-campaign-data">
         <Typography variant="h6" style={{ margin: "4px", cursor: "pointer" }}>
@@ -94,28 +97,34 @@ const ExportMultipleCampaignDataDialog: React.FC<Props> = (props) => {
         setExportOptOut={setExportOptOut}
         setExportFiltered={setExportFiltered}
       />
+      <Divider variant="middle" />
       <DialogContent>
         <DialogContentText>
-          Exporting data for:
-          {campaignDetailsForExport.map((campaign) => {
-            return (
-              <div
-                key={campaign.id}
-                style={{ display: "flex", alignItems: "center", margin: "4px" }}
-              >
-                <CheckBoxOutlinedIcon />
-                <Typography
-                  variant="h6"
-                  style={{ margin: "4px", cursor: "pointer" }}
+          <Typography variant="subtitle1" style={{ margin: "4px" }}>
+            Selected campaigns:
+          </Typography>
+          {campaignDetailsForExport.map(
+            (campaign: CampaignDetailsForExport) => {
+              return (
+                <div
+                  key={campaign.id}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    margin: "4px"
+                  }}
                 >
-                  {campaign.title}
-                </Typography>
-                <Typography variant="subtitle1" style={{ marginLeft: "8px" }}>
-                  id: {campaign.id}
-                </Typography>
-              </div>
-            );
-          })}
+                  <AssignmentRoundedIcon />
+                  <Typography variant="h6" style={{ margin: "4px" }}>
+                    {campaign.title}
+                  </Typography>
+                  <Typography variant="subtitle1" style={{ marginLeft: "8px" }}>
+                    id: {campaign.id}
+                  </Typography>
+                </div>
+              );
+            }
+          )}
         </DialogContentText>
       </DialogContent>
       <DialogActions>

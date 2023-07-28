@@ -3,11 +3,11 @@ import { blue, orange } from "@material-ui/core/colors";
 import Divider from "@material-ui/core/Divider";
 import type { Theme } from "@material-ui/core/styles";
 import { useTheme } from "@material-ui/core/styles";
-import GroupWorkOutlinedIcon from "@material-ui/icons/GroupWorkOutlined";
+import AssignmentRoundedIcon from "@material-ui/icons/AssignmentRounded";
 import LocalOfferOutlinedIcon from "@material-ui/icons/LocalOfferOutlined";
-import PeopleAltOutlinedIcon from "@material-ui/icons/PeopleAltOutlined";
-import PersonOutlineIcon from "@material-ui/icons/PersonOutline";
-import ScheduleIcon from "@material-ui/icons/Schedule";
+import PeopleOutlineRoundedIcon from "@material-ui/icons/PeopleOutlineRounded";
+import PersonOutlineRoundedIcon from "@material-ui/icons/PersonOutlineRounded";
+import ScheduleRoundedIcon from "@material-ui/icons/ScheduleRounded";
 import type {
   CampaignListEntryFragment,
   ExternalSystem
@@ -70,7 +70,7 @@ const DueByIcon: React.FC<DueByIconProps> = (props) => {
     : { color: theme.palette.grey[900] };
   return (
     <Chip
-      icon={<ScheduleIcon style={iconStyle} />}
+      icon={<ScheduleRoundedIcon style={iconStyle} />}
       label={label}
       style={{
         ...inlineStyles.chip,
@@ -101,7 +101,7 @@ const CampaignDetails: React.FC<CampaignDetailsProps> = (props) => {
       <div style={inlineStyles.wrapper}>
         {creatorName ? (
           <Chip
-            icon={<PersonOutlineIcon />}
+            icon={<PersonOutlineRoundedIcon />}
             label={creatorName}
             style={inlineStyles.chip}
             variant="outlined"
@@ -110,7 +110,7 @@ const CampaignDetails: React.FC<CampaignDetailsProps> = (props) => {
         <DueByIcon dueBy={dueBy} theme={theme} />
         {teams.length > 0 ? (
           <Chip
-            icon={<PeopleAltOutlinedIcon />}
+            icon={<PeopleOutlineRoundedIcon />}
             label={teams
               .map((team: Record<string, unknown>) => team.title)
               .join(", ")}
@@ -118,9 +118,9 @@ const CampaignDetails: React.FC<CampaignDetailsProps> = (props) => {
             variant="outlined"
           />
         ) : null}
-        {campaignGroups.length > 0 ? (
+        {campaignGroups?.edges.length > 0 ? (
           <Chip
-            icon={<GroupWorkOutlinedIcon />}
+            icon={<AssignmentRoundedIcon />}
             label={campaignGroups.edges
               .map(({ node }: { node: Record<string, unknown> }) => node.name)
               .join(", ")}
