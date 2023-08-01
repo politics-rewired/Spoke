@@ -246,6 +246,7 @@ const ConfigureColumnMappingDialog: React.FC<ConfigureColumnMappingDialogProps> 
                               variant="outlined"
                               error={fieldError !== undefined}
                               helperText={fieldError?.message}
+                              label="Remap To"
                             />
                           )}
                         />
