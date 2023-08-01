@@ -166,7 +166,7 @@ class CampaignCannedResponsesForm extends React.Component<InnerProps, State> {
       ...response,
       id: newId,
       displayOrder: cannedResponses.length
-    });
+    };
 
     if (
       this.cannedResponseArraysEqual(
