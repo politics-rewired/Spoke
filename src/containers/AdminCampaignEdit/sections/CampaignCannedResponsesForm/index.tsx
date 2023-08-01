@@ -117,7 +117,7 @@ class CampaignCannedResponsesForm extends React.Component<InnerProps, State> {
         cannedResponsesToAdd: [],
         cannedResponseIdsToDelete: []
       });
-    } catch (err) {
+    } catch (err: any) {
       this.props.onError(err.message);
     } finally {
       this.setState({ isWorking: false });
@@ -146,13 +146,15 @@ class CampaignCannedResponsesForm extends React.Component<InnerProps, State> {
       ...new Set(this.state.cannedResponseIdsToDelete).add(responseId)
     ];
 
+    // eslint-disable-next-line max-len
     const cannedResponseToDelete = this.pendingCannedResponses().cannedResponses.find(
       ({ id }) => id === responseId
     );
 
     const cannedResponsesToUpdate = this.pendingCannedResponses()
       .cannedResponses.filter(
-        ({ displayOrder }) => displayOrder > cannedResponseToDelete.displayOrder
+        ({ displayOrder }) =>
+          displayOrder > (cannedResponseToDelete?.displayOrder ?? -1)
       )
       .map((cannedResponse) => {
         return {
@@ -252,7 +254,7 @@ class CampaignCannedResponsesForm extends React.Component<InnerProps, State> {
         updatedCannedResponses,
         editedCannedResponses,
         "id"
-      )
+      ) as CannedResponse[]
     });
   };
 
@@ -353,6 +355,10 @@ class CampaignCannedResponsesForm extends React.Component<InnerProps, State> {
                             ref={providedDrag.innerRef}
                             {...providedDrag.draggableProps}
                             {...providedDrag.dragHandleProps}
+                            // The prop types for div and ref are fighting here
+                            onDragStart={
+                              providedDrag.dragHandleProps?.onDragStart as any
+                            }
                           >
                             <CannedResponseRow
                               key={cannedResponse.id}
@@ -362,6 +368,7 @@ class CampaignCannedResponsesForm extends React.Component<InnerProps, State> {
                               onDelete={this.createHandleOnDelete(
                                 cannedResponse.id
                               )}
+                              // eslint-disable-next-line max-len
                               onToggleResponseEditor={this.makeHandleToggleResponseDialog(
                                 cannedResponse.id
                               )}
@@ -383,7 +390,7 @@ class CampaignCannedResponsesForm extends React.Component<InnerProps, State> {
         {this.renderCannedResponseDialog()}
         {!shouldShowEditor && (
           <Button
-            {...dataTest("newCannedResponse")}
+            {...dataTest("newCannedResponse", false)}
             color="secondary"
             endIcon={<CreateIcon />}
             onClick={this.makeHandleToggleResponseDialog()}
