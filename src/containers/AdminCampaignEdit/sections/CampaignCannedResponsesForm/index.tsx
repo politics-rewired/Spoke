@@ -117,11 +117,39 @@ class CampaignCannedResponsesForm extends React.Component<InnerProps, State> {
         cannedResponsesToAdd: [],
         cannedResponseIdsToDelete: []
       });
-    } catch (err) {
+    } catch (err: any) {
       this.props.onError(err.message);
     } finally {
       this.setState({ isWorking: false });
     }
+  };
+
+  cannedResponseTitleSort = (
+    { title: titleFirst }: CannedResponse,
+    { title: titleSecond }: CannedResponse
+  ) => {
+    if (titleFirst > titleSecond) {
+      return 1;
+    }
+    if (titleFirst < titleSecond) {
+      return -1;
+    }
+    return 0;
+  };
+
+  cannedResponseArraysEqual = (
+    cannedResponses1: CannedResponse[],
+    cannedResponses2: CannedResponse[]
+  ) =>
+    cannedResponses1.length === cannedResponses2.length &&
+    cannedResponses1.every(
+      (cr, idx) => cr.title === cannedResponses2[idx].title
+    );
+
+  mapToTitleDisplayOrder = (cannedResponses: CannedResponse[]) => {
+    return cannedResponses.map((cannedResponse, idx) => {
+      return { ...cannedResponse, displayOrder: idx };
+    });
   };
 
   handleOnSaveResponse = (response: CannedResponse) => {
@@ -130,11 +158,53 @@ class CampaignCannedResponsesForm extends React.Component<InnerProps, State> {
       .replace(/[^a-zA-Z1-9]+/g, "");
 
     const { cannedResponses } = this.pendingCannedResponses();
-    const cannedResponsesToAdd = this.state.cannedResponsesToAdd.concat({
+    const cannedResponsesAlphabetical = cannedResponses.sort(
+      this.cannedResponseTitleSort
+    );
+
+    let newCannedResponse = {
       ...response,
       id: newId,
       displayOrder: cannedResponses.length
     });
+
+    if (
+      this.cannedResponseArraysEqual(
+        cannedResponses,
+        cannedResponsesAlphabetical
+      )
+    ) {
+      const newCannedResponses = cannedResponses.concat({
+        ...newCannedResponse
+      });
+      newCannedResponses.sort(this.cannedResponseTitleSort);
+      const newCannedResponsesWithOrder = this.mapToTitleDisplayOrder(
+        newCannedResponses
+      );
+
+      const newCannedResponseWithOrder = newCannedResponsesWithOrder.find(
+        ({ id }) => id === newId
+      );
+      if (newCannedResponseWithOrder)
+        newCannedResponse = newCannedResponseWithOrder;
+
+      const updatedCannedResponses = newCannedResponsesWithOrder.filter(
+        ({ id }) => id !== newId
+      );
+
+      this.setState({
+        editedCannedResponses: unionBy(
+          updatedCannedResponses,
+          this.state.editedCannedResponses,
+          "id"
+        ) as CannedResponse[]
+      });
+    }
+
+    const cannedResponsesToAdd = this.state.cannedResponsesToAdd.concat(
+      newCannedResponse
+    );
+
     this.setState({ cannedResponsesToAdd, shouldShowEditor: false });
   };
 
@@ -146,13 +216,15 @@ class CampaignCannedResponsesForm extends React.Component<InnerProps, State> {
       ...new Set(this.state.cannedResponseIdsToDelete).add(responseId)
     ];
 
+    // eslint-disable-next-line max-len
     const cannedResponseToDelete = this.pendingCannedResponses().cannedResponses.find(
       ({ id }) => id === responseId
     );
 
     const cannedResponsesToUpdate = this.pendingCannedResponses()
       .cannedResponses.filter(
-        ({ displayOrder }) => displayOrder > cannedResponseToDelete.displayOrder
+        ({ displayOrder }) =>
+          displayOrder > (cannedResponseToDelete?.displayOrder ?? -1)
       )
       .map((cannedResponse) => {
         return {
@@ -265,7 +337,7 @@ class CampaignCannedResponsesForm extends React.Component<InnerProps, State> {
         updatedCannedResponses,
         editedCannedResponses,
         "id"
-      )
+      ) as CannedResponse[]
     });
   };
 
@@ -366,6 +438,10 @@ class CampaignCannedResponsesForm extends React.Component<InnerProps, State> {
                             ref={providedDrag.innerRef}
                             {...providedDrag.draggableProps}
                             {...providedDrag.dragHandleProps}
+                            // The prop types for div and ref are fighting here
+                            onDragStart={
+                              providedDrag.dragHandleProps?.onDragStart as any
+                            }
                           >
                             <CannedResponseRow
                               key={cannedResponse.id}
@@ -375,6 +451,7 @@ class CampaignCannedResponsesForm extends React.Component<InnerProps, State> {
                               onDelete={this.createHandleOnDelete(
                                 cannedResponse.id
                               )}
+                              // eslint-disable-next-line max-len
                               onToggleResponseEditor={this.makeHandleToggleResponseDialog(
                                 cannedResponse.id
                               )}
@@ -396,7 +473,7 @@ class CampaignCannedResponsesForm extends React.Component<InnerProps, State> {
         {this.renderCannedResponseDialog()}
         {!shouldShowEditor && (
           <Button
-            {...dataTest("newCannedResponse")}
+            {...dataTest("newCannedResponse", false)}
             color="secondary"
             endIcon={<CreateIcon />}
             onClick={this.makeHandleToggleResponseDialog()}
