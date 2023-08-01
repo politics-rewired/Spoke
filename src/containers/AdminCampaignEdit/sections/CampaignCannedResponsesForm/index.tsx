@@ -133,7 +133,7 @@ class CampaignCannedResponsesForm extends React.Component<InnerProps, State> {
     const cannedResponsesToAdd = this.state.cannedResponsesToAdd.concat({
       ...response,
       id: newId,
-      displayOrder: cannedResponses.length + 1
+      displayOrder: cannedResponses.length
     });
     this.setState({ cannedResponsesToAdd, shouldShowEditor: false });
   };
