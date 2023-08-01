@@ -8,17 +8,16 @@ import Warning from "@material-ui/icons/Warning";
 import type { Register10DlcNotice } from "@spoke/spoke-codegen";
 import React from "react";
 
+import { isRegister10DlcBrandNotice } from "../../../api/notice";
 import BrandRegistration10DlcNoticeText from "../../../components/NoticeText/BrandRegistration10DlcNoticeText";
 import CampaignRegistration10DlcNoticeText from "../../../components/NoticeText/CampaignRegistration10DlcNoticeText";
 
-interface Register10DlcNoticeCardProps extends Register10DlcNotice {
-  __typename?: string;
-}
+type Register10DlcNoticeCardProps = Register10DlcNotice;
 
 const Register10DlcNoticeCard: React.FC<Register10DlcNoticeCardProps> = (
   props
 ) => {
-  const isBrandNotice = props.__typename === "Register10DlcBrandNotice";
+  const isBrandNotice = isRegister10DlcBrandNotice(props);
   return (
     <Card variant="outlined" style={{ marginBottom: "2em" }}>
       <CardHeader

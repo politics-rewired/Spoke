@@ -5,15 +5,14 @@ import AssignmentTurnedIn from "@material-ui/icons/AssignmentTurnedIn";
 import type { PricingNotice } from "@spoke/spoke-codegen";
 import React from "react";
 
+import { isPricing10DlcNotice } from "../../../api/notice";
 import Pricing10DlcNoticeText from "../../../components/NoticeText/Pricing10DlcNoticeText";
 import PricingTollFreeNoticeText from "../../../components/NoticeText/PricingTollFreeNoticeText";
 
-interface PricingNoticeCardProps extends PricingNotice {
-  __typename?: string;
-}
+type PricingNoticeCardProps = PricingNotice;
 
 const PricingNoticeCard: React.FC<PricingNoticeCardProps> = (props) => {
-  const is10DlcNotice = props.__typename === "Pricing10DlcNotice";
+  const is10DlcNotice = isPricing10DlcNotice(props);
 
   return (
     <Card variant="outlined" style={{ marginBottom: "2em" }}>
