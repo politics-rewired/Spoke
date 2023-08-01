@@ -99,7 +99,7 @@ const ConfigureColumnMappingDialog: React.FC<ConfigureColumnMappingDialogProps> 
   };
 
   useEffect(() => {
-    if (open && !parseComplete) {
+    if (open && !parseComplete && contactsFile) {
       Papa.parse(contactsFile, {
         header: true,
         preview: 2,
@@ -107,7 +107,7 @@ const ConfigureColumnMappingDialog: React.FC<ConfigureColumnMappingDialogProps> 
           const columnMappings = results?.meta?.fields?.map(
             (header: string) => ({
               column: header.trim(),
-              remap: namedFields[header.trim()] ?? null
+              remap: (namedFields as any)[header.trim()] ?? null
             })
           );
 
@@ -141,15 +141,18 @@ const ConfigureColumnMappingDialog: React.FC<ConfigureColumnMappingDialogProps> 
     }
 
     const remappedColumns = mappedColumns.map((column) => {
-      const alias = fieldAliases[column.remap];
-      return {
-        column: column.column,
-        remap: alias ?? column.remap
-      };
+      if (column.remap) {
+        const alias = (fieldAliases as any)[column.remap];
+        return {
+          column: column.column,
+          remap: alias ?? column.remap
+        };
+      }
+      return null;
     });
 
     setError(null);
-    onSave(remappedColumns);
+    onSave(remappedColumns as ColumnMapping[]);
   };
 
   // Eslint disable required here to prevent enter from submitting form
@@ -225,8 +228,8 @@ const ConfigureColumnMappingDialog: React.FC<ConfigureColumnMappingDialogProps> 
                           fullWidth
                           freeSolo
                           filterOptions={(
-                            options: string[],
-                            params: FilterOptionsState<string>
+                            options: unknown[],
+                            params: FilterOptionsState<unknown>
                           ) => {
                             const filtered = filter(options, params);
 
