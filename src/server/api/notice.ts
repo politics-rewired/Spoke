@@ -1,5 +1,4 @@
 /* eslint-disable import/prefer-default-export */
-
 import type { Notice } from "@spoke/spoke-codegen";
 
 import {
@@ -10,6 +9,7 @@ import {
   isRegister10DlcCampaignNotice
 } from "../../api/notice";
 
+// explicitly setting typename
 export const resolvers = {
   Notice: {
     __resolveType(obj: Notice) {

@@ -43,12 +43,15 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
           if (
             isRegister10DlcBrandNotice(node) ||
             isRegister10DlcCampaignNotice(node)
-          )
+          ) {
             return <Register10DlcNoticeCard key={node.id} {...node} />;
-          if (isPending10DlcCampaignNotice(node))
+          }
+          if (isPending10DlcCampaignNotice(node)) {
             return <Pending10DlcCampaignNoticeCard key={node.id} {...node} />;
-          if (isPricing10DlcNotice(node) || isPricingTollFreeNotice(node))
+          }
+          if (isPricing10DlcNotice(node) || isPricingTollFreeNotice(node)) {
             return <PricingNoticeCard key={node.id} {...node} />;
+          }
         }
         return null;
       })}

@@ -1,12 +1,15 @@
 import React from "react";
 
+import KnowledgeBase10DlcNoticeText from "./KnowledgeBaseText";
+
 const CampaignRegistration10DlcNoticeText: React.FC = () => (
   <>
     <p>
-      <b>
+      <strong>
         You have started but not yet completed your 10DLC registration form.
-      </b>
-      <br /> <br />
+      </strong>
+    </p>
+    <p>
       You must complete registration in order to gain access to our{" "}
       <a
         href="https://www.politicsrewired.com/pricing"
@@ -17,7 +20,8 @@ const CampaignRegistration10DlcNoticeText: React.FC = () => (
       </a>
       . Please complete the second section of our 10DLC form to finalize your
       registration.
-      <br /> <br />
+    </p>
+    <p>
       You are currently on our{" "}
       <a
         href="https://www.politicsrewired.com/pricing"
@@ -29,17 +33,7 @@ const CampaignRegistration10DlcNoticeText: React.FC = () => (
       . You may send messages without registering for 10DLC at an increased
       price per message segment.
     </p>
-    <p>
-      To learn more about 10DLC and our pricing plans, please see our{" "}
-      <a
-        href="https://docs.spokerewired.com/article/124-10dlc"
-        target="_blank"
-        rel="noreferrer"
-      >
-        10DLC knowledge base article
-      </a>
-      .
-    </p>
+    <KnowledgeBase10DlcNoticeText />
   </>
 );
 
