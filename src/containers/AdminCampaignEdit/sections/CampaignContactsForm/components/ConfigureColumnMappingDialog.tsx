@@ -152,7 +152,7 @@ const ConfigureColumnMappingDialog: React.FC<ConfigureColumnMappingDialogProps> 
     onSave(remappedColumns);
   };
 
-  // Eslint disable required here to prevent enter from submitting form
+  // Eslint disable is required here to prevent enter from submitting form
   // Enter key is used to lock in the freesolo option in autocomplete
   // https://github.com/react-hook-form/react-hook-form/discussions/2549
   /* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
