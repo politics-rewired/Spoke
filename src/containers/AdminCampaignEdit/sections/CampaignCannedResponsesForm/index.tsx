@@ -124,17 +124,87 @@ class CampaignCannedResponsesForm extends React.Component<InnerProps, State> {
     }
   };
 
+  cannedResponseTitleSort = (
+    { title: titleFirst }: CannedResponse,
+    { title: titleSecond }: CannedResponse
+  ) => {
+    if (titleFirst > titleSecond) {
+      return 1;
+    }
+    if (titleFirst < titleSecond) {
+      return -1;
+    }
+    return 0;
+  };
+
+  cannedResponseArraysEqual = (
+    cannedResponses1: CannedResponse[],
+    cannedResponses2: CannedResponse[]
+  ) =>
+    cannedResponses1.length === cannedResponses2.length &&
+    cannedResponses1.every(
+      (cr, idx) => cr.title === cannedResponses2[idx].title
+    );
+
+  mapToTitleDisplayOrder = (cannedResponses: CannedResponse[]) => {
+    return cannedResponses.map((cannedResponse, idx) => {
+      return { ...cannedResponse, displayOrder: idx };
+    });
+  };
+
   handleOnSaveResponse = (response: CannedResponse) => {
     const newId = Math.random()
       .toString(36)
       .replace(/[^a-zA-Z1-9]+/g, "");
 
     const { cannedResponses } = this.pendingCannedResponses();
-    const cannedResponsesToAdd = this.state.cannedResponsesToAdd.concat({
+    const cannedResponsesAlphabetical = cannedResponses.sort(
+      this.cannedResponseTitleSort
+    );
+
+    let newCannedResponse = {
       ...response,
       id: newId,
       displayOrder: cannedResponses.length + 1
-    });
+    };
+
+    if (
+      this.cannedResponseArraysEqual(
+        cannedResponses,
+        cannedResponsesAlphabetical
+      )
+    ) {
+      const newCannedResponses = cannedResponses.concat({
+        ...newCannedResponse
+      });
+      newCannedResponses.sort(this.cannedResponseTitleSort);
+      const newCannedResponsesWithOrder = this.mapToTitleDisplayOrder(
+        newCannedResponses
+      );
+
+      const newCannedResponseWithOrder = newCannedResponsesWithOrder.find(
+        ({ id }) => id === newId
+      );
+      if (newCannedResponseWithOrder)
+        newCannedResponse = newCannedResponseWithOrder;
+
+      const updatedCannedResponses = newCannedResponsesWithOrder.filter(
+        ({ id }) => id !== newId
+      );
+
+      this.setState({
+        editedCannedResponses: unionBy(
+          updatedCannedResponses,
+          this.state.editedCannedResponses,
+          "id"
+        ) as CannedResponse[]
+      });
+    }
+
+    const cannedResponsesToAdd = this.state.cannedResponsesToAdd.concat(
+      newCannedResponse
+    );
+
     this.setState({ cannedResponsesToAdd, shouldShowEditor: false });
   };
 
