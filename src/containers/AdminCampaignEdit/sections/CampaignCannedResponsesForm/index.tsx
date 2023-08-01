@@ -208,8 +208,8 @@ class CampaignCannedResponsesForm extends React.Component<InnerProps, State> {
   onDragEnd = (result: DropResult) => {
     if (!result.destination) return;
 
-    const sourceDisplayOrder = result.source.index + 1;
-    const destinationDisplayOrder = result.destination.index + 1;
+    const sourceDisplayOrder = result.source.index;
+    const destinationDisplayOrder = result.destination.index;
     const cannedResponseId = result.draggableId;
 
     const { cannedResponses } = this.pendingCannedResponses();
@@ -226,11 +226,15 @@ class CampaignCannedResponsesForm extends React.Component<InnerProps, State> {
     );
 
     // Get all items that were moved, except item that was moved
-    const movedItems = allCannedResponses.filter(
+    const cannedResponsesToMoveDown = allCannedResponses.filter(
       ({ displayOrder }) =>
         displayOrder >= destinationDisplayOrder &&
-        displayOrder <= sourceDisplayOrder &&
-        displayOrder !== sourceDisplayOrder
+        displayOrder < sourceDisplayOrder
+    );
+    const cannedResponsesToMoveUp = allCannedResponses.filter(
+      ({ displayOrder }) =>
+        displayOrder <= destinationDisplayOrder &&
+        displayOrder > sourceDisplayOrder
     );
 
     updatedCannedResponses.push({
@@ -238,14 +242,23 @@ class CampaignCannedResponsesForm extends React.Component<InnerProps, State> {
       displayOrder: destinationDisplayOrder
     });
 
-    updatedCannedResponses = updatedCannedResponses.concat(
-      movedItems.map((cannedResponse) => {
-        return {
-          ...cannedResponse,
-          displayOrder: cannedResponse.displayOrder + 1
-        };
-      })
-    );
+    updatedCannedResponses = updatedCannedResponses
+      .concat(
+        cannedResponsesToMoveUp.map((cannedResponse) => {
+          return {
+            ...cannedResponse,
+            displayOrder: cannedResponse.displayOrder - 1
+          };
+        })
+      )
+      .concat(
+        cannedResponsesToMoveDown.map((cannedResponse) => {
+          return {
+            ...cannedResponse,
+            displayOrder: cannedResponse.displayOrder + 1
+          };
+        })
+      );
 
     this.setState({
       editedCannedResponses: unionBy(
