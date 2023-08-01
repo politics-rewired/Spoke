@@ -107,7 +107,7 @@ const ConfigureColumnMappingDialog: React.FC<ConfigureColumnMappingDialogProps> 
   };
 
   useEffect(() => {
-    if (open && !parseComplete && contactsFile) {
+    if (open && contactsFile) {
       Papa.parse(contactsFile, {
         header: true,
         preview: 2,
@@ -125,7 +125,7 @@ const ConfigureColumnMappingDialog: React.FC<ConfigureColumnMappingDialogProps> 
         }
       });
     }
-  }, [open, contactsFile]);
+  }, [contactsFile]);
 
   const handleSave = (formValues: FormValues) => {
     const mappedColumns = formValues.columnMappings.filter((column) =>
