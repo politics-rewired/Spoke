@@ -100,7 +100,7 @@ export const get10DlcBrandNotices: OrgLevelNotificationGetter = async (
   }
 
   const profileTollFree = profilesWithChannels.find(
-    (p) => p.channel === "TOLL-FREE"
+    (p) => p.channel === "TOLL_FREE"
   );
   if (profileTollFree !== undefined)
     return [
