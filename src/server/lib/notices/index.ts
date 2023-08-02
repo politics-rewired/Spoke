@@ -1,4 +1,5 @@
-import type { Notice } from "../../../api/notice";
+import type { Notice } from "@spoke/spoke-codegen";
+
 import { get10DlcBrandNotices } from "./register-10dlc-brand";
 import type { OrgLevelNotificationGetter } from "./types";
 

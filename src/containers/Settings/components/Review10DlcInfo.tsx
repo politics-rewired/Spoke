@@ -6,8 +6,8 @@ import CardHeader from "@material-ui/core/CardHeader";
 import OpenInNew from "@material-ui/icons/OpenInNew";
 import React from "react";
 import { compose } from "recompose";
-import Registration10DLCWarningText from "src/components/Registration10DLCWarningText";
 
+import BrandRegistration10DlcNoticeText from "../../../components/NoticeText/BrandRegistration10DlcNoticeText";
 import type { QueryMap } from "../../../network/types";
 import { loadData } from "../../hoc/with-operations";
 import type { OrganizationMessagingServicesType } from "./queries";
@@ -43,7 +43,7 @@ const Review10DlcInfo: React.FC<InnerProps> = (props) => {
     <Card style={style}>
       <CardHeader title="10DLC Registration Information" />
       <CardContent>
-        <Registration10DLCWarningText />
+        <BrandRegistration10DlcNoticeText />
       </CardContent>
       <CardActions disableSpacing>
         <Button
