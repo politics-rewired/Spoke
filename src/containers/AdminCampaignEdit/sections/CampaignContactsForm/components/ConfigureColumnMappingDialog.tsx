@@ -37,8 +37,14 @@ const namedFields = {
   external_id: externalId,
   externalId
 };
+type namedFieldsKeys = keyof typeof namedFields;
 
-const requiredUploadFields = [firstName, lastName, cell];
+type requiredUploadFieldsValues = "First Name" | "Last Name" | "Cell Phone";
+const requiredUploadFields = [
+  firstName,
+  lastName,
+  cell
+] as requiredUploadFieldsValues[];
 
 const friendlyFieldNames = [firstName, lastName, cell, externalId, zip];
 
@@ -49,10 +55,11 @@ const fieldAliases = {
   "External ID": "external_id",
   Zip: "zip"
 };
+type fieldAliasKeys = keyof typeof fieldAliases;
 
 export type ColumnMapping = {
-  column: string;
-  remap: string | null;
+  column: namedFieldsKeys;
+  remap: fieldAliasKeys | null;
 };
 
 export interface ConfigureColumnMappingDialogProps {
@@ -66,8 +73,9 @@ type FormValues = {
   columnMappings: Array<ColumnMapping>;
 };
 
-const filter = createFilterOptions();
+const filter = createFilterOptions<string>();
 
+// eslint-disable-next-line max-len
 const ConfigureColumnMappingDialog: React.FC<ConfigureColumnMappingDialogProps> = ({
   contactsFile,
   onSave,
@@ -79,7 +87,7 @@ const ConfigureColumnMappingDialog: React.FC<ConfigureColumnMappingDialogProps> 
   const theme = useTheme();
 
   const { handleSubmit, watch, control, reset } = useForm<FormValues>({
-    defaultValues: { columnMappings: [] }
+    defaultValues: { columnMappings: [] as ColumnMapping[] }
   });
 
   const { fields } = useFieldArray({
@@ -99,19 +107,20 @@ const ConfigureColumnMappingDialog: React.FC<ConfigureColumnMappingDialogProps> 
   };
 
   useEffect(() => {
-    if (open && !parseComplete) {
+    if (open && !parseComplete && contactsFile) {
       Papa.parse(contactsFile, {
         header: true,
         preview: 2,
         complete: (results: ParseResult<any>) => {
-          const columnMappings = results?.meta?.fields?.map(
-            (header: string) => ({
-              column: header.trim(),
-              remap: namedFields[header.trim()] ?? null
-            })
-          );
+          const columnMappings = results?.meta?.fields?.map((h) => {
+            const header = h.trim() as namedFieldsKeys;
+            return {
+              column: header,
+              remap: (namedFields[header] as fieldAliasKeys) ?? null
+            };
+          });
 
-          reset({ columnMappings });
+          if (columnMappings) reset({ columnMappings });
           setParseComplete(true);
         }
       });
@@ -141,11 +150,14 @@ const ConfigureColumnMappingDialog: React.FC<ConfigureColumnMappingDialogProps> 
     }
 
     const remappedColumns = mappedColumns.map((column) => {
-      const alias = fieldAliases[column.remap];
-      return {
-        column: column.column,
-        remap: alias ?? column.remap
-      };
+      if (column.remap) {
+        const alias = fieldAliases[column.remap] as fieldAliasKeys;
+        return {
+          column: column.column,
+          remap: alias ?? column.remap
+        };
+      }
+      return {} as ColumnMapping;
     });
 
     setError(null);
@@ -243,6 +255,7 @@ const ConfigureColumnMappingDialog: React.FC<ConfigureColumnMappingDialogProps> 
                               variant="outlined"
                               error={fieldError !== undefined}
                               helperText={fieldError?.message}
+                              label="Remap To"
                             />
                           )}
                         />
