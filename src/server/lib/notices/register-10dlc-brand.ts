@@ -60,7 +60,7 @@ export const get10DlcBrandNotices: OrgLevelNotificationGetter = async (
       user_id: userId,
       active: true
     })
-    .whereIn("role", ["OWNER", "ADMIN"])
+    .whereIn("role", ["OWNER", "ADMIN", "SUPERVOLUNTEER"])
     .where({
       "user_organization.organization_id": organizationId
     });
@@ -110,7 +110,11 @@ export const get10DlcBrandNotices: OrgLevelNotificationGetter = async (
       }
     ];
 
-  const { messaging_service_sid: messagingServiceSid } = ownedProfiles[0];
+  const messagingServiceSid =
+    ownedProfiles.length > 0
+      ? ownedProfiles[0].messaging_service_sid
+      : profiles[0].messaging_service_sid;
+
   let brand: { campaigns: { nodes: { state: string }[] } } | undefined;
 
   for (const profile of profiles) {
@@ -150,7 +154,10 @@ export const get10DlcBrandNotices: OrgLevelNotificationGetter = async (
       {
         __typename: "Register10DlcBrandNotice",
         id: messagingServiceSid,
-        tcrRegistrationUrl: `https://portal.spokerewired.com/10dlc-registration/${messagingServiceSid}`
+        tcrRegistrationUrl:
+          ownedProfiles.length > 0
+            ? `https://portal.spokerewired.com/10dlc-registration/${messagingServiceSid}`
+            : null
       }
     ];
 
@@ -164,7 +171,10 @@ export const get10DlcBrandNotices: OrgLevelNotificationGetter = async (
       {
         __typename: "Register10DlcCampaignNotice",
         id: messagingServiceSid,
-        tcrRegistrationUrl: `https://portal.spokerewired.com/10dlc-registration/${messagingServiceSid}`
+        tcrRegistrationUrl:
+          ownedProfiles.length > 0
+            ? `https://portal.spokerewired.com/10dlc-registration/${messagingServiceSid}`
+            : null
       }
     ];
 
