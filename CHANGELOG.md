@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [7.1.0](https://github.com/politics-rewired/spoke/compare/v7.0.0...v7.1.0) (2023-08-02)
+
+
+### Features
+
+* **10dlc:** add additional notices ([#1645](https://github.com/politics-rewired/spoke/issues/1645)) ([602e5d5](https://github.com/politics-rewired/spoke/commit/602e5d5bf523750d58995d55a7cf3a9405963224))
+
+
+### Bug Fixes
+
+* **canned responses:** default to alphabetical sorting ([#1647](https://github.com/politics-rewired/spoke/issues/1647)) ([7d53908](https://github.com/politics-rewired/spoke/commit/7d53908ceef1cba4bc8197a5171d0cc124e00a30))
+* **canned responses:** handle canned response moving up in the list ([#1646](https://github.com/politics-rewired/spoke/issues/1646)) ([0b9d2de](https://github.com/politics-rewired/spoke/commit/0b9d2de6d25ddc70878c3d7e8d24ee5614e177dc))
+* **csv mapping:** add autocomplete label ([#1649](https://github.com/politics-rewired/spoke/issues/1649)) ([480d078](https://github.com/politics-rewired/spoke/commit/480d078d2c97ab7e37f63ebaa78d577d25b7bc97))
+* **csv mapping:** rerender on file upload ([#1650](https://github.com/politics-rewired/spoke/issues/1650)) ([2c372ce](https://github.com/politics-rewired/spoke/commit/2c372ce00a2c45b2c87af53649959c629ea35d7b))
+
+
+### Backend Changes
+
+* **canned responses:** update form types ([#1648](https://github.com/politics-rewired/spoke/issues/1648)) ([b7238f0](https://github.com/politics-rewired/spoke/commit/b7238f0f14818cdafcbacce564544f74a110e373))
+* Add changelog for missing 6.1.3 release ([#1590](https://github.com/politics-rewired/spoke/issues/1590)) ([15a8122](https://github.com/politics-rewired/spoke/commit/15a8122800cc4f72012c2eb9030b6924af2297a4))
+
 ## [7.0.0](https://github.com/politics-rewired/spoke/compare/v7.0.0-rc.1...v7.0.0) (2023-07-26)
 
 
