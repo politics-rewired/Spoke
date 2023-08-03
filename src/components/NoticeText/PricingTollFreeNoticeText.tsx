@@ -4,8 +4,15 @@ const PricingTollFreeNoticeText: React.FC = () => (
   <>
     <p>Your organization is fully registered for Toll Free sending!</p>
     <p>
-      You are currently on our Toll Free pricing plan, which provides our best
-      deliverability and sending throughput.
+      You are currently on our{" "}
+      <a
+        href="https://www.politicsrewired.com/pricing"
+        target="_blank"
+        rel="noreferrer"
+      >
+        Toll Free pricing plan
+      </a>
+      , which provides our best deliverability and sending throughput.
     </p>
   </>
 );
