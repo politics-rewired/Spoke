@@ -18,10 +18,12 @@ export interface CampaignOperations {
   ) => ClickHandler;
   archiveCampaign: (campaignId: string) => ClickHandler;
   unarchiveCampaign: (campaignId: string) => ClickHandler;
-  selectForExport: (campaignId: string) => void;
+}
+interface Props extends CampaignOperations {
+  campaign: CampaignListEntryFragment;
 }
 
-export const CampaignListMenu: React.FC<CampaignOperations> = (props) => {
+export const CampaignListMenu: React.FC<Props> = (props) => {
   const [menuAnchor, setMenuAnchor] = useState<HTMLButtonElement | null>(null);
 
   const {
