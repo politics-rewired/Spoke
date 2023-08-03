@@ -34,7 +34,7 @@ interface CampaignDetailsProps {
   description: string;
   creatorName: string | null;
   dueBy: DateTime;
-  isAutoassignEligible: boolean;
+  isAutoAssignEligible: boolean;
   teams: CampaignListEntryFragment["teams"];
   campaignGroups: CampaignListEntryFragment["campaignGroups"];
   externalSystem: Pick<ExternalSystem, "name" | "type"> | null | undefined;
@@ -54,8 +54,7 @@ const makeDueByLabel = (dueBy: DateTime, isPastDue: boolean): string => {
     : `Due ${dueBy.toFormat("DD")}`;
 };
 
-const DueByIcon: React.FC<DueByIconProps> = (props) => {
-  const { dueBy, theme } = props;
+const DueByIcon: React.FC<DueByIconProps> = ({ dueBy, theme }) => {
   const isPastDue = DateTime.local() >= dueBy;
 
   const label = makeDueByLabel(dueBy, isPastDue);
@@ -81,20 +80,22 @@ const DueByIcon: React.FC<DueByIconProps> = (props) => {
   );
 };
 
-const CampaignDetails: React.FC<CampaignDetailsProps> = (props) => {
-  const {
-    description,
-    creatorName,
-    dueBy,
-    externalSystem,
-    isAutoAssignEligible,
-    teams,
-    campaignGroups
-  } = props;
+const CampaignDetails: React.FC<CampaignDetailsProps> = ({
+  description,
+  creatorName,
+  dueBy,
+  externalSystem,
+  isAutoAssignEligible,
+  teams,
+  campaignGroups
+}) => {
   const theme = useTheme();
 
   // display van configuration and auto assign eligible tags in divided section
   const shouldShowExtraTags = externalSystem || isAutoAssignEligible;
+
+  const showCampaignGroupsTags =
+    campaignGroups?.edges && campaignGroups.edges?.length > 0;
 
   return (
     <>
@@ -118,7 +119,7 @@ const CampaignDetails: React.FC<CampaignDetailsProps> = (props) => {
             variant="outlined"
           />
         ) : null}
-        {campaignGroups?.edges.length > 0 ? (
+        {showCampaignGroupsTags ? (
           <Chip
             icon={<AssignmentRoundedIcon />}
             label={campaignGroups.edges

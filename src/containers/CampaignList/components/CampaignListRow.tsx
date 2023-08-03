@@ -64,6 +64,13 @@ export const CampaignListRow: React.FC<Props> = (props) => {
   const campaignUrl = `/admin/${organizationId}/campaigns/${campaign.id}${
     isStarted ? "" : "/edit"
   }`;
+
+  // satisfy typescript (boolean | null | undefined possible for these vars)
+  const isAutoAssignEligible = !!(
+    isStarted &&
+    !isArchived &&
+    isAutoassignEnabled
+  );
   return (
     <Card
       variant="outlined"
@@ -99,9 +106,7 @@ export const CampaignListRow: React.FC<Props> = (props) => {
               teams={teams}
               campaignGroups={campaignGroups}
               externalSystem={externalSystem}
-              isAutoAssignEligible={
-                isStarted && !isArchived && isAutoassignEnabled
-              }
+              isAutoAssignEligible={isAutoAssignEligible}
             />
           }
           secondaryTypographyProps={{ color: "textPrimary" }}
