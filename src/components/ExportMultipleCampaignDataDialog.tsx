@@ -39,9 +39,9 @@ const ExportMultipleCampaignDataDialog: React.FC<Props> = (props) => {
 
   const [exportCampaignsMutation] = useExportCampaignsMutation();
 
-  const handleChange = (setStateFunction: any) => (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const handleChange = (
+    setStateFunction: React.Dispatch<React.SetStateAction<boolean>>
+  ) => (event: React.ChangeEvent<HTMLInputElement>) => {
     setStateFunction(event.target.checked);
   };
 

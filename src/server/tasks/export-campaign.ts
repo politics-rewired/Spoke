@@ -387,7 +387,7 @@ export const processMessagesChunk = async (
 
 interface UploadCampaignContacts {
   campaignTitle: string;
-  interactionSteps: Array<any>;
+  interactionSteps: InteractionStepRecord[];
   contactsCount: number;
   campaignId: number;
   helpers: ProgressTaskHelpers;
@@ -635,12 +635,12 @@ export interface SpokeOptions {
 }
 
 export interface CampaignDataForExport {
-  fileNameKey: any;
+  fileNameKey: string;
   campaignId: number;
-  campaignTitle: any;
+  campaignTitle: string;
   contactsCount: number;
   helpers: ProgressTaskHelpers;
-  interactionSteps: any[];
+  interactionSteps: InteractionStepRecord[];
   campaignVariableNames: string[];
 }
 
@@ -755,7 +755,7 @@ export const exportCampaign: ProgressTask<ExportCampaignPayload> = async (
     fileNameKey = `${fileNameKey}-${timestamp}`;
   }
 
-  const campaignData = {
+  const campaignMetaData = {
     fileNameKey,
     campaignId,
     campaignTitle,
@@ -770,7 +770,7 @@ export const exportCampaign: ProgressTask<ExportCampaignPayload> = async (
     campaignFilteredContactsExportUrl,
     campaignOptOutsExportUrl,
     campaignMessagesExportUrl
-  } = await processExportData(campaignData, spokeOptions);
+  } = await processExportData(campaignMetaData, spokeOptions);
 
   helpers.logger.debug("Waiting for streams to finish");
 
