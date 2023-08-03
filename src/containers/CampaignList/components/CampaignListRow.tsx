@@ -56,7 +56,7 @@ export const CampaignListRow: React.FC<Props> = (props) => {
     hasUnhandledMessages
   });
 
-  const isCampaignSelected = campaignDetailsForExport.find(
+  const isCampaignSelected = !!campaignDetailsForExport.find(
     (selectedCampaign: CampaignDetailsForExport) =>
       selectedCampaign.id === campaign.id
   );
@@ -73,7 +73,7 @@ export const CampaignListRow: React.FC<Props> = (props) => {
         <ListItemIcon>
           <Checkbox
             edge="start"
-            checked={!!isCampaignSelected}
+            checked={isCampaignSelected}
             tabIndex={-1}
             disableRipple
             onClick={() =>

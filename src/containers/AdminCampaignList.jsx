@@ -57,8 +57,8 @@ class AdminCampaignList extends React.Component {
     releaseAllRepliesError: undefined,
     releaseAllRepliesResult: undefined,
     campaignDetailsForExport: [],
-    shouldShowExportModal: false,
-    shouldShowExportSnackbar: false,
+    showExportModal: false,
+    showExportSnackbar: false,
     exportErrorMessage: null
   };
 
@@ -175,15 +175,15 @@ class AdminCampaignList extends React.Component {
 
   handleClickExportButton = () => {
     this.setState({
-      shouldShowExportModal: true
+      showExportModal: true
     });
   };
 
   handleErrorCampaignExport = (exportErrorMessage) => {
     this.setState({
       exportErrorMessage,
-      shouldShowExportModal: false,
-      shouldShowExportSnackbar: true
+      showExportModal: false,
+      showExportSnackbar: true
     });
   };
 
@@ -205,8 +205,8 @@ class AdminCampaignList extends React.Component {
       releasingAllReplies,
       releasingInProgress,
       campaignDetailsForExport,
-      shouldShowExportModal,
-      shouldShowExportSnackbar,
+      showExportModal,
+      showExportSnackbar,
       exportErrorMessage
     } = this.state;
 
@@ -365,10 +365,10 @@ class AdminCampaignList extends React.Component {
         />
         <ExportMultipleCampaignDataDialog
           campaignDetailsForExport={campaignDetailsForExport}
-          open={shouldShowExportModal}
+          open={showExportModal}
           onClose={() =>
             this.setState({
-              shouldShowExportModal: false,
+              showExportModal: false,
               campaignDetailsForExport: []
             })
           }
@@ -376,17 +376,17 @@ class AdminCampaignList extends React.Component {
           onComplete={() =>
             this.setState({
               campaignDetailsForExport: [],
-              shouldShowExportModal: false,
-              shouldShowExportSnackbar: true
+              showExportModal: false,
+              showExportSnackbar: true
             })
           }
         />
         <ExportCampaignDataSnackbar
-          open={shouldShowExportSnackbar}
+          open={showExportSnackbar}
           errorMessage={exportErrorMessage}
           onClose={() => {
             this.setState({
-              shouldShowExportSnackbar: false,
+              showExportSnackbar: false,
               exportErrorMessage: null
             });
           }}

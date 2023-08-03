@@ -18,7 +18,7 @@ const styles = {
   }
 };
 
-const FIVE_HUNDRED = 500;
+const DEBOUNCE_INTERVAL = 500;
 
 interface Props {
   campaignDetailsForExport: CampaignDetailsForExport[];
@@ -31,7 +31,7 @@ const CampaignListHeader = (props: Props) => {
 
   const debounceSearchTerm = useDebouncedCallback((str: string) => {
     filterByCampaignTitle(str);
-  }, FIVE_HUNDRED);
+  }, DEBOUNCE_INTERVAL);
 
   const campaignIds = campaignDetailsForExport.map((campaign) => campaign.id);
 
