@@ -7,10 +7,7 @@ import DialogTitle from "@material-ui/core/DialogTitle";
 import Divider from "@material-ui/core/Divider";
 import Typography from "@material-ui/core/Typography";
 import AssignmentRoundedIcon from "@material-ui/icons/AssignmentRounded";
-import {
-  CampaignExportType,
-  useExportCampaignsMutation
-} from "@spoke/spoke-codegen";
+import { useExportCampaignsMutation } from "@spoke/spoke-codegen";
 import React, { useState } from "react";
 
 import { CampaignExportModalContent } from "../containers/AdminCampaignStats/components/CampaignExportModal";
@@ -56,7 +53,6 @@ const ExportMultipleCampaignDataDialog: React.FC<Props> = (props) => {
       variables: {
         options: {
           campaignIds,
-          exportType: CampaignExportType.Spoke,
           spokeOptions: {
             campaign: exportCampaign,
             messages: exportMessages,

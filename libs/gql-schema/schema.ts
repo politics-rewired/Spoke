@@ -216,9 +216,8 @@ const rootSchema = `
   }
 
     input MultipleCampaignExportInput {
-    campaignIds: [String!]
-    exportType: CampaignExportType!
-    spokeOptions: ExportForSpokeInput
+    campaignIds: [String!]!
+    spokeOptions: ExportForSpokeInput!
   }
 
   input QuestionResponseSyncConfigInput {
