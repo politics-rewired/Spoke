@@ -24,14 +24,13 @@ interface Props {
   onComplete(): void;
 }
 
-const ExportMultipleCampaignDataDialog: React.FC<Props> = (props) => {
-  const {
-    campaignDetailsForExport,
-    open,
-    onClose,
-    onError,
-    onComplete
-  } = props;
+const ExportMultipleCampaignDataDialog: React.FC<Props> = ({
+  campaignDetailsForExport,
+  open,
+  onClose,
+  onError,
+  onComplete
+}) => {
   const [exportCampaign, setExportCampaign] = useState<boolean>(true);
   const [exportMessages, setExportMessages] = useState<boolean>(true);
   const [exportOptOut, setExportOptOut] = useState<boolean>(false);

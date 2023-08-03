@@ -49,8 +49,12 @@ interface CampaignHeaderProps {
   onClick: () => void;
 }
 
-const CampaignHeader = (props: CampaignHeaderProps) => {
-  const { campaignTitle, campaignId, tags, onClick } = props;
+const CampaignHeader: React.FC<CampaignHeaderProps> = ({
+  campaignTitle,
+  campaignId,
+  tags,
+  onClick
+}) => {
   return (
     <div style={inlineStyles.wrapper}>
       <Typography

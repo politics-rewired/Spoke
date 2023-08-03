@@ -32,20 +32,18 @@ interface CampaignExportModalContentProps {
   setExportOptOut: React.Dispatch<React.SetStateAction<boolean>>;
   setExportFiltered: React.Dispatch<React.SetStateAction<boolean>>;
 }
-export const CampaignExportModalContent: React.FC<CampaignExportModalContentProps> = (
-  props: CampaignExportModalContentProps
-) => {
-  const {
-    exportCampaign,
-    exportMessages,
-    exportOptOut,
-    exportFiltered,
-    handleChange,
-    setExportCampaign,
-    setExportMessages,
-    setExportOptOut,
-    setExportFiltered
-  } = props;
+// eslint-disable-next-line max-len
+export const CampaignExportModalContent: React.FC<CampaignExportModalContentProps> = ({
+  exportCampaign,
+  exportMessages,
+  exportOptOut,
+  exportFiltered,
+  handleChange,
+  setExportCampaign,
+  setExportMessages,
+  setExportOptOut,
+  setExportFiltered
+}) => {
   return (
     <DialogContent>
       <div>

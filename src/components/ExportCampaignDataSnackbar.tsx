@@ -8,9 +8,11 @@ interface Props {
   onClose: () => void;
 }
 
-const ExportCampaignDataSnackbar: React.FC<Props> = (props) => {
-  const { open, errorMessage, onClose } = props;
-
+const ExportCampaignDataSnackbar: React.FC<Props> = ({
+  open,
+  errorMessage,
+  onClose
+}) => {
   return errorMessage ? (
     <Snackbar open={open} autoHideDuration={5000} onClose={onClose}>
       <Alert severity="error">{errorMessage}</Alert>

@@ -26,9 +26,11 @@ interface Props {
   onClick: () => void;
 }
 
-const CampaignListHeader = (props: Props) => {
-  const { campaignDetailsForExport, onClick, filterByCampaignTitle } = props;
-
+const CampaignListHeader: React.FC<Props> = ({
+  campaignDetailsForExport,
+  onClick,
+  filterByCampaignTitle
+}) => {
   const debounceSearchTerm = useDebouncedCallback((str: string) => {
     filterByCampaignTitle(str);
   }, DEBOUNCE_INTERVAL);
