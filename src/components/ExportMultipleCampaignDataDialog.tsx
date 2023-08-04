@@ -6,7 +6,6 @@ import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import Divider from "@material-ui/core/Divider";
 import Typography from "@material-ui/core/Typography";
-import AssignmentRoundedIcon from "@material-ui/icons/AssignmentRounded";
 import { useExportCampaignsMutation } from "@spoke/spoke-codegen";
 import React, { useState } from "react";
 
@@ -109,12 +108,14 @@ const ExportMultipleCampaignDataDialog: React.FC<Props> = ({
                     margin: "4px"
                   }}
                 >
-                  <AssignmentRoundedIcon />
-                  <Typography variant="h6" style={{ margin: "4px" }}>
+                  <Typography variant="body1" style={{ margin: "4px" }}>
                     {campaign.title}
                   </Typography>
-                  <Typography variant="subtitle1" style={{ marginLeft: "8px" }}>
-                    id: {campaign.id}
+                  <Typography
+                    variant="body1"
+                    style={{ marginLeft: "4px", color: "#666666" }}
+                  >
+                    ID: {campaign.id}
                   </Typography>
                 </div>
               );
