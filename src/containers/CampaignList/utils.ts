@@ -29,39 +29,52 @@ export const makeCampaignHeaderTags: MakeCampaignTagsFn = ({
   // display 'Started' or 'Not Started' first
   if (isStarted) {
     tags.push({
-      title: "Started"
+      title: "Started",
+      status: "success"
     });
   } else {
     tags.push({
-      title: "Not Started"
+      title: "Not Started",
+      status: "alert"
     });
   }
 
   if (hasUnassignedContacts) {
     tags.push({
-      title: "Unassigned Contacts"
+      title: "Unassigned Contacts",
+      status: "alert"
     });
   } else {
     tags.push({
-      title: "All Contacts Assigned"
+      title: "All Contacts Assigned",
+      status: "success"
     });
   }
 
   if (isStarted) {
     const tag = hasUnsentInitialMessages
       ? {
-          title: "Unsent Initial Messages"
+          title: "Unsent Initial Messages",
+          status: "alert"
         }
       : {
-          title: "All Initials Sent"
+          title: "All Initials Sent",
+          status: "success"
         };
     tags.push(tag);
   }
 
   if (isStarted && hasUnhandledMessages) {
-    tags.push({
-      title: "Unhandled Replies"
-    });
+    const tag = hasUnhandledMessages
+      ? {
+          title: "Unhandled Replies",
+          status: "alert"
+        }
+      : {
+          title: "All Replies Handled",
+          status: "success"
+        };
+    tags.push(tag);
   }
 
   return tags;

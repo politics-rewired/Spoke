@@ -10,7 +10,6 @@ import { useHistory } from "react-router-dom";
 
 import type { CampaignDetailsForExport } from "../../../components/ExportMultipleCampaignDataDialog";
 import { dataTest } from "../../../lib/attributes";
-import { DateTime } from "../../../lib/datetime";
 import { makeCampaignHeaderTags } from "../utils";
 import CampaignDetails from "./CampaignDetails";
 import CampaignHeader from "./CampaignHeader";
@@ -46,7 +45,6 @@ export const CampaignListRow: React.FC<Props> = (props) => {
     externalSystem
   } = campaign;
 
-  const dueBy = DateTime.fromISO(campaign.dueBy || "");
   const creatorName = campaign.creator ? campaign.creator.displayName : null;
 
   const headerTags = makeCampaignHeaderTags({
@@ -101,7 +99,6 @@ export const CampaignListRow: React.FC<Props> = (props) => {
             <CampaignDetails
               id={campaign.id}
               description={campaign.description}
-              dueBy={dueBy}
               creatorName={creatorName}
               teams={teams}
               campaignGroups={campaignGroups}

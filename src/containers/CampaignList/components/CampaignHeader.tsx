@@ -1,27 +1,8 @@
 import { Divider, Typography } from "@material-ui/core";
 import Chip from "@material-ui/core/Chip";
-import { green, orange } from "@material-ui/core/colors";
-import CheckCircleOutlineRoundedIcon from "@material-ui/icons/CheckCircleOutlineRounded";
-import WarningRoundedIcon from "@material-ui/icons/WarningRounded";
+import CheckCircleIcon from "@material-ui/icons/CheckCircle";
+import ErrorIcon from "@material-ui/icons/Error";
 import React from "react";
-
-type IconMap = {
-  [key: string]: JSX.Element;
-};
-
-const CHIP_ICONS: IconMap = {
-  "Not Started": <WarningRoundedIcon style={{ color: orange[300] }} />,
-  "Unassigned Contacts": <WarningRoundedIcon style={{ color: orange[300] }} />,
-  "Unsent Initial Messages": (
-    <WarningRoundedIcon style={{ color: orange[300] }} />
-  ),
-  "All Contacts Assigned": (
-    <CheckCircleOutlineRoundedIcon style={{ color: green[500] }} />
-  ),
-  "All Initials Sent": (
-    <CheckCircleOutlineRoundedIcon style={{ color: green[500] }} />
-  )
-};
 
 const inlineStyles = {
   wrapper: {
@@ -31,15 +12,13 @@ const inlineStyles = {
   },
   chip: {
     margin: "4px",
-    padding: "4px",
-    borderRadius: "2px"
+    padding: "4px"
   }
 };
 
 export type Tag = {
   title: string;
-  backgroundColor?: string;
-  color?: string;
+  status: string;
 };
 
 interface CampaignHeaderProps {
@@ -58,14 +37,17 @@ const CampaignHeader: React.FC<CampaignHeaderProps> = ({
   return (
     <div style={inlineStyles.wrapper}>
       <Typography
-        variant="h5"
+        variant="h6"
         onClick={onClick}
         style={{ margin: "4px", cursor: "pointer" }}
       >
         {campaignTitle}
       </Typography>
-      <Typography variant="subtitle1" style={{ marginLeft: "8px" }}>
-        id: {campaignId}
+      <Typography
+        variant="subtitle1"
+        style={{ marginLeft: "8px", color: "#666666" }}
+      >
+        ID: {campaignId}
       </Typography>
       <Divider
         orientation="vertical"
@@ -73,26 +55,28 @@ const CampaignHeader: React.FC<CampaignHeaderProps> = ({
         style={{ margin: "4px 8px 4px 8px" }}
       />
       {tags.map((tag) => {
-        const Icon = CHIP_ICONS[tag.title] ?? null;
-        // "Started" tag should have green background
-        const tagStyle =
-          tag.title === "Started"
+        // display check or alert icon
+        const Icon =
+          tag.status === "success" ? (
+            <CheckCircleIcon fontSize="small" style={{ color: "#4caf50" }} />
+          ) : (
+            <ErrorIcon fontSize="small" style={{ color: "#FF781D" }} />
+          );
+        // display green or orange background
+        const backgroundColor =
+          tag.status === "success"
             ? {
-                backgroundColor: green[100]
+                backgroundColor: "#DFF0DF"
               }
             : {
-                border: "1px white"
+                backgroundColor: "#FFF2E9"
               };
         return (
           <Chip
             key={tag.title}
             label={tag.title}
             icon={Icon}
-            style={{
-              ...inlineStyles.chip,
-              ...tagStyle
-            }}
-            variant="outlined"
+            style={{ ...inlineStyles.chip, ...backgroundColor }}
           />
         );
       })}

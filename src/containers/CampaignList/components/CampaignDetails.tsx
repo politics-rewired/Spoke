@@ -1,20 +1,17 @@
 import Chip from "@material-ui/core/Chip";
-import { blue, orange } from "@material-ui/core/colors";
+import { blue } from "@material-ui/core/colors";
 import Divider from "@material-ui/core/Divider";
-import type { Theme } from "@material-ui/core/styles";
-import { useTheme } from "@material-ui/core/styles";
-import AssignmentRoundedIcon from "@material-ui/icons/AssignmentRounded";
+import Tooltip from "@material-ui/core/Tooltip";
+import DescriptionOutlinedIcon from "@material-ui/icons/DescriptionOutlined";
 import LocalOfferOutlinedIcon from "@material-ui/icons/LocalOfferOutlined";
 import PeopleOutlineRoundedIcon from "@material-ui/icons/PeopleOutlineRounded";
 import PersonOutlineRoundedIcon from "@material-ui/icons/PersonOutlineRounded";
-import ScheduleRoundedIcon from "@material-ui/icons/ScheduleRounded";
+import RecordVoiceOverIcon from "@material-ui/icons/RecordVoiceOver";
 import type {
   CampaignListEntryFragment,
   ExternalSystem
 } from "@spoke/spoke-codegen";
 import React from "react";
-
-import { DateTime } from "../../../lib/datetime";
 
 const inlineStyles = {
   wrapper: {
@@ -25,7 +22,7 @@ const inlineStyles = {
   chip: {
     margin: "4px",
     padding: "4px",
-    border: "1px white"
+    color: "#666666"
   }
 };
 
@@ -33,66 +30,22 @@ interface CampaignDetailsProps {
   id: string;
   description: string;
   creatorName: string | null;
-  dueBy: DateTime;
   isAutoAssignEligible: boolean;
   teams: CampaignListEntryFragment["teams"];
   campaignGroups: CampaignListEntryFragment["campaignGroups"];
   externalSystem: Pick<ExternalSystem, "name" | "type"> | null | undefined;
 }
 
-interface DueByIconProps {
-  dueBy: DateTime;
-  theme: Theme;
-}
-
-const makeDueByLabel = (dueBy: DateTime, isPastDue: boolean): string => {
-  if (!dueBy.isValid) {
-    return "No due date set";
-  }
-  return isPastDue
-    ? `Past due ${dueBy.toFormat("DD")}`
-    : `Due ${dueBy.toFormat("DD")}`;
-};
-
-const DueByIcon: React.FC<DueByIconProps> = ({ dueBy, theme }) => {
-  const isPastDue = DateTime.local() >= dueBy;
-
-  const label = makeDueByLabel(dueBy, isPastDue);
-  const chipStyle = isPastDue
-    ? {
-        margin: "4px",
-        color: orange[300]
-      }
-    : { margin: "4px", color: theme.palette.grey[900] };
-  const iconStyle = isPastDue
-    ? { color: orange[300] }
-    : { color: theme.palette.grey[900] };
-  return (
-    <Chip
-      icon={<ScheduleRoundedIcon style={iconStyle} />}
-      label={label}
-      style={{
-        ...inlineStyles.chip,
-        ...chipStyle
-      }}
-      variant="outlined"
-    />
-  );
-};
-
 const CampaignDetails: React.FC<CampaignDetailsProps> = ({
   description,
   creatorName,
-  dueBy,
   externalSystem,
   isAutoAssignEligible,
   teams,
   campaignGroups
 }) => {
-  const theme = useTheme();
-
   // display van configuration and auto assign eligible tags in divided section
-  const shouldShowExtraTags = externalSystem || isAutoAssignEligible;
+  const showExtraTags = externalSystem || isAutoAssignEligible;
 
   const showCampaignGroupsTags =
     campaignGroups?.edges && campaignGroups.edges?.length > 0;
@@ -101,51 +54,66 @@ const CampaignDetails: React.FC<CampaignDetailsProps> = ({
     <>
       <div style={inlineStyles.wrapper}>
         {creatorName ? (
-          <Chip
-            icon={<PersonOutlineRoundedIcon />}
-            label={creatorName}
-            style={inlineStyles.chip}
-            variant="outlined"
-          />
+          <Tooltip title="Created by">
+            <Chip
+              icon={<PersonOutlineRoundedIcon fontSize="small" />}
+              label={creatorName}
+              style={inlineStyles.chip}
+              variant="outlined"
+            />
+          </Tooltip>
         ) : null}
-        <DueByIcon dueBy={dueBy} theme={theme} />
         {teams.length > 0 ? (
-          <Chip
-            icon={<PeopleOutlineRoundedIcon />}
-            label={teams
-              .map((team: Record<string, unknown>) => team.title)
-              .join(", ")}
-            style={inlineStyles.chip}
-            variant="outlined"
-          />
+          <Tooltip title="Teams">
+            <Chip
+              icon={<PeopleOutlineRoundedIcon fontSize="small" />}
+              label={teams
+                .map((team: Record<string, unknown>) => team.title)
+                .join(", ")}
+              style={inlineStyles.chip}
+              variant="outlined"
+            />
+          </Tooltip>
         ) : null}
         {showCampaignGroupsTags ? (
-          <Chip
-            icon={<AssignmentRoundedIcon />}
-            label={campaignGroups.edges
-              .map(({ node }: { node: Record<string, unknown> }) => node.name)
-              .join(", ")}
-            style={inlineStyles.chip}
-            variant="outlined"
-          />
+          <Tooltip title="Campaigns">
+            <Chip
+              icon={<RecordVoiceOverIcon fontSize="small" />}
+              label={campaignGroups.edges
+                .map(({ node }: { node: Record<string, unknown> }) => node.name)
+                .join(", ")}
+              style={inlineStyles.chip}
+              variant="outlined"
+            />
+          </Tooltip>
         ) : null}
       </div>
-      <div style={inlineStyles.chip}>Description: {description}</div>
-      {shouldShowExtraTags ? (
+      <div style={inlineStyles.chip}>
+        <Tooltip title="Description" placement="bottom-start">
+          <div style={inlineStyles.wrapper}>
+            <DescriptionOutlinedIcon
+              fontSize="small"
+              style={{ marginRight: "4px" }}
+            />
+            {description}
+          </div>
+        </Tooltip>
+      </div>
+      {showExtraTags ? (
         <>
           <Divider component="li" />
 
           <div style={{ marginTop: "8px" }}>
             {isAutoAssignEligible ? (
               <Chip
-                icon={<LocalOfferOutlinedIcon />}
+                icon={<LocalOfferOutlinedIcon fontSize="small" />}
                 label="Auto-Assign Eligible"
                 style={inlineStyles.chip}
               />
             ) : null}
             {externalSystem ? (
               <Chip
-                icon={<LocalOfferOutlinedIcon />}
+                icon={<LocalOfferOutlinedIcon fontSize="small" />}
                 label={`${externalSystem.type}: ${externalSystem.name}`}
                 style={{ ...inlineStyles.chip, backgroundColor: blue[300] }}
               />
