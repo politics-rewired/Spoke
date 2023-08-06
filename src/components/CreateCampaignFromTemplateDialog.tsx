@@ -23,6 +23,7 @@ export interface CreateCampaignFromTemplateDialogProps {
   defaultTemplate?: TemplateCampaignFragment;
 }
 
+// eslint-disable-next-line max-len
 export const CreateCampaignFromTemplateDialog: React.FC<CreateCampaignFromTemplateDialogProps> = (
   props
 ) => {
