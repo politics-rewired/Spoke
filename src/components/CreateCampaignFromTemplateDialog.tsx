@@ -45,15 +45,10 @@ export const CreateCampaignFromTemplateDialog: React.FC<CreateCampaignFromTempla
   const templates =
     data?.organization?.templateCampaigns?.edges?.map(({ node }) => node) ?? [];
 
-  const handleChangeTemplate = useCallback(
-    (
-      _event: React.ChangeEvent<unknown>,
-      value: TemplateCampaignFragment | null
-    ) => {
-      setSelectedTemplate(value);
-    },
-    [setSelectedTemplate]
-  );
+  const handleChangeTemplate = (
+    _event: React.ChangeEvent<unknown>,
+    value: TemplateCampaignFragment | null
+  ) => setSelectedTemplate(value);
 
   const handleChangeQuantity: React.ChangeEventHandler<HTMLInputElement> = (
     event
