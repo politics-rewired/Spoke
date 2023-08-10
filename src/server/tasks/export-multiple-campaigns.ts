@@ -1,5 +1,6 @@
 import DateTime from "../../lib/datetime";
 import type { JobRequestRecord } from "../api/types";
+import sendEmail from "../mail";
 import { r } from "../models";
 import type { ExportCampaignPayload } from "./export-campaign";
 import { fetchExportData, processExportData } from "./export-campaign";
@@ -54,23 +55,18 @@ export const exportCampaignForBulkOperation: ProgressTask<ExportCampaignPayload>
     campaignVariableNames
   };
 
-  try {
-    const exportUrls = await processExportData(campaignMetaData, spokeOptions);
-    helpers.logger.debug("Waiting for streams to finish");
+  const exportUrls = await processExportData(campaignMetaData, spokeOptions);
+  helpers.logger.info(`Successfully exported ${campaignId}`);
 
-    // store exportUrls in job_request table
-    await helpers.updateResult({ message: JSON.stringify(exportUrls) });
-    // indicate that the exports have been processed
-    await helpers.updateStatus(100);
-  } finally {
-    helpers.logger.info(
-      `Successfully exported campaign ${campaignId} for bulk operation`
-    );
-  }
+  // store exportUrls in job_request table
+  await helpers.updateResult({ message: JSON.stringify(exportUrls) });
+  // indicate that the exports have been processed
+  await helpers.updateStatus(100);
 };
 
 type EmailBulkOperationPayload = ExportCampaignPayload & {
   jobRequestRecords: JobRequestRecord[];
+  campaignIds: string[];
 };
 
 // eslint-disable-next-line max-len
@@ -78,7 +74,64 @@ export const sendEmailForBulkExportOperation: ProgressTask<EmailBulkOperationPay
   payload,
   helpers
 ) => {
-  console.log("HELLO", payload, "helpers", helpers);
+  const { jobRequestRecords, campaignId, requesterId, campaignIds } = payload;
+
+  // map campaign id to campaign title and export urls for email composition
+  const campaignMetaDataMap: Record<string, Record<string, unknown>> = {};
+  for (const id of campaignIds) {
+    const parsed = parseInt(id, 10);
+    const { campaignTitle } = await fetchExportData(parsed, requesterId);
+    campaignMetaDataMap[id] = { campaignTitle, exportUrls: null };
+  }
+
+  // query job_req table for campaign export urls where status is 100 (exports complete)
+  const { rows } = await helpers.query(
+    `
+      select campaign_id, result_message 
+      from job_request 
+      where id = ANY ($1)
+        and status = 100
+    `,
+    [jobRequestRecords.map((rec) => rec.id)]
+  );
+
+  // map query result to campaign id and parse JSON
+  const campaignExportsMap = rows.map((result) => ({
+    campaignId: result.campaign_id,
+    exportUrls: JSON.parse(result.result_message)
+  }));
+
+  // map fetched export urls to  campaignMetaData
+  for (const campaignExport of campaignExportsMap) {
+    if (!Object.keys(campaignMetaDataMap).includes(campaignExport.campaignId)) {
+      throw new Error("attempted to index metaData for incorrect campaign");
+    }
+    campaignMetaDataMap[campaignExport.campaignId].exportUrls =
+      campaignExport.exportUrls;
+  }
+
+  try {
+    const campaignIdsString = campaignIds.join(", ");
+    // get email
+    const { notificationEmail } = await fetchExportData(
+      campaignId,
+      requesterId
+    );
+    // TODO - format email content
+    // trigger retry by throwing if export urls is null for a campaign?
+    // const exporContent = await formatEmailContent
+    await sendEmail({
+      to: notificationEmail,
+      subject: `Export(s) ready for campaign(s) ${campaignIdsString}`
+      // html: exportContent
+    });
+    helpers.logger.info(
+      `Successfully sent export details email for bulk operation`
+    );
+  } finally {
+    // TODO - clean up job_request table
+    helpers.logger.info("Finishing bulk export process");
+  }
 };
 
 // add jobs for each campaign export to the job_requests table
@@ -100,9 +153,10 @@ export const addExportMultipleCampaigns = async (
 
     jobRequestRecords.push(requestRecord);
   }
-  console.log("job results", jobRequestRecords);
+
+  console.log("requests", jobRequestRecords);
   const emailTaskPayload = {
-    ...rest,
+    ...payload,
     campaignId: campaignIds[0],
     jobRequestRecords
   };
