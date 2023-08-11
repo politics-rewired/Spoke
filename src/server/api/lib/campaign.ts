@@ -24,6 +24,7 @@ import { cacheableData, datawarehouse, r } from "../../models";
 import { addAssignTexters } from "../../tasks/assign-texters";
 import { accessRequired } from "../errors";
 import type {
+  AutoReplyTriggerRecord,
   CampaignRecord,
   InteractionStepRecord,
   UserRecord
@@ -267,27 +268,44 @@ export const copyCampaign = async (options: CopyCampaignOptions) => {
       }
 
       // Copy interactions
-      const interactions = await trx<InteractionStepRecord>("interaction_step")
-        .where({
-          campaign_id: campaignId,
-          is_deleted: false
-        })
-        .then((interactionSteps) =>
-          interactionSteps.map<InteractionStepRecord | { id: string }>(
-            (interactionStep) => ({
-              id: `new${interactionStep.id}`,
-              questionText: interactionStep.question,
-              scriptOptions: interactionStep.script_options,
-              answerOption: interactionStep.answer_option,
-              answerActions: interactionStep.answer_actions,
-              isDeleted: interactionStep.is_deleted,
-              campaign_id: newCampaign.id,
-              parentInteractionId: interactionStep.parent_interaction_id
-                ? `new${interactionStep.parent_interaction_id}`
-                : interactionStep.parent_interaction_id
-            })
-          )
-        );
+      const campaignInteractionStepRecords = await trx<InteractionStepRecord>(
+        "interaction_step"
+      ).where({
+        campaign_id: campaignId,
+        is_deleted: false
+      });
+
+      const triggers: AutoReplyTriggerRecord[] = await r
+        .knex("auto_reply_trigger")
+        .join(
+          "interaction_step",
+          "auto_reply_trigger.interaction_step_id",
+          "interaction_step.id"
+        )
+        .where({ campaign_id: campaignId });
+
+      const campaignInteractionSteps = campaignInteractionStepRecords.map(
+        (step) => {
+          const stepTokens = triggers
+            .filter((trigger) => trigger.interaction_step_id === step.id)
+            .map((trigger) => trigger.token);
+          return { ...step, autoReplyTokens: stepTokens };
+        }
+      );
+
+      const interactions = campaignInteractionSteps.map((interactionStep) => ({
+        id: `new${interactionStep.id}`,
+        questionText: interactionStep.question,
+        scriptOptions: interactionStep.script_options,
+        answerOption: interactionStep.answer_option,
+        answerActions: interactionStep.answer_actions,
+        isDeleted: interactionStep.is_deleted,
+        campaign_id: newCampaign.id,
+        parentInteractionId: interactionStep.parent_interaction_id
+          ? `new${interactionStep.parent_interaction_id}`
+          : interactionStep.parent_interaction_id,
+        autoReplyTokens: interactionStep.autoReplyTokens
+      }));
 
       if (interactions.length > 0) {
         await persistInteractionStepTree(
