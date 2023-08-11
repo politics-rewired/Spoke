@@ -115,6 +115,11 @@ const validators = {
     default: false,
     isClient: true
   }),
+  ENABLE_AUTO_REPLIES: bool({
+    desc: "Whether auto reply handling is enabled",
+    default: false,
+    isClient: true
+  }),
   DISABLE_ASSIGNMENT_CASCADE: bool({
     desc:
       "Whether to just assign from 1 campaign rather than gathering from multiple to fulfill a request",
