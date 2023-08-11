@@ -41,6 +41,12 @@ exports.up = function up(knex) {
         on auto_reply_trigger
         for each row
         execute procedure auto_reply_trigger_before_insert();
+
+        create trigger _500_auto_reply_trigger_updated_at
+        before update
+        on public.auto_reply_trigger
+        for each row
+        execute procedure universal_updated_at();
       `
     )
     .alterTable("campaign_contact", (table) => {
