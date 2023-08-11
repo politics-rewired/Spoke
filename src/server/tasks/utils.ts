@@ -100,6 +100,7 @@ export interface ProgressTaskHelpers extends JobHelpers {
   jobRequest: JobRequestRecord;
   updateStatus(status: number): Promise<void>;
   updateResult(result: Record<string, unknown>): Promise<void>;
+  cleanUpJobRequest: (id: number) => Promise<void>;
 }
 
 export type ProgressTask<P = unknown> = (
@@ -130,11 +131,16 @@ export const wrapProgressTask = <P extends { [key: string]: any }>(
       .where({ id: jobId });
   };
 
+  const cleanUpJobRequest = async (id: number) => {
+    await r.knex("job_request").where({ id }).del();
+  };
+
   const progressHelpers: ProgressTaskHelpers = {
     ...helpers,
     jobRequest,
     updateStatus,
-    updateResult
+    updateResult,
+    cleanUpJobRequest
   };
 
   try {
