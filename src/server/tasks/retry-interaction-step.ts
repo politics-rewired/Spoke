@@ -22,6 +22,7 @@ export const TASK_IDENTIFIER = "retry-interaction-step";
 export interface RetryInteractionStepPayload {
   campaignContactId: number;
   unassignAfterSend?: boolean;
+  interactionStepId?: number;
 }
 
 interface RetryInteractionStepRecord {
@@ -82,7 +83,7 @@ export const retryInteractionStep: Task = async (
   };
   const texter = recordToCamelCase<User>(user);
   const customFields = Object.keys(JSON.parse(contact.customFields));
-  const campaignVariableIds = campaignVariables.map(({ id }) => id);
+  const campaignVariableIds = campaignVariables.map(({ id }) => id.toString());
 
   const body = applyScript({
     script,
