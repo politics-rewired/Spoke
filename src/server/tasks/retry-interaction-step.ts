@@ -1,10 +1,8 @@
+import type { CampaignContact, MessageInput, User } from "@spoke/spoke-codegen";
 import type { Task } from "graphile-worker";
 import sample from "lodash/sample";
 import md5 from "md5";
 
-import type { CampaignContact } from "../../api/campaign-contact";
-import type { MessageInput } from "../../api/types";
-import type { User } from "../../api/user";
 import { recordToCamelCase } from "../../lib/attributes";
 import { applyScript } from "../../lib/scripts";
 import { sendMessage } from "../api/lib/send-message";
@@ -36,7 +34,7 @@ export const retryInteractionStep: Task = async (
   payload: RetryInteractionStepPayload,
   helpers
 ) => {
-  const { campaignContactId } = payload;
+  const { campaignContactId, interactionStepId } = payload;
 
   const {
     rows: [record]
@@ -53,9 +51,12 @@ export const retryInteractionStep: Task = async (
       join public.user u on u.id = a.user_id
       where
         cc.id = $1
-        and istep.parent_interaction_id is null
+        and (
+          ($2::integer is null and istep.parent_interaction_id is null)
+          or istep.id = $2::integer
+        )
     `,
-    [campaignContactId]
+    [campaignContactId, interactionStepId]
   );
 
   if (!record)
