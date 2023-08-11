@@ -12,3 +12,10 @@ mutation SendMessage($message: MessageInput!, $campaignContactId: String!) {
     }
   }
 }
+
+mutation MarkForManualReply($campaignContactId: String!) {
+  markForManualReply(campaignContactId: $campaignContactId) {
+    id
+    autoReplyEligible
+  }
+}

@@ -4,13 +4,14 @@ import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
-import { useSendMessageMutation } from "@spoke/spoke-codegen";
+import type { Conversation, Message, MessageInput } from "@spoke/spoke-codegen";
+import {
+  useMarkForManualReplyMutation,
+  useSendMessageMutation
+} from "@spoke/spoke-codegen";
 import React, { useState } from "react";
 import * as yup from "yup";
 
-import type { Conversation } from "../../../../../api/conversations";
-import type { Message } from "../../../../../api/message";
-import type { MessageInput } from "../../../../../api/types";
 import GSForm from "../../../../../components/forms/GSForm";
 import SpokeFormField from "../../../../../components/forms/SpokeFormField";
 import MessageLengthInfo from "../../../../../components/MessageLengthInfo";
@@ -41,6 +42,7 @@ const MessageResponse: React.FC<MessageResponseProps> = ({
   const [messageForm, setMessageForm] = useState<HTMLFormElement | null>(null);
 
   const [sendMessage] = useSendMessageMutation();
+  const [markForManualReply] = useMarkForManualReplyMutation();
 
   const createMessageToContact = (text: string) => {
     const { contact, texter } = conversation;
@@ -65,8 +67,12 @@ const MessageResponse: React.FC<MessageResponseProps> = ({
     setIsSending(true);
 
     try {
+      const campaignContactId = contact.id as string;
       const { data, errors } = await sendMessage({
-        variables: { message, campaignContactId: contact.id as string }
+        variables: { message, campaignContactId }
+      });
+      await markForManualReply({
+        variables: { campaignContactId }
       });
       const messages = data?.sendMessage?.messages;
 
