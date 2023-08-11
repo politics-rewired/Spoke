@@ -1,3 +1,4 @@
+import type { InteractionStepWithChildren } from "@spoke/spoke-codegen";
 import { Pool } from "pg";
 
 import {
@@ -6,7 +7,6 @@ import {
   createInteractionStep,
   createQuestionResponse
 } from "../../../../__test__/testbed-preparation/core";
-import type { InteractionStepWithChildren } from "../../../api/interaction-step";
 import { config } from "../../../config";
 import { withClient } from "../../utils";
 import type { InteractionStepRecord } from "../types";
