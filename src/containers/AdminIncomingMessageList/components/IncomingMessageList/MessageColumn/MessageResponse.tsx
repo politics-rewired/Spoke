@@ -31,6 +31,8 @@ const messageSchema = yup.object({
     .max(window.MAX_MESSAGE_LENGTH)
 });
 
+type MessageFormValue = { messageText: string };
+
 const MessageResponse: React.FC<MessageResponseProps> = ({
   conversation,
   value,
