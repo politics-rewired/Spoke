@@ -1,18 +1,21 @@
+import type {
+  Assignment,
+  Campaign,
+  CampaignContact,
+  InteractionStep,
+  Message,
+  Organization,
+  User
+} from "@spoke/spoke-codegen";
 import faker from "faker";
 import AuthHasher from "passport-local-authenticate";
 import type { PoolClient } from "pg";
 
-import type { Assignment } from "../../src/api/assignment";
-import type { Campaign } from "../../src/api/campaign";
-import type { CampaignContact } from "../../src/api/campaign-contact";
-import type { InteractionStep } from "../../src/api/interaction-step";
-import type { Message } from "../../src/api/message";
-import type { Organization } from "../../src/api/organization";
 import { UserRoleType } from "../../src/api/organization-membership";
-import type { User } from "../../src/api/user";
 import { DateTime } from "../../src/lib/datetime";
 import type {
   AssignmentRecord,
+  AutoReplyTriggerRecord,
   CampaignContactRecord,
   CampaignRecord,
   InteractionStepRecord,
@@ -388,7 +391,7 @@ export const createMessage = async (
     .then(({ rows: [message] }) => message);
 
 export interface CreateCompleteCampaignOptions {
-  organization?: CreateOrganizationOptions;
+  organization?: CreateOrganizationOptions & { id: number };
   campaign?: Omit<CreateCampaignOptions, "organizationId">;
   texters?: number | CreateTexterOptions[];
   contacts?: number | Omit<CreateCampaignContactOptions, "campaignId">[];
@@ -398,10 +401,10 @@ export const createCompleteCampaign = async (
   client: PoolClient,
   options: CreateCompleteCampaignOptions
 ) => {
-  const organization = await createOrganization(
-    client,
-    options.organization ?? {}
-  );
+  const optOrg = options.organization;
+  const organization = optOrg?.id
+    ? { id: optOrg?.id }
+    : await createOrganization(client, options.organization ?? {});
 
   const campaign = await createCampaign(client, {
     ...(options.campaign ?? {}),
@@ -524,6 +527,26 @@ export const createQuestionResponse = async (
       [options.value, options.campaignContactId, options.interactionStepId]
     )
     .then(({ rows: [questionResponse] }) => questionResponse);
+
+export type CreateAutoReplyTriggerOptions = {
+  token: string;
+  interactionStepId: number;
+};
+
+export const createAutoReplyTrigger = async (
+  client: PoolClient,
+  options: CreateAutoReplyTriggerOptions
+) =>
+  client
+    .query<AutoReplyTriggerRecord>(
+      `
+        insert into public.auto_reply_trigger (token, interaction_step_id)
+        values ($1, $2)
+        returning *
+      `,
+      [options.token, options.interactionStepId]
+    )
+    .then(({ rows: [trigger] }) => trigger);
 
 export const assignContacts = async (
   client: PoolClient,
