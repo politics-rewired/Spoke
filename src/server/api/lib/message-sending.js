@@ -1,6 +1,7 @@
 import groupBy from "lodash/groupBy";
 
 import { config } from "../../../config";
+import { optOutTriggers } from "../../../lib/opt-out-triggers";
 import { eventBus, EventType } from "../../event-bus";
 import { queueExternalSyncForAction } from "../../lib/external-systems";
 import { cacheableData, r } from "../../models";
@@ -15,23 +16,6 @@ export const SpokeSendStatus = Object.freeze({
   Paused: "PAUSED",
   NotAttempted: "NOT_ATTEMPTED"
 });
-
-const OPT_OUT_TRIGGERS = [
-  "stop",
-  "stop all",
-  "stopall",
-  "unsub",
-  "unsubscribe",
-  "cancel",
-  "end",
-  "quit",
-  "stop2quit",
-  "stop 2 quit",
-  "stop=quit",
-  "stop = quit",
-  "stop to quit",
-  "stoptoquit"
-];
 
 /**
  * Return a list of messaing services for an organization that are candidates for assignment.
@@ -386,12 +370,15 @@ export async function saveNewIncomingMessage(messageInstance) {
   };
   eventBus.emit(EventType.MessageReceived, payload);
 
-  const cleanedUpText = text.toLowerCase().trim();
+  const noPunctuationText = text.replace(/[,.!]/g, "");
+  const cleanedUpText = noPunctuationText.toLowerCase().trim();
 
   // Separate update fields according to: https://stackoverflow.com/a/42307979
   let updateQuery = r.knex("campaign_contact").limit(1);
 
-  if (OPT_OUT_TRIGGERS.includes(cleanedUpText)) {
+  // Prioritize auto opt outs > auto replies > regular inbound message handling
+  const handleOptOut = optOutTriggers.includes(cleanedUpText);
+  if (handleOptOut) {
     updateQuery = updateQuery.update({ message_status: "closed" });
 
     const { id: organizationId } = await r
