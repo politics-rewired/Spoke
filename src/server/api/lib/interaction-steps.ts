@@ -79,21 +79,23 @@ export const persistInteractionStepNode = async (
       .where({ interaction_step_id: rootInteractionStep.id })
       .pluck("token");
 
-    const tokensToInsert = removeMatchingTokens(tokens, existingTokens);
-    const triggersToInsert = mapTokensToTriggers(
-      tokensToInsert,
-      parseInt(rootInteractionStep.id, 10)
-    );
+    if (tokens && existingTokens) {
+      const tokensToInsert = removeMatchingTokens(tokens, existingTokens);
+      const triggersToInsert = mapTokensToTriggers(
+        tokensToInsert,
+        parseInt(rootInteractionStep.id, 10)
+      );
 
-    if (triggersToInsert.length)
-      await knexTrx("auto_reply_trigger").insert(triggersToInsert);
+      if (triggersToInsert.length)
+        await knexTrx("auto_reply_trigger").insert(triggersToInsert);
 
-    const tokensToDelete = removeMatchingTokens(existingTokens, tokens);
+      const tokensToDelete = removeMatchingTokens(existingTokens, tokens);
 
-    await knexTrx("auto_reply_trigger")
-      .where({ interaction_step_id: rootInteractionStep.id })
-      .whereIn("token", tokensToDelete)
-      .delete();
+      await knexTrx("auto_reply_trigger")
+        .where({ interaction_step_id: rootInteractionStep.id })
+        .whereIn("token", tokensToDelete)
+        .delete();
+    }
   }
 
   // Persist child interaction steps
