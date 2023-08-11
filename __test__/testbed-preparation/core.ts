@@ -524,3 +524,24 @@ export const createQuestionResponse = async (
       [options.value, options.campaignContactId, options.interactionStepId]
     )
     .then(({ rows: [questionResponse] }) => questionResponse);
+
+export const assignContacts = async (
+  client: PoolClient,
+  assignmentId: number,
+  campaignId: number,
+  count: number
+) => {
+  await client.query(
+    `
+          update campaign_contact
+          set assignment_id = $1
+          where id in (
+            select id from campaign_contact
+            where campaign_id = $2
+              and assignment_id is null
+            limit $3
+          )
+        `,
+    [assignmentId, campaignId, count]
+  );
+};

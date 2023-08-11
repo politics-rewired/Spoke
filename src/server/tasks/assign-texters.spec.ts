@@ -2,6 +2,7 @@ import type { PoolClient } from "pg";
 import { Pool } from "pg";
 
 import {
+  assignContacts,
   createCompleteCampaign,
   createTexter
 } from "../../../__test__/testbed-preparation/core";
@@ -37,27 +38,6 @@ const texterContactCount = async (
     [texterId, campaignId]
   );
   return count;
-};
-
-const assignContacts = async (
-  client: PoolClient,
-  assignmentId: number,
-  campaignId: number,
-  count: number
-) => {
-  await client.query(
-    `
-      update campaign_contact
-      set assignment_id = $1
-      where id in (
-        select id from campaign_contact
-        where campaign_id = $2
-          and assignment_id is null
-        limit $3
-      )
-    `,
-    [assignmentId, campaignId, count]
-  );
 };
 
 describe("assign-texters", () => {
