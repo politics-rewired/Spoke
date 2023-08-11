@@ -556,15 +556,15 @@ export const assignContacts = async (
 ) => {
   await client.query(
     `
-          update campaign_contact
-          set assignment_id = $1
-          where id in (
-            select id from campaign_contact
-            where campaign_id = $2
-              and assignment_id is null
-            limit $3
-          )
-        `,
+      update campaign_contact
+      set assignment_id = $1
+      where id in (
+        select id from campaign_contact
+        where campaign_id = $2
+          and assignment_id is null
+        limit $3
+      )
+    `,
     [assignmentId, campaignId, count]
   );
 };
