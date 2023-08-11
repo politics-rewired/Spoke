@@ -784,6 +784,7 @@ type InteractionStep {
   scriptOptions: [String]!
   answerOption: String
   parentInteractionId: String
+  autoReplyTokens: [String]
   isDeleted: Boolean
   answerActions: String
   questionResponse(campaignContactId: String): QuestionResponse
@@ -939,6 +940,8 @@ type CampaignContact {
   messageStatus: String!
   assignmentId: String
   updatedAt: Date!
+  autoReplyEligible: Boolean!
+
   tags: [CampaignContactTag!]!
 }
 

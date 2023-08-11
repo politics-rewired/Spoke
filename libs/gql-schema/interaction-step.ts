@@ -6,6 +6,7 @@ export const schema = `
     scriptOptions: [String]!
     answerOption: String
     parentInteractionId: String
+    autoReplyTokens: [String]
     isDeleted: Boolean
     answerActions: String
     questionResponse(campaignContactId: String): QuestionResponse
@@ -18,6 +19,7 @@ export const schema = `
     scriptOptions: [String]!
     answerOption: String
     answerActions: String
+    autoReplyTokens: [String]
     parentInteractionId: String
     isDeleted: Boolean
     createdAt: Date
