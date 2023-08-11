@@ -1,5 +1,7 @@
 import DateTime from "../../lib/datetime";
+import formatMultipleCampaignExportsEmail from "../api/export-multiple-campaigns";
 import type { JobRequestRecord } from "../api/types";
+import type { CampaignExportMetaData } from "../lib/templates/export-multiple-campaigns";
 import sendEmail from "../mail";
 import { r } from "../models";
 import type { ExportCampaignPayload } from "./export-campaign";
@@ -56,7 +58,9 @@ export const exportCampaignForBulkOperation: ProgressTask<ExportCampaignPayload>
   };
 
   const exportUrls = await processExportData(campaignMetaData, spokeOptions);
-  helpers.logger.info(`Successfully exported ${campaignId}`);
+  helpers.logger.info(
+    `Exported data for campaign: ${campaignTitle} - ID ${campaignId}`
+  );
 
   // store exportUrls in job_request table
   await helpers.updateResult({ message: JSON.stringify(exportUrls) });
@@ -77,13 +81,14 @@ export const sendEmailForBulkExportOperation: ProgressTask<EmailBulkOperationPay
   const { jobRequestRecords, campaignId, requesterId, campaignIds } = payload;
 
   // map campaign id to campaign title and export urls for email composition
-  const campaignMetaDataMap: Record<string, Record<string, unknown>> = {};
+  const campaignMetaDataMap: CampaignExportMetaData = {};
   for (const id of campaignIds) {
     const parsed = parseInt(id, 10);
     const { campaignTitle } = await fetchExportData(parsed, requesterId);
     campaignMetaDataMap[id] = { campaignTitle, exportUrls: null };
   }
 
+  const jobRequestIds = jobRequestRecords.map((record) => record.id);
   // query job_req table for campaign export urls where status is 100 (exports complete)
   const { rows } = await helpers.query(
     `
@@ -92,8 +97,11 @@ export const sendEmailForBulkExportOperation: ProgressTask<EmailBulkOperationPay
       where id = ANY ($1)
         and status = 100
     `,
-    [jobRequestRecords.map((rec) => rec.id)]
+    [jobRequestIds]
   );
+
+  // wait for all campaign exports to process
+  const exportsStillProcessing = rows.length !== campaignIds.length;
 
   // map query result to campaign id and parse JSON
   const campaignExportsMap = rows.map((result) => ({
@@ -103,34 +111,44 @@ export const sendEmailForBulkExportOperation: ProgressTask<EmailBulkOperationPay
 
   // map fetched export urls to  campaignMetaData
   for (const campaignExport of campaignExportsMap) {
-    if (!Object.keys(campaignMetaDataMap).includes(campaignExport.campaignId)) {
-      throw new Error("attempted to index metaData for incorrect campaign");
+    if (
+      !Object.keys(campaignMetaDataMap).includes(
+        campaignExport.campaignId.toString()
+      )
+    ) {
+      throw new Error("attempted to store exportUrls for incorrect campaign");
     }
     campaignMetaDataMap[campaignExport.campaignId].exportUrls =
       campaignExport.exportUrls;
   }
 
   try {
+    if (exportsStillProcessing) {
+      throw new Error("Attempting to send export email before expots process");
+    }
     const campaignIdsString = campaignIds.join(", ");
     // get email
     const { notificationEmail } = await fetchExportData(
       campaignId,
       requesterId
     );
-    // TODO - format email content
-    // trigger retry by throwing if export urls is null for a campaign?
-    // const exporContent = await formatEmailContent
+    // trigger retry by throwing if export urls is null for a campaign
+    const exportContent = formatMultipleCampaignExportsEmail(
+      campaignMetaDataMap
+    );
     await sendEmail({
       to: notificationEmail,
-      subject: `Export(s) ready for campaign(s) ${campaignIdsString}`
-      // html: exportContent
+      subject: `Export(s) ready for campaign(s) ${campaignIdsString}`,
+      html: exportContent
     });
-    helpers.logger.info(
-      `Successfully sent export details email for bulk operation`
-    );
+    helpers.logger.info(`Successfully sent email for bulk export operation`);
+    // TODO - restore after debugging
+    // remove export_campaign job_requests from requests table
+    // for (const id of jobRequestIds) {
+    //   await helpers.cleanUpJobRequest(id);
+    // }
   } finally {
-    // TODO - clean up job_request table
-    helpers.logger.info("Finishing bulk export process");
+    helpers.logger.info("Successfully completed bulk export operation");
   }
 };
 
@@ -147,30 +165,27 @@ export const addExportMultipleCampaigns = async (
       identifier: EXPORT_TASK_IDENTIFIER,
       payload: innerPayload,
       taskSpec: {
-        queueName: "export-multiple-campaigns"
+        queueName: "export-campaigns-for-bulk-operation"
       }
     });
 
     jobRequestRecords.push(requestRecord);
   }
 
-  console.log("requests", jobRequestRecords);
+  // satisfy ProgressJobPayload: campaignId = required
   const emailTaskPayload = {
     ...payload,
     campaignId: campaignIds[0],
     jobRequestRecords
   };
-  // dispatch a single job to email export urls to client
+  // dispatch a single job to email exportUrls
   await addProgressJob({
     identifier: EMAIL_TASK_IDENTIFIER,
     payload: emailTaskPayload,
     taskSpec: {
-      queueName: "send-email-after-bulk-export"
+      queueName: "send-email-after-bulk-export",
+      priority: 0
     }
   });
   return jobRequestRecords;
 };
-
-// desired flow:
-// each export gets called as a job
-// one email is sent after the exports are processed

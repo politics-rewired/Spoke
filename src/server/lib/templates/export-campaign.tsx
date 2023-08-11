@@ -7,13 +7,12 @@ export type ExportURLs = {
   campaignOptOutsExportUrl?: string | undefined;
   campaignFilteredContactsExportUrl?: string | undefined;
 };
-
 interface ExportProps {
   exportUrls: ExportURLs;
   campaignTitle: string;
 }
 
-const ExportCampaign: React.FC<ExportProps> = ({
+export const ExportCampaign: React.FC<ExportProps> = ({
   exportUrls,
   campaignTitle
 }) => {
