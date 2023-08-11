@@ -6,6 +6,7 @@ import DialogContent from "@material-ui/core/DialogContent";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import CreateIcon from "@material-ui/icons/Create";
 import FileCopyIcon from "@material-ui/icons/FileCopyOutlined";
+import LibraryAddOutlinedIcon from "@material-ui/icons/LibraryAddOutlined";
 import SpeedDial from "@material-ui/lab/SpeedDial";
 import SpeedDialAction from "@material-ui/lab/SpeedDialAction";
 import SpeedDialIcon from "@material-ui/lab/SpeedDialIcon";
@@ -18,6 +19,7 @@ import { withRouter } from "react-router-dom";
 import { compose } from "recompose";
 
 import CreateCampaignFromTemplateDialog from "../components/CreateCampaignFromTemplateDialog";
+import CreateCampaignFromLibraryDialog from "../components/CreateFromLibraryDialog";
 import LoadingIndicator from "../components/LoadingIndicator";
 import theme from "../styles/theme";
 import { withAuthzContext } from "./AuthzProvider";
@@ -47,7 +49,8 @@ class AdminCampaignList extends React.Component {
     releasingInProgress: false,
     releasingAllReplies: false,
     releaseAllRepliesError: undefined,
-    releaseAllRepliesResult: undefined
+    releaseAllRepliesResult: undefined,
+    createFromLibraryOpen: false
   };
 
   handleClickNewButton = async () => {
@@ -289,12 +292,22 @@ class AdminCampaignList extends React.Component {
               tooltipTitle="Create from Template"
               onClick={() => this.setState({ createFromTemplateOpen: true })}
             />
+            <SpeedDialAction
+              icon={<LibraryAddOutlinedIcon />}
+              tooltipTitle="Create from Library"
+              onClick={() => this.setState({ createFromLibraryOpen: true })}
+            />
           </SpeedDial>
         ) : null}
         <CreateCampaignFromTemplateDialog
           organizationId={organizationId}
           open={this.state.createFromTemplateOpen}
           onClose={() => this.setState({ createFromTemplateOpen: false })}
+        />
+        <CreateCampaignFromLibraryDialog
+          organizationId={organizationId}
+          open={this.state.createFromLibraryOpen}
+          onClose={() => this.setState({ createFromLibraryOpen: false })}
         />
       </div>
     );
