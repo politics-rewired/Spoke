@@ -1,8 +1,8 @@
 import type { Resolver, Resolvers } from "@apollo/client";
 import { gql } from "@apollo/client";
+import type { InteractionStep } from "@spoke/spoke-codegen";
 import produce from "immer";
 
-import type { InteractionStep } from "../../../../api/interaction-step";
 import { DateTime } from "../../../../lib/datetime";
 import type { LocalResolverContext } from "../../../../network/types";
 
@@ -20,6 +20,7 @@ export const EditInteractionStepFragment = gql`
     answerActions
     parentInteractionId
     isDeleted
+    autoReplyTokens
     isModified @client
   }
 `;
@@ -108,6 +109,7 @@ export type AddInteractionStepPayload = Partial<
     | "answerActions"
     | "questionText"
     | "scriptOptions"
+    | "autoReplyTokens"
   >
 >;
 
@@ -134,6 +136,7 @@ export const stageAddInteractionStep: Resolver = (
       scriptOptions: payload.scriptOptions ?? [""],
       answerOption: payload.answerOption ?? "",
       answerActions: payload.answerActions ?? "",
+      autoReplyTokens: payload.autoReplyTokens ?? [],
       isDeleted: false,
       isModified: true,
       createdAt: DateTime.local().toISO()
@@ -148,7 +151,10 @@ export const stageAddInteractionStep: Resolver = (
 };
 
 export type UpdateInteractionStepPayload = Partial<
-  Pick<InteractionStep, "answerOption" | "questionText" | "scriptOptions">
+  Pick<
+    InteractionStep,
+    "answerOption" | "questionText" | "scriptOptions" | "autoReplyTokens"
+  >
 >;
 
 export interface StageUpdateInteractionStepVars
@@ -161,6 +167,7 @@ const EditableIStepFragment = gql`
     questionText
     scriptOptions
     answerOption
+    autoReplyTokens
     isModified @client
   }
 `;

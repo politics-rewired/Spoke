@@ -3565,6 +3565,22 @@ const rootMutations = {
       });
 
       return true;
+    },
+    markForManualReply: async (_root, { campaignContactId }) => {
+      return r.knex.transaction(async (trx) => {
+        const [contact] = await trx("campaign_contact")
+          .where({ id: campaignContactId })
+          .update({ auto_reply_eligible: false })
+          .returning(["id", "auto_reply_eligible"]);
+
+        await trx.raw(`
+          delete from graphile_worker.jobs
+          where task_identifier = 'retry-interaction-step'
+          and (payload->>'campaignContactId')::integer = ${campaignContactId}
+        `);
+
+        return contact;
+      });
     }
   }
 };

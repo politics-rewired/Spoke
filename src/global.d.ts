@@ -16,6 +16,7 @@ interface Window {
   BASE_URL: string;
   ENABLE_TROLLBOT: boolean;
   SHOW_10DLC_REGISTRATION_NOTICES: boolean;
+  ENABLE_AUTO_REPLIES: boolean;
 
   AuthService: any;
 }

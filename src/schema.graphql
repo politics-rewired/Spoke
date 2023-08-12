@@ -337,6 +337,7 @@ type RootMutation {
   bulkOptOut(organizationId: String!, csvFile: Upload, numbersList: String): Int!
   bulkOptIn(organizationId: String!, csvFile: Upload, numbersList: String): Int!
   exportOptOuts(organizationId: String!, campaignIds: [String!]): Boolean!
+  markForManualReply(campaignContactId: String!): CampaignContact!
 }
 
 schema {
@@ -797,10 +798,26 @@ input InteractionStepInput {
   scriptOptions: [String]!
   answerOption: String
   answerActions: String
+  autoReplyTokens: [String]
   parentInteractionId: String
   isDeleted: Boolean
   createdAt: Date
   interactionSteps: [InteractionStepInput]
+}
+
+type InteractionStepWithChildren {
+  id: ID!
+  question: Question
+  questionText: String
+  scriptOptions: [String]!
+  answerOption: String
+  parentInteractionId: String
+  autoReplyTokens: [String]
+  isDeleted: Boolean
+  answerActions: String
+  questionResponse(campaignContactId: String): QuestionResponse
+  createdAt: Date!
+  interactionSteps: [InteractionStep]
 }
 
 
