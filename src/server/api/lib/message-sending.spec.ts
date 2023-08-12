@@ -183,15 +183,27 @@ describe("automatic message handling", () => {
     expect(retryJobsCount).toBe(0);
   });
 
-  test("responds appropriately to a contact who says YES! with a YES and MAYBE auto reply configured for the campaign", async () => {
+  test("queues appropriate response to a contact who says YES! with a YES and MAYBE auto reply configured for the campaign", async () => {
     const testbed = await withClient(pool, async (client) => {
       return createTestBed(client, agent, { createAutoReplies: true });
     });
 
     await sendReply(agent, testbed.cookies, testbed.contact.id, "YES!");
-    const retryJobsCount = await checkRetryJobCountForContact(
-      testbed.contact.id
+
+    const {
+      rows: [retryJobsWithYesTrigger]
+    } = await pool.query(
+      `
+        select count(*) from graphile_worker.jobs j
+        join auto_reply_trigger art on (payload->>'interactionStepId')::int = art.interaction_step_id
+        where task_identifier = 'retry-interaction-step'
+        and payload->>'campaignContactId' = $1
+        and token = 'yes'
+      `,
+      [testbed.contact.id]
     );
+
+    const retryJobsCount = parseInt(retryJobsWithYesTrigger.count, 10);
     expect(retryJobsCount).toBe(1);
   });
 });
