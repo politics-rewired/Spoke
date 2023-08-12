@@ -6,18 +6,18 @@ import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
-import type { CampaignVariablePage } from "@spoke/spoke-codegen";
+import type {
+  Action,
+  Campaign,
+  CampaignVariablePage,
+  InteractionStep,
+  InteractionStepWithChildren
+} from "@spoke/spoke-codegen";
 import produce from "immer";
 import isEqual from "lodash/isEqual";
 import React, { useEffect, useState } from "react";
 import { compose } from "recompose";
 
-import type { Campaign } from "../../../../api/campaign";
-import type {
-  InteractionStep,
-  InteractionStepWithChildren
-} from "../../../../api/interaction-step";
-import type { Action } from "../../../../api/types";
 import { readClipboardText, writeClipboardText } from "../../../../client/lib";
 import ScriptPreviewButton from "../../../../components/ScriptPreviewButton";
 import { dataTest } from "../../../../lib/attributes";
@@ -43,7 +43,7 @@ import {
   generateId,
   GET_CAMPAIGN_INTERACTIONS
 } from "./resolvers";
-import { isBlock } from "./utils";
+import { hasDuplicateTriggerError, isBlock } from "./utils";
 
 const DEFAULT_EMPTY_STEP_ID = "DEFAULT_EMPTY_STEP_ID";
 
@@ -69,7 +69,11 @@ interface HocProps {
   data: {
     campaign: Pick<
       Campaign,
-      "id" | "isStarted" | "customFields" | "externalSystem"
+      | "id"
+      | "isStarted"
+      | "customFields"
+      | "externalSystem"
+      | "invalidScriptFields"
     > & {
       interactionSteps: InteractionStepWithLocalState[];
       campaignVariables: CampaignVariablePage;
@@ -104,7 +108,7 @@ const CampaignInteractionStepsForm: React.FC<InnerProps> = (props) => {
     const hasEmptyScript = (step: InteractionStep) => {
       const hasNoOptions = step.scriptOptions.length === 0;
       const hasEmptyScriptOption =
-        step.scriptOptions.find((version) => version.trim() === "") !==
+        step.scriptOptions.find((version) => version?.trim() === "") !==
         undefined;
       return hasNoOptions || hasEmptyScriptOption;
     };
@@ -159,8 +163,14 @@ const CampaignInteractionStepsForm: React.FC<InnerProps> = (props) => {
       const response = await props.mutations.editCampaign({
         interactionSteps
       });
-      if (response.errors) throw response.errors;
-    } catch (err) {
+      if (response.errors) {
+        if (hasDuplicateTriggerError(response.errors)) {
+          throw new Error(
+            "Please double check your auto reply tokens! Each interaction step can only have 1 child step assigned to any particular auto reply token!"
+          );
+        } else throw response.errors;
+      }
+    } catch (err: any) {
       props.onError(err.message);
     } finally {
       setIsWorking(false);
@@ -227,11 +237,17 @@ const CampaignInteractionStepsForm: React.FC<InnerProps> = (props) => {
         id: generateId()
       });
     }
-    const { answerOption, questionText, scriptOptions } = changedStep;
+    const {
+      answerOption,
+      questionText,
+      scriptOptions,
+      autoReplyTokens
+    } = changedStep;
     props.mutations.stageUpdateInteractionStep(changedStep.id, {
       answerOption,
       questionText,
-      scriptOptions
+      scriptOptions,
+      autoReplyTokens
     });
   };
 
@@ -255,14 +271,15 @@ const CampaignInteractionStepsForm: React.FC<InnerProps> = (props) => {
     while (interactionStepsAdded !== 0) {
       interactionStepsAdded = 0;
 
-      for (const is of interactionSteps) {
+      for (const step of interactionSteps) {
         if (
-          !interactionStepsInBlock.has(is.id) &&
-          is.parentInteractionId &&
-          interactionStepsInBlock.has(is.parentInteractionId)
+          !interactionStepsInBlock.has(step.id) &&
+          step.parentInteractionId &&
+          interactionStepsInBlock.has(step.parentInteractionId)
         ) {
-          block.push(is);
-          interactionStepsInBlock.add(is.id);
+          const { __typename, ...stepWithoutTypename } = step;
+          block.push(stepWithoutTypename);
+          interactionStepsInBlock.add(step.id);
           interactionStepsAdded += 1;
         }
       }
@@ -302,16 +319,20 @@ const CampaignInteractionStepsForm: React.FC<InnerProps> = (props) => {
     stripLocals: true
   });
 
+  const stringCustomFields = customFields as string[];
+
   const invalidCampaignVariables = interactionSteps.reduce<Array<string>>(
     (acc, step) => {
       let result = acc;
       for (const scriptOption of step.scriptOptions) {
-        const { invalidCampaignVariablesUsed } = scriptToTokens({
-          script: scriptOption ?? "",
-          customFields,
-          campaignVariables
-        });
-        result = result.concat(invalidCampaignVariablesUsed);
+        if (customFields) {
+          const { invalidCampaignVariablesUsed } = scriptToTokens({
+            script: scriptOption ?? "",
+            customFields: stringCustomFields,
+            campaignVariables
+          });
+          result = result.concat(invalidCampaignVariablesUsed);
+        }
       }
       return result;
     },
@@ -341,25 +362,27 @@ const CampaignInteractionStepsForm: React.FC<InnerProps> = (props) => {
   const campaignId = props.data?.campaign?.id;
 
   const renderInvalidScriptFields = () => {
-    if (invalidScriptFields.length === 0) {
-      return null;
+    if (invalidScriptFields) {
+      if (invalidScriptFields.length === 0) {
+        return null;
+      }
+      const invalidFields = invalidCampaignVariables.concat(
+        invalidScriptFields.map((field: string) => `{${field}}`)
+      );
+      return (
+        <div>
+          <p style={{ color: theme.colors.red, fontSize: "1.2em" }}>
+            Warning: Variable values are not all present for this script. You
+            can continue working on your script but you cannot start this
+            campaign. The following variables do not have values and will not
+            populate in your script:
+          </p>
+          <p style={{ color: theme.colors.red, fontSize: "1.2em" }}>
+            {invalidFields.join(", ")}
+          </p>
+        </div>
+      );
     }
-    const invalidFields = invalidCampaignVariables.concat(
-      invalidScriptFields.map((field: string) => `{${field}}`)
-    );
-    return (
-      <div>
-        <p style={{ color: theme.colors.red, fontSize: "1.2em" }}>
-          Warning: Variable values are not all present for this script. You can
-          continue working on your script but you cannot start this campaign.
-          The following variables do not have values and will not populate in
-          your script:
-        </p>
-        <p style={{ color: theme.colors.red, fontSize: "1.2em" }}>
-          {invalidFields.join(", ")}
-        </p>
-      </div>
-    );
   };
 
   return (
@@ -395,7 +418,7 @@ const CampaignInteractionStepsForm: React.FC<InnerProps> = (props) => {
       {renderInvalidScriptFields()}
       <InteractionStepCard
         interactionStep={finalFree}
-        customFields={customFields}
+        customFields={stringCustomFields}
         campaignVariables={campaignVariables}
         integrationSourced={externalSystem !== null}
         availableActions={availableActions}
@@ -487,7 +510,7 @@ const mutations: MutationMap<FullComponentProps> = {
         variables
       });
       const data = produce(old, (draft: any) => {
-        draft.campaign.interactionSteps = editCampaign.interactionSteps.map(
+        draft.campaign.interactionSteps = editCampaign?.interactionSteps.map(
           (step: InteractionStepWithLocalState) => ({
             ...step,
             isModified: false
@@ -524,6 +547,7 @@ const mutations: MutationMap<FullComponentProps> = {
         $questionText: String
         $scriptOptions: [String]
         $answerOption: String
+        $autoReplyTokens: [String]
       ) {
         stageAddInteractionStep(
           campaignId: $campaignId
@@ -532,6 +556,7 @@ const mutations: MutationMap<FullComponentProps> = {
           questionText: $questionText
           scriptOptions: $scriptOptions
           answerOption: $answerOption
+          autoReplyTokens: $autoReplyTokens
         ) @client
       }
     `,
@@ -547,12 +572,14 @@ const mutations: MutationMap<FullComponentProps> = {
         $questionText: String
         $scriptOptions: [String]
         $answerOption: String
+        $autoReplyTokens: [String]
       ) {
         stageUpdateInteractionStep(
           iStepId: $iStepId
           questionText: $questionText
           scriptOptions: $scriptOptions
           answerOption: $answerOption
+          autoReplyTokens: $autoReplyTokens
         ) @client
       }
     `,

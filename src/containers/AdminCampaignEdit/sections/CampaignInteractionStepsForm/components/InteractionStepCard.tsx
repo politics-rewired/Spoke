@@ -11,15 +11,14 @@ import DeleteIcon from "@material-ui/icons/Delete";
 import ExpandLess from "@material-ui/icons/ExpandLess";
 import ExpandMore from "@material-ui/icons/ExpandMore";
 import HelpIconOutline from "@material-ui/icons/HelpOutline";
-import type { CampaignVariable } from "@spoke/spoke-codegen";
+import type {
+  CampaignVariable,
+  InteractionStepWithChildren
+} from "@spoke/spoke-codegen";
 import isNil from "lodash/isNil";
 import React, { useCallback, useState } from "react";
 import * as yup from "yup";
 
-import type {
-  InteractionStep,
-  InteractionStepWithChildren
-} from "../../../../../api/interaction-step";
 import { supportsClipboard } from "../../../../../client/lib";
 import GSForm from "../../../../../components/forms/GSForm";
 import SpokeFormField from "../../../../../components/forms/SpokeFormField";
@@ -47,7 +46,8 @@ const interactionStepSchema = yup.object({
   scriptOptions: yup.array(yup.string()),
   questionText: yup.string(),
   answerOption: yup.string(),
-  answerActions: yup.string()
+  answerActions: yup.string(),
+  autoReplyTokens: yup.array(yup.string())
 });
 
 type BlockHandlerFactory = (stepId: string) => () => Promise<void> | void;
@@ -62,7 +62,7 @@ interface Props {
   title?: string;
   disabled?: boolean;
   onFormChange(e: any): void;
-  onCopyBlock(interactionStep: InteractionStep): void;
+  onCopyBlock(interactionStep: InteractionStepWithChildren): void;
   onRequestRootPaste(): void;
   deleteStepFactory: BlockHandlerFactory;
   addStepFactory: BlockHandlerFactory;
@@ -111,7 +111,7 @@ export const InteractionStepCard: React.FC<Props> = (props) => {
   const stepCanHaveChildren = isRootStep || answerOption;
   const isAbleToAddResponse =
     stepHasQuestion && stepHasScript && stepCanHaveChildren;
-  const childStepsLength = childSteps?.length;
+  const childStepsLength = childSteps?.length ?? 0;
 
   const clipboardEnabled = supportsClipboard();
 
@@ -251,6 +251,13 @@ export const InteractionStepCard: React.FC<Props> = (props) => {
               multiLine
               disabled={disabled}
             />
+            {window.ENABLE_AUTO_REPLIES && parentInteractionId && (
+              <SpokeFormField
+                name="autoReplyTokens"
+                type="autoreplytokens"
+                disabled={disabled}
+              />
+            )}
             <SpokeFormField
               {...dataTest("questionText")}
               name="questionText"
@@ -288,26 +295,32 @@ export const InteractionStepCard: React.FC<Props> = (props) => {
         )}
         {expanded &&
           (childSteps ?? [])
-            .filter((is) => !is.isDeleted)
-            .map((childStep) => (
-              <InteractionStepCard
-                key={childStep.id}
-                title={`Question: ${questionText}`}
-                interactionStep={childStep}
-                customFields={customFields}
-                campaignVariables={campaignVariables}
-                integrationSourced={integrationSourced}
-                availableActions={availableActions}
-                hasBlockCopied={hasBlockCopied}
-                disabled={disabled}
-                onFormChange={onFormChange}
-                onCopyBlock={onCopyBlock}
-                onRequestRootPaste={onRequestRootPaste}
-                addStepFactory={addStepFactory}
-                deleteStepFactory={deleteStepFactory}
-                pasteBlockFactory={pasteBlockFactory}
-              />
-            ))}
+            .filter((is) => !is?.isDeleted)
+            .map((childStep) => {
+              if (childStep) {
+                const { __typename, ...childStepWithoutTypename } = childStep;
+                return (
+                  <InteractionStepCard
+                    key={childStep?.id}
+                    title={`Question: ${questionText}`}
+                    interactionStep={childStepWithoutTypename}
+                    customFields={customFields}
+                    campaignVariables={campaignVariables}
+                    integrationSourced={integrationSourced}
+                    availableActions={availableActions}
+                    hasBlockCopied={hasBlockCopied}
+                    disabled={disabled}
+                    onFormChange={onFormChange}
+                    onCopyBlock={onCopyBlock}
+                    onRequestRootPaste={onRequestRootPaste}
+                    addStepFactory={addStepFactory}
+                    deleteStepFactory={deleteStepFactory}
+                    pasteBlockFactory={pasteBlockFactory}
+                  />
+                );
+              }
+              return null;
+            })}
       </div>
     </div>
   );

@@ -1,6 +1,7 @@
 import React from "react";
 import BaseForm from "react-formal";
 
+import GSAutoReplyTokensField from "./GSAutoReplyTokensField";
 import GSDateField from "./GSDateField";
 import GSPasswordField from "./GSPasswordField";
 import GSScriptField from "./GSScriptField";
@@ -51,6 +52,8 @@ const SpokeFormField = React.forwardRef<unknown, Props>(function Component(
             Input = GSSelectField;
           } else if (type === "password") {
             Input = GSPasswordField;
+          } else if (type === "autoreplytokens") {
+            Input = GSAutoReplyTokensField;
           } else {
             Input = type || GSTextField;
           }

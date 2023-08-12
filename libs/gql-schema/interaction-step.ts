@@ -25,5 +25,20 @@ export const schema = `
     createdAt: Date
     interactionSteps: [InteractionStepInput]
   }
+
+  type InteractionStepWithChildren {
+    id: ID!
+    question: Question
+    questionText: String
+    scriptOptions: [String]!
+    answerOption: String
+    parentInteractionId: String
+    autoReplyTokens: [String]
+    isDeleted: Boolean
+    answerActions: String
+    questionResponse(campaignContactId: String): QuestionResponse
+    createdAt: Date!
+    interactionSteps: [InteractionStep]
+  }
 `;
 export default schema;

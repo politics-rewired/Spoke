@@ -1,4 +1,4 @@
-/* eslint-disable import/prefer-default-export */
+import type { GraphQLError } from "graphql";
 
 export const isBlock = (text: string) => {
   try {
@@ -7,4 +7,15 @@ export const isBlock = (text: string) => {
   } catch (ex) {
     return false;
   }
+};
+
+export const hasDuplicateTriggerError = (
+  errors: Error | readonly GraphQLError[]
+) => {
+  return (
+    Array.isArray(errors) &&
+    errors[0].message.includes(
+      "Each interaction step can only have 1 child step assigned to any particular auto reply token"
+    )
+  );
 };
