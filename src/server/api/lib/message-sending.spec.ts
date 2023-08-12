@@ -42,7 +42,8 @@ const sendReply = async (
 
 const createTestBed = async (
   client: PoolClient,
-  agent: supertest.SuperAgentTest
+  agent: supertest.SuperAgentTest,
+  opts?: { createAutoReplies?: boolean }
 ) => {
   const { organization, user, cookies } = await createOrgAndSession(client, {
     agent,
@@ -67,19 +68,31 @@ const createTestBed = async (
     text: "Hi! Want to attend my cool event?"
   });
 
-  const rootStep = await createInteractionStep(client, {
-    campaignId: campaign.id
-  });
+  if (opts?.createAutoReplies) {
+    const rootStep = await createInteractionStep(client, {
+      campaignId: campaign.id
+    });
 
-  const childStep = await createInteractionStep(client, {
-    campaignId: campaign.id,
-    parentInteractionId: rootStep.id
-  });
+    const yesStep = await createInteractionStep(client, {
+      campaignId: campaign.id,
+      parentInteractionId: rootStep.id
+    });
 
-  await createAutoReplyTrigger(client, {
-    interactionStepId: childStep.id,
-    token: "yes"
-  });
+    await createAutoReplyTrigger(client, {
+      interactionStepId: yesStep.id,
+      token: "yes"
+    });
+
+    const maybeStep = await createInteractionStep(client, {
+      campaignId: campaign.id,
+      parentInteractionId: rootStep.id
+    });
+
+    await createAutoReplyTrigger(client, {
+      interactionStepId: maybeStep.id,
+      token: "maybe"
+    });
+  }
 
   return { organization, user, cookies, contact, assignment };
 };
@@ -87,6 +100,22 @@ const createTestBed = async (
 describe("automatic message handling", () => {
   let pool: Pool;
   let agent: supertest.SuperAgentTest;
+
+  const checkRetryJobCountForContact = async (contactId: number) => {
+    const {
+      rows: [retryJobs]
+    } = await pool.query(
+      `
+      select count(*) from graphile_worker.jobs 
+      where task_identifier = 'retry-interaction-step'
+      and payload->>'campaignContactId' = $1
+    `,
+      [contactId]
+    );
+
+    const retryJobsCount = parseInt(retryJobs.count, 10);
+    return retryJobsCount;
+  };
 
   beforeAll(async () => {
     pool = new Pool({ connectionString: config.TEST_DATABASE_URL });
@@ -136,56 +165,33 @@ describe("automatic message handling", () => {
     });
 
     await sendReply(agent, testbed.cookies, testbed.contact.id, "YES");
-    const {
-      rows: [msgs]
-    } = await pool.query(
-      `select count(*) from message where campaign_contact_id = $1`,
-      [testbed.contact.id]
+    const retryJobsCount = await checkRetryJobCountForContact(
+      testbed.contact.id
     );
-
-    const msgCount = parseInt(msgs.count, 10);
-    expect(msgCount).toBe(2);
-  });
-
-  test("does not respond to a contact who says Yes, where? with a YES auto reply configured for the campaign", async () => {
-    const testbed = await withClient(pool, async (client) => {
-      return createTestBed(client, agent);
-    });
-
-    await sendReply(agent, testbed.cookies, testbed.contact.id, "Yes, where?");
-    const {
-      rows: [retryJobs]
-    } = await pool.query(
-      `
-        select count(*) from graphile_worker.jobs 
-        where task_identifier = 'retry-interaction-step'
-        and payload->>'campaignContactId' = $1
-      `,
-      [testbed.contact.id]
-    );
-
-    const retryJobsCount = parseInt(retryJobs.count, 10);
     expect(retryJobsCount).toBe(0);
   });
 
-  test("responds to a contact who says YES! with a YES auto reply configured for the campaign", async () => {
+  test("does not respond to a contact who says Yes, where? with a YES and MAYBE auto reply configured for the campaign", async () => {
     const testbed = await withClient(pool, async (client) => {
-      return createTestBed(client, agent);
+      return createTestBed(client, agent, { createAutoReplies: true });
+    });
+
+    await sendReply(agent, testbed.cookies, testbed.contact.id, "Yes, where?");
+    const retryJobsCount = await checkRetryJobCountForContact(
+      testbed.contact.id
+    );
+    expect(retryJobsCount).toBe(0);
+  });
+
+  test("responds appropriately to a contact who says YES! with a YES and MAYBE auto reply configured for the campaign", async () => {
+    const testbed = await withClient(pool, async (client) => {
+      return createTestBed(client, agent, { createAutoReplies: true });
     });
 
     await sendReply(agent, testbed.cookies, testbed.contact.id, "YES!");
-    const {
-      rows: [retryJobs]
-    } = await pool.query(
-      `
-        select count(*) from graphile_worker.jobs 
-        where task_identifier = 'retry-interaction-step'
-        and payload->>'campaignContactId' = $1
-      `,
-      [testbed.contact.id]
+    const retryJobsCount = await checkRetryJobCountForContact(
+      testbed.contact.id
     );
-
-    const retryJobsCount = parseInt(retryJobs.count, 10);
     expect(retryJobsCount).toBe(1);
   });
 });
