@@ -44,7 +44,16 @@ const GSAutoReplyTokensField: React.FC<GSAutoReplyTokensFieldProps> = ({
   }, [optionValue]);
 
   const handleInputChange = (newValue: string) => {
-    setInputValue(newValue);
+    if (newValue.includes(",")) {
+      const splitTokens = newValue.split(",");
+      const tokenValues = splitTokens.map((token: string) =>
+        createOption(token)
+      );
+
+      const newOptionsValue = [...optionValue, ...tokenValues];
+      const uniqValue = uniqBy(newOptionsValue, "value");
+      setOptionValue(uniqValue);
+    } else setInputValue(newValue);
   };
 
   const handleChange = (newValue: Option[]) => {
@@ -53,8 +62,8 @@ const GSAutoReplyTokensField: React.FC<GSAutoReplyTokensFieldProps> = ({
 
   const handleKeyDown: KeyboardEventHandler = (event) => {
     if (!inputValue) return;
-
     const lowerInputValue = inputValue.toLowerCase().trim();
+
     if (optOutTriggers.includes(lowerInputValue)) {
       setInputValue("");
       return;
@@ -88,6 +97,7 @@ const GSAutoReplyTokensField: React.FC<GSAutoReplyTokensFieldProps> = ({
         onChange={handleChange}
         onInputChange={handleInputChange}
         onKeyDown={handleKeyDown}
+        onPas
         placeholder="Words or phrases that Spoke should automatically respond to using this script, separated by commas"
         value={optionValue}
         isDisabled={disabled}
