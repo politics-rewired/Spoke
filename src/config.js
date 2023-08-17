@@ -739,12 +739,19 @@ const env = envalid.cleanEnv(process.env, validators, {
   strict: true
 });
 
+const envConfig = {
+  isDevelopment: env.isDevelopment,
+  isProduction: env.isProduction,
+  isTest: env.isTest
+};
+
 const clientConfig = pickBy(
   { ...env },
   (value, key) => validators[key].isClient
 );
 
 const config = {
+  ...envConfig,
   ...env,
   // feature flags
   ALLOW_SEND_ALL: bool({
