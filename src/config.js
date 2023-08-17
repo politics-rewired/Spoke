@@ -757,94 +757,89 @@ const config = {
   ALLOW_SEND_ALL: bool({
     desc:
       "Whether to allow sending all messages in a campaign at once. NOT LEGAL IN US.",
-    default: false,
+    default: env.isTest,
     isClient: true
   }),
   ASSIGNMENT_SHOW_REQUESTS_AVAILABLE: bool({
     desc:
       "If enabled, display icons on the home page organization selection list indicating availability of assignments.",
-    default: false,
+    default: env.isTest,
     isClient: true
   }),
   AUTO_HANDLE_REQUESTS: bool({
     desc: "Whether to auto handle requests after submission",
-    default: false
+    default: env.isTest
   }),
   ENABLE_AUTOSENDING: bool({
     desc: "Whether autosending is enabled",
-    default: false,
-    isClient: true
-  }),
-  ENABLE_AUTO_REPLIES: bool({
-    desc: "Whether auto reply handling is enabled",
-    default: false,
+    default: env.isTest,
     isClient: true
   }),
   AWS_ACCESS_AVAILABLE: bool({
     desc: "Enable or disable S3 campaign exports within Amazon Lambda.",
-    default: false
+    default: env.isTest
   }),
   DEBUG_INCOMING_MESSAGES: bool({
     desc: "Emit console.log on events related to handleIncomingMessages.",
-    default: false
+    default: env.isTest
   }),
   DEBUG_SCALING: bool({
     desc: "Emit console.log on events related to scaling issues.",
-    default: false
+    default: env.isTest
   }),
   ENABLE_TROLLBOT: bool({
     desc: "Whether to enable trollbot",
-    default: false,
+    default: env.isTest,
     isClient: true
   }),
   ENABLE_CAMPAIGN_GROUPS: bool({
     desc: "Whether to enable campaign groups",
-    default: false,
+    default: env.isTest,
     isClient: true
   }),
   ENABLE_SHORTLINK_DOMAINS: bool({
     desc: "Whether to enable shortlink domains",
-    default: false,
+    default: env.isTest,
     isClient: true
   }),
   ENABLE_MONTHLY_ORG_MESSAGE_LIMITS: bool({
     desc: "Whether to enable monthly, per organization message limits",
-    default: false
+    default: env.isTest
   }),
   EXPERIMENTAL_VAN_SYNC: bool({
     desc: "Use experimental real-time VAN sync",
-    default: false,
+    default: env.isTest,
     isClient: true
   }),
   FIX_ORGLESS: bool({
     desc:
       "Set to true only if you want to run the job that automatically assigns the default org (see DEFAULT_ORG) to new users who have no assigned org.",
-    default: false
+    default: env.isTest
   }),
   LAMBDA_DEBUG_LOG: bool({
     desc: "When true, log each lambda event to the console.",
-    default: false
+    default: env.isTest
   }),
   NOT_IN_USA: bool({
     desc:
       "A flag to affirmatively indicate the ability to use features that are discouraged or not legally usable in the United States. Consult with an attorney about the implications for doing so. Default assumes a USA legal context.",
-    default: false,
+    default: env.isTest,
     isClient: true
   }),
   OPTOUTS_SHARE_ALL_ORGS: bool({
     desc:
       "Can be set to true if opt outs should be respected per instance and across organizations.",
-    default: false
+    default: env.isTest
   }),
   SLACK_SYNC_CHANNELS: bool({
     desc:
       "If true, Spoke team membership will be synced with matching Slack channel membership",
-    default: false
+    default: env.isTest
   }),
   TERMS_REQUIRE: bool({
     desc:
       "Require texters to accept the Terms page before they can start texting.",
-    default: false,
+    default: env.isTest,
     isClient: true
   })
 };
