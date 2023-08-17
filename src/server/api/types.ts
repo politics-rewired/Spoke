@@ -211,6 +211,14 @@ export interface QuestionResponseRecord {
   is_deleted: boolean;
 }
 
+export interface AutoReplyTriggerRecord {
+  id: number;
+  interaction_step_id: number;
+  token: string;
+  created_at: string;
+  updated_at: string;
+}
+
 export enum MessageSendStatus {
   Queued = "QUEUED",
   Sending = "SENDING",

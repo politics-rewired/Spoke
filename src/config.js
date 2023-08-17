@@ -23,12 +23,6 @@ const validators = {
     desc: "ActionKit API secret.",
     default: undefined
   }),
-  ALLOW_SEND_ALL: bool({
-    desc:
-      "Whether to allow sending all messages in a campaign at once. NOT LEGAL IN US.",
-    default: false,
-    isClient: true
-  }),
   ALTERNATE_LOGIN_URL: url({
     desc:
       'When set, the "Login" link on the home page will direct to this alternate URL',
@@ -61,11 +55,6 @@ const validators = {
     desc: "Webhook URL to notify when a texter assignment is requested.",
     default: undefined
   }),
-  ASSIGNMENT_REQUESTED_URL_REQUIRED: bool({
-    desc:
-      "Require successful assignment requested webhook to persist assignment request in Spoke.",
-    default: false
-  }),
   ASSIGNMENT_REQUESTED_TOKEN: str({
     desc: "Bearer token to use as authorization with ASSIGNMENT_REQUESTED_URL.",
     default: undefined
@@ -79,12 +68,6 @@ const validators = {
     desc:
       "Comma separated list of team IDs to restrict 'assignment complete' notifications to.",
     default: ""
-  }),
-  ASSIGNMENT_SHOW_REQUESTS_AVAILABLE: bool({
-    desc:
-      "If enabled, display icons on the home page organization selection list indicating availability of assignments.",
-    default: false,
-    isClient: true
   }),
   ASSIGNMENT_MANAGER_DATABASE_URL: str({
     desc:
@@ -106,15 +89,6 @@ const validators = {
     desc: "Client secret from Auth0 app.",
     default: undefined
   }),
-  AUTO_HANDLE_REQUESTS: bool({
-    desc: "Whether to auto handle requests after submission",
-    default: false
-  }),
-  ENABLE_AUTOSENDING: bool({
-    desc: "Whether autosending is enabled",
-    default: false,
-    isClient: true
-  }),
   DISABLE_ASSIGNMENT_CASCADE: bool({
     desc:
       "Whether to just assign from 1 campaign rather than gathering from multiple to fulfill a request",
@@ -123,10 +97,6 @@ const validators = {
   AUTO_HANDLE_REQUESTS_CONCURRENCY: num({
     desc: "How many requests to handle at once",
     default: 1
-  }),
-  AWS_ACCESS_AVAILABLE: bool({
-    desc: "Enable or disable S3 campaign exports within Amazon Lambda.",
-    default: false
   }),
   AWS_ENDPOINT: url({
     desc:
@@ -273,14 +243,6 @@ const validators = {
     choice: ["require"],
     default: undefined
   }),
-  DEBUG_INCOMING_MESSAGES: bool({
-    desc: "Emit console.log on events related to handleIncomingMessages.",
-    default: false
-  }),
-  DEBUG_SCALING: bool({
-    desc: "Emit console.log on events related to scaling issues.",
-    default: false
-  }),
   DEFAULT_SERVICE: str({
     desc: "Default SMS service.",
     choices: ["assemble-numbers", "twilio", "nexmo", "fakeservice"],
@@ -323,25 +285,10 @@ const validators = {
     default: false,
     isClient: true
   }),
-  ENABLE_TROLLBOT: bool({
-    desc: "Whether to enable trollbot",
-    default: false,
-    isClient: true
-  }),
   TROLL_ALERT_PERIOD_MINUTES: num({
     desc:
       "The interval length in minutes that each troll patrol sweep will examine messages within.",
     default: 6
-  }),
-  ENABLE_CAMPAIGN_GROUPS: bool({
-    desc: "Whether to enable campaign groups",
-    default: false,
-    isClient: true
-  }),
-  ENABLE_SHORTLINK_DOMAINS: bool({
-    desc: "Whether to enable shortlink domains",
-    default: false,
-    isClient: true
   }),
   DISABLE_TEXTER_NOTIFICATIONS: bool({
     desc:
@@ -355,7 +302,7 @@ const validators = {
   }),
   DISABLE_SIDEBAR_BADGES: bool({
     desc: "Whether to disable showing the badge counts on the admin sidebar.",
-    default: "false",
+    default: false,
     isClient: true
   }),
   EMAIL_FROM: email({
@@ -387,10 +334,6 @@ const validators = {
     desc: "Email server user. Required for custom SMTP server usage.",
     default: undefined
   }),
-  ENABLE_MONTHLY_ORG_MESSAGE_LIMITS: bool({
-    desc: "Whether to enable monthly, per organization message limits",
-    default: false
-  }),
   ENCRYPTION_ALGORITHM: str({
     desc: "Encryption algorithm to use with crypto package.",
     choices: ["aes256"],
@@ -406,11 +349,6 @@ const validators = {
     choices: ["hex"],
     default: "hex"
   }),
-  EXPERIMENTAL_VAN_SYNC: bool({
-    desc: "Use experimental real-time VAN sync",
-    default: false,
-    isClient: true
-  }),
   EXPORT_DRIVER: str({
     desc: "Which cloud storage driver to use for exports.",
     choices: ["s3", "gs-json"], // eventually add support for GCP w/ HMAC interoperability: ["gs"]
@@ -419,11 +357,6 @@ const validators = {
   EXPORT_CAMPAIGN_CHUNK_SIZE: num({
     desc: "Chunk size to use for exporting campaign contacts and messages.",
     default: 1000
-  }),
-  FIX_ORGLESS: bool({
-    desc:
-      "Set to true only if you want to run the job that automatically assigns the default org (see DEFAULT_ORG) to new users who have no assigned org.",
-    default: false
   }),
   GOOGLE_APPLICATION_CREDENTIALS: str({
     desc: "JSON token for service account",
@@ -459,10 +392,6 @@ const validators = {
   JOBS_SYNC: bool({
     desc:
       "Whether jobs should be performed syncronously. Requires JOBS_SAME_PROCESS.",
-    default: false
-  }),
-  LAMBDA_DEBUG_LOG: bool({
-    desc: "When true, log each lambda event to the console.",
     default: false
   }),
   LARGE_CAMPAIGN_THRESHOLD: num({
@@ -529,20 +458,9 @@ const validators = {
     default: "development",
     isClient: true
   }),
-  NOT_IN_USA: bool({
-    desc:
-      "A flag to affirmatively indicate the ability to use features that are discouraged or not legally usable in the United States. Consult with an attorney about the implications for doing so. Default assumes a USA legal context.",
-    default: false,
-    isClient: true
-  }),
   OPT_OUT_MESSAGE: str({
     desc: "Spoke instance-wide default for opt out message.",
     default: undefined
-  }),
-  OPTOUTS_SHARE_ALL_ORGS: bool({
-    desc:
-      "Can be set to true if opt outs should be respected per instance and across organizations.",
-    default: false
   }),
   OUTPUT_DIR: str({
     desc: "Directory path for packaged files should be saved to. Required.",
@@ -660,11 +578,6 @@ const validators = {
       "If set, then on post-install (often from deploying) a message will be posted to a slack channel's #spoke channel",
     default: undefined
   }),
-  SLACK_SYNC_CHANNELS: bool({
-    desc:
-      "If true, Spoke team membership will be synced with matching Slack channel membership",
-    default: false
-  }),
   SLACK_SYNC_CHANNELS_CRONTAB: str({
     desc: "The crontab schedule to run the team sync on",
     default: "*/10 * * * *"
@@ -683,12 +596,6 @@ const validators = {
     desc:
       "Prevent self-invitations. Recommend setting before making sites available to public.",
     default: true,
-    isClient: true
-  }),
-  TERMS_REQUIRE: bool({
-    desc:
-      "Require texters to accept the Terms page before they can start texting.",
-    default: false,
     isClient: true
   }),
   TEST_DATABASE_URL: url({
@@ -828,13 +735,118 @@ const validators = {
   })
 };
 
-const config = envalid.cleanEnv(process.env, validators, {
+const env = envalid.cleanEnv(process.env, validators, {
   strict: true
 });
 
+const envConfig = {
+  isDevelopment: env.isDevelopment,
+  isProduction: env.isProduction,
+  isTest: env.isTest
+};
+
 const clientConfig = pickBy(
-  { ...config },
+  { ...env },
   (value, key) => validators[key].isClient
 );
+
+const config = {
+  ...envConfig,
+  ...env,
+  // feature flags
+  ALLOW_SEND_ALL: bool({
+    desc:
+      "Whether to allow sending all messages in a campaign at once. NOT LEGAL IN US.",
+    default: env.isTest,
+    isClient: true
+  }),
+  ASSIGNMENT_SHOW_REQUESTS_AVAILABLE: bool({
+    desc:
+      "If enabled, display icons on the home page organization selection list indicating availability of assignments.",
+    default: env.isTest,
+    isClient: true
+  }),
+  AUTO_HANDLE_REQUESTS: bool({
+    desc: "Whether to auto handle requests after submission",
+    default: env.isTest
+  }),
+  ENABLE_AUTOSENDING: bool({
+    desc: "Whether autosending is enabled",
+    default: env.isTest,
+    isClient: true
+  }),
+  ENABLE_AUTO_REPLIES: bool({
+    desc: "Whether auto reply handling is enabled",
+    default: false,
+    isClient: true
+  }),
+  AWS_ACCESS_AVAILABLE: bool({
+    desc: "Enable or disable S3 campaign exports within Amazon Lambda.",
+    default: env.isTest
+  }),
+  DEBUG_INCOMING_MESSAGES: bool({
+    desc: "Emit console.log on events related to handleIncomingMessages.",
+    default: env.isTest
+  }),
+  DEBUG_SCALING: bool({
+    desc: "Emit console.log on events related to scaling issues.",
+    default: env.isTest
+  }),
+  ENABLE_TROLLBOT: bool({
+    desc: "Whether to enable trollbot",
+    default: env.isTest,
+    isClient: true
+  }),
+  ENABLE_CAMPAIGN_GROUPS: bool({
+    desc: "Whether to enable campaign groups",
+    default: env.isTest,
+    isClient: true
+  }),
+  ENABLE_SHORTLINK_DOMAINS: bool({
+    desc: "Whether to enable shortlink domains",
+    default: env.isTest,
+    isClient: true
+  }),
+  ENABLE_MONTHLY_ORG_MESSAGE_LIMITS: bool({
+    desc: "Whether to enable monthly, per organization message limits",
+    default: env.isTest
+  }),
+  EXPERIMENTAL_VAN_SYNC: bool({
+    desc: "Use experimental real-time VAN sync",
+    default: env.isTest,
+    isClient: true
+  }),
+  FIX_ORGLESS: bool({
+    desc:
+      "Set to true only if you want to run the job that automatically assigns the default org (see DEFAULT_ORG) to new users who have no assigned org.",
+    default: env.isTest
+  }),
+  LAMBDA_DEBUG_LOG: bool({
+    desc: "When true, log each lambda event to the console.",
+    default: env.isTest
+  }),
+  NOT_IN_USA: bool({
+    desc:
+      "A flag to affirmatively indicate the ability to use features that are discouraged or not legally usable in the United States. Consult with an attorney about the implications for doing so. Default assumes a USA legal context.",
+    default: env.isTest,
+    isClient: true
+  }),
+  OPTOUTS_SHARE_ALL_ORGS: bool({
+    desc:
+      "Can be set to true if opt outs should be respected per instance and across organizations.",
+    default: env.isTest
+  }),
+  SLACK_SYNC_CHANNELS: bool({
+    desc:
+      "If true, Spoke team membership will be synced with matching Slack channel membership",
+    default: env.isTest
+  }),
+  TERMS_REQUIRE: bool({
+    desc:
+      "Require texters to accept the Terms page before they can start texting.",
+    default: env.isTest,
+    isClient: true
+  })
+};
 
 module.exports = { config, clientConfig, ServerMode };

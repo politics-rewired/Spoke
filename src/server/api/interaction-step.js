@@ -27,7 +27,14 @@ export const resolvers = {
           interaction_step_id: interactionStep.id
         })
         .first()
-        .then((qr) => qr || null)
+        .then((qr) => qr || null),
+    autoReplyTokens: async (interactionStep) =>
+      r
+        .reader("auto_reply_trigger")
+        .where({
+          interaction_step_id: interactionStep.id
+        })
+        .pluck("token")
   }
 };
 

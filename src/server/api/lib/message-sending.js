@@ -1,6 +1,7 @@
 import groupBy from "lodash/groupBy";
 
 import { config } from "../../../config";
+import { optOutTriggers } from "../../../lib/opt-out-triggers";
 import { eventBus, EventType } from "../../event-bus";
 import { queueExternalSyncForAction } from "../../lib/external-systems";
 import { cacheableData, r } from "../../models";
@@ -15,23 +16,6 @@ export const SpokeSendStatus = Object.freeze({
   Paused: "PAUSED",
   NotAttempted: "NOT_ATTEMPTED"
 });
-
-const OPT_OUT_TRIGGERS = [
-  "stop",
-  "stop all",
-  "stopall",
-  "unsub",
-  "unsubscribe",
-  "cancel",
-  "end",
-  "quit",
-  "stop2quit",
-  "stop 2 quit",
-  "stop=quit",
-  "stop = quit",
-  "stop to quit",
-  "stoptoquit"
-];
 
 /**
  * Return a list of messaing services for an organization that are candidates for assignment.
@@ -386,46 +370,127 @@ export async function saveNewIncomingMessage(messageInstance) {
   };
   eventBus.emit(EventType.MessageReceived, payload);
 
-  const cleanedUpText = text.toLowerCase().trim();
+  const noPunctuationText = text.replace(/[,.!]/g, "");
+  const cleanedUpText = noPunctuationText.toLowerCase().trim();
 
   // Separate update fields according to: https://stackoverflow.com/a/42307979
   let updateQuery = r.knex("campaign_contact").limit(1);
 
-  if (OPT_OUT_TRIGGERS.includes(cleanedUpText)) {
-    updateQuery = updateQuery.update({ message_status: "closed" });
+  // Prioritize auto opt outs > auto replies > regular inbound message handling
+  const handleOptOut = optOutTriggers.includes(cleanedUpText);
+  const cc_id = messageInstance.campaign_contact_id;
 
-    const { id: organizationId } = await r
-      .knex("organization")
-      .first("organization.id")
-      .join("campaign", "organization_id", "=", "organization.id")
-      .join("assignment", "campaign_id", "=", "campaign.id")
-      .where({ "assignment.id": assignment_id });
-
-    const optOutId = await cacheableData.optOut.save(r.knex, {
-      cell: contact_number,
-      reason: "Automatic OptOut",
-      assignmentId: assignment_id,
-      organizationId
-    });
-
-    await queueExternalSyncForAction(ActionType.OptOut, optOutId);
-  } else {
-    updateQuery = updateQuery.update({ message_status: "needsResponse" });
+  let rowCount;
+  if (!handleOptOut && config.ENABLE_AUTO_REPLIES) {
+    ({
+      rows: [{ count: rowCount }]
+    } = await r.knex.raw(
+      `
+        with cc as (select * from campaign_contact where id = ?),
+        step_to_send as (
+          select art.* from auto_reply_trigger art
+          cross join cc
+          join interaction_step ins on art.interaction_step_id = ins.id
+          where token = ?
+          and (
+            -- if a trigger exists, it will be associated with
+            -- an interaction step whose parent has a question_response record
+            ins.parent_interaction_id in (
+            select id from interaction_step child_steps
+            where parent_interaction_id in ( 
+              select interaction_step_id from question_response qr
+              where campaign_contact_id = cc.id
+              order by qr.id desc
+              limit 1
+            )
+            or ( -- there is no question_response yet and the parent_interaction_id is null
+                ins.parent_interaction_id = (
+                select id from interaction_step root_step
+                where parent_interaction_id is null
+                and campaign_id = cc.campaign_id
+              )
+              and not exists (
+                select interaction_step_id from question_response qr
+                where campaign_contact_id = cc.id
+                order by qr.id desc
+                limit 1
+              )
+            )
+          )
+        )
+      ),
+      mark_qr as (
+        insert into question_response(campaign_contact_id, interaction_step_id, value)
+        select ?, ins.parent_interaction_id, ins.answer_option 
+        from step_to_send sts
+        join interaction_step ins on sts.interaction_step_id = ins.id
+        returning *
+      ),
+      send_message as (
+        select graphile_worker.add_job(
+          identifier := 'retry-interaction-step'::text,
+              payload := json_build_object(
+                'campaignContactId', cc.id, 
+                'campaignId', cc.campaign_id,
+                'unassignAfterSend', false,
+                'interactionStepId', step_to_send.interaction_step_id
+              ),
+              job_key := format('%s|%s', 'retry-interaction-step', cc.id),
+              queue_name := null,
+              max_attempts := 1,
+              -- run between 2-3 minutes in the future
+              run_at := now() + interval '2 minutes' + random() * interval '1 minute',
+              -- prioritize in order as: autoassignment, autosending, handle delivery reports
+              priority := 4
+        )
+        from step_to_send
+        cross join cc
+      )
+      select count(*) from mark_qr
+      union select count(*) from send_message
+    `,
+      [cc_id, cleanedUpText, cc_id]
+    ));
   }
+  const autoReplyCount = parseInt(rowCount, 10);
 
-  // Prefer to match on campaign contact ID
-  if (messageInstance.campaign_contact_id) {
-    updateQuery = updateQuery.where({
-      id: messageInstance.campaign_contact_id
-    });
-  } else {
-    updateQuery = updateQuery.where({
-      assignment_id: messageInstance.assignment_id,
-      cell: messageInstance.contact_number
-    });
+  if (handleOptOut || Number.isNaN(autoReplyCount) || autoReplyCount === 0) {
+    const updateColumns = { auto_reply_eligible: false };
+    updateColumns.message_status = handleOptOut ? "closed" : "needsResponse";
+    updateQuery.update(updateColumns);
+
+    if (handleOptOut) {
+      const { id: organizationId } = await r
+        .knex("organization")
+        .first("organization.id")
+        .join("campaign", "organization_id", "=", "organization.id")
+        .join("assignment", "campaign_id", "=", "campaign.id")
+        .where({ "assignment.id": assignment_id });
+
+      const optOutId = await cacheableData.optOut.save(r.knex, {
+        cell: contact_number,
+        reason: "Automatic OptOut",
+        assignmentId: assignment_id,
+        organizationId
+      });
+
+      await queueExternalSyncForAction(ActionType.OptOut, optOutId);
+    }
+
+    // Prefer to match on campaign contact ID
+    if (messageInstance.campaign_contact_id) {
+      updateQuery = updateQuery.where({
+        id: messageInstance.campaign_contact_id
+      });
+    } else {
+      updateQuery = updateQuery.where({
+        assignment_id: messageInstance.assignment_id,
+        cell: messageInstance.contact_number
+      });
+    }
+
+    await updateQuery;
   }
-
-  await updateQuery;
 }
 
 /**

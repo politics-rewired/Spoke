@@ -1,9 +1,22 @@
 /* eslint-disable import/prefer-default-export */
+import type { InteractionStepWithChildren } from "@spoke/spoke-codegen";
 import type { Knex } from "knex";
 
-import type { InteractionStepWithChildren } from "../../../api/interaction-step";
 import { r } from "../../models";
 import type { CampaignRecord } from "../types";
+
+const mapTokensToTriggers = (tokens: string[], stepId: number) => {
+  return tokens.map((token: string) => {
+    return {
+      interaction_step_id: stepId,
+      token
+    };
+  });
+};
+
+const removeMatchingTokens = (tokens1: string[], tokens2: string[]) => {
+  return tokens1.filter((token: string) => !tokens2.includes(token));
+};
 
 export const persistInteractionStepNode = async (
   campaignId: number,
@@ -19,6 +32,7 @@ export const persistInteractionStepNode = async (
   // Update the parent interaction step ID if this step has a reference to a temporary ID
   // and the parent has since been inserted
   const { parentInteractionId } = rootInteractionStep;
+
   if (parentInteractionId && temporaryIdMap[parentInteractionId]) {
     rootInteractionStep.parentInteractionId =
       temporaryIdMap[parentInteractionId];
@@ -30,6 +44,8 @@ export const persistInteractionStepNode = async (
     answer_option: rootInteractionStep.answerOption,
     answer_actions: rootInteractionStep.answerActions
   };
+
+  const tokens = rootInteractionStep.autoReplyTokens as string[];
 
   if (rootInteractionStep.id.indexOf("new") !== -1) {
     // Insert new interaction steps
@@ -46,24 +62,63 @@ export const persistInteractionStepNode = async (
     temporaryIdMap[rootInteractionStep.id] = newId;
 
     rootStepId = newId;
+
+    if (tokens?.length) {
+      const triggers = mapTokensToTriggers(tokens, newId);
+      await knexTrx("auto_reply_trigger").insert(triggers);
+    }
   } else {
     // Update the interaction step record
     await knexTrx("interaction_step")
       .where({ id: rootInteractionStep.id })
       .update(payload)
       .returning("id");
+
+    const existingTokens = await r
+      .reader("auto_reply_trigger")
+      .where({ interaction_step_id: rootInteractionStep.id })
+      .pluck("token");
+
+    if (tokens && existingTokens) {
+      const tokensToInsert = removeMatchingTokens(tokens, existingTokens);
+      const triggersToInsert = mapTokensToTriggers(
+        tokensToInsert,
+        parseInt(rootInteractionStep.id, 10)
+      );
+
+      if (triggersToInsert.length)
+        await knexTrx("auto_reply_trigger").insert(triggersToInsert);
+
+      const tokensToDelete = removeMatchingTokens(existingTokens, tokens);
+
+      await knexTrx("auto_reply_trigger")
+        .where({ interaction_step_id: rootInteractionStep.id })
+        .whereIn("token", tokensToDelete)
+        .delete();
+    }
   }
 
   // Persist child interaction steps
-  const childStepIds = await Promise.all(
-    rootInteractionStep.interactionSteps.map((childStep) =>
-      persistInteractionStepNode(campaignId, childStep, knexTrx, temporaryIdMap)
-    )
-  ).then((childResults) =>
-    childResults.reduce((acc, childIds) => acc.concat(childIds), [])
-  );
+  const childSteps = rootInteractionStep.interactionSteps;
+  if (childSteps) {
+    const childStepsWithChildren = childSteps as InteractionStepWithChildren[];
 
-  return childStepIds.concat([rootStepId]);
+    const childStepIds = await Promise.all(
+      childStepsWithChildren.map((childStep) =>
+        persistInteractionStepNode(
+          campaignId,
+          childStep,
+          knexTrx,
+          temporaryIdMap
+        )
+      )
+    ).then((childResults) =>
+      childResults.reduce((acc, childIds) => acc.concat(childIds), [])
+    );
+
+    return childStepIds.concat([rootStepId]);
+  }
+  return [rootStepId];
 };
 
 export const persistInteractionStepTree = async (
@@ -118,9 +173,18 @@ export const persistInteractionStepTree = async (
         from steps_to_delete del
         where ins.id = del.id and for_update
         returning *
+      ),
+
+      delete_triggers as (
+        delete from auto_reply_trigger
+        using steps_to_delete del
+        where interaction_step_id = del.id
+        returning *
       )
 
-      select count(*) from delete_steps union select count(*) from update_steps
+      select count(*) from delete_steps 
+      union select count(*) from update_steps
+      union select count(*) from delete_triggers
     `,
     [campaignId, stepIds]
   );
