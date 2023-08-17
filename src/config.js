@@ -775,6 +775,11 @@ const config = {
     default: env.isTest,
     isClient: true
   }),
+  ENABLE_AUTO_REPLIES: bool({
+    desc: "Whether auto reply handling is enabled",
+    default: false,
+    isClient: true
+  }),
   AWS_ACCESS_AVAILABLE: bool({
     desc: "Enable or disable S3 campaign exports within Amazon Lambda.",
     default: env.isTest
