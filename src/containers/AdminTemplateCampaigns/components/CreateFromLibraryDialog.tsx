@@ -13,7 +13,7 @@ import React, { useCallback, useMemo, useState } from "react";
 // TODO - campaign variables
 type DefaultTemplateCampaign = Pick<
   Campaign,
-  "title" | "description" | "interactionSteps" | "campaignVariables"
+  "title" | "description" | "campaignVariables" | "interactionSteps"
 >;
 
 // TODO - hook up github page
@@ -22,21 +22,21 @@ const DUMMY_LIBRARY = [
     title: "GOTV",
     description: "a get out the vote campaign for your candidate or issue",
     interactionSteps: {
-      scriptOptions: [""]
+      scriptOptions: ["hi there"]
     }
   },
   {
     title: "Fundraising",
     description: "a fundraising campaign for your candidate or issue",
     interactionSteps: {
-      scriptOptions: [""]
+      scriptOptions: ["hiya"]
     }
   },
   {
     title: "Voter Reg",
     description: "a voter registration campaign for your area",
     interactionSteps: {
-      scriptOptions: [""]
+      scriptOptions: ["howdy!"]
     }
   }
 ];
@@ -54,7 +54,7 @@ export const CreateCampaignFromLibraryDialog: React.FC<CreateCampaignFromLibrary
   const [
     selectedTemplate,
     setSelectedTemplate
-  ] = useState<TemplateCampaignFragment | null>(null);
+  ] = useState<DefaultTemplateCampaign | null>(null);
   const [quantity, setQuantity] = useState<number | null>(1);
 
   // TODO
@@ -154,6 +154,7 @@ export const CreateCampaignFromLibraryDialog: React.FC<CreateCampaignFromLibrary
               // window.open(`/preview/${previewUrl}`, "_blank");
             }}
             size="small"
+            disabled={!selectedTemplate}
           >
             Open Script Preview
           </Button>
