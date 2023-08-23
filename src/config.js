@@ -828,13 +828,60 @@ const validators = {
   })
 };
 
-const config = envalid.cleanEnv(process.env, validators, {
+const env = envalid.cleanEnv(process.env, validators, {
   strict: true
 });
 
 const clientConfig = pickBy(
-  { ...config },
+  { ...env },
   (value, key) => validators[key].isClient
 );
+
+const {
+  ALLOW_SEND_ALL,
+  ASSIGNMENT_SHOW_REQUESTS_AVAILABLE,
+  AUTO_HANDLE_REQUESTS,
+  ENABLE_AUTOSENDING,
+  AWS_ACCESS_AVAILABLE,
+  DEBUG_INCOMING_MESSAGES,
+  DEBUG_SCALING,
+  ENABLE_TROLLBOT,
+  ENABLE_CAMPAIGN_GROUPS,
+  ENABLE_SHORTLINK_DOMAINS,
+  ENABLE_MONTHLY_ORG_MESSAGE_LIMITS,
+  EXPERIMENTAL_VAN_SYNC,
+  FIX_ORGLESS,
+  LAMBDA_DEBUG_LOG,
+  NOT_IN_USA,
+  OPTOUTS_SHARE_ALL_ORGS,
+  SLACK_SYNC_CHANNELS,
+  TERMS_REQUIRE,
+  ...configWithoutFeatureFlags
+} = env;
+
+const config = {
+  ...configWithoutFeatureFlags,
+  // feature flags
+  ALLOW_SEND_ALL: env.isTest || ALLOW_SEND_ALL,
+  ASSIGNMENT_SHOW_REQUESTS_AVAILABLE:
+    env.isTest || ASSIGNMENT_SHOW_REQUESTS_AVAILABLE,
+  AUTO_HANDLE_REQUESTS: env.isTest || AUTO_HANDLE_REQUESTS,
+  ENABLE_AUTOSENDING: env.isTest || ENABLE_AUTOSENDING,
+  AWS_ACCESS_AVAILABLE: env.isTest || AWS_ACCESS_AVAILABLE,
+  DEBUG_INCOMING_MESSAGES: env.isTest || DEBUG_INCOMING_MESSAGES,
+  DEBUG_SCALING: env.isTest || DEBUG_SCALING,
+  ENABLE_TROLLBOT: env.isTest || ENABLE_TROLLBOT,
+  ENABLE_CAMPAIGN_GROUPS: env.isTest || ENABLE_CAMPAIGN_GROUPS,
+  ENABLE_SHORTLINK_DOMAINS: env.isTest || ENABLE_SHORTLINK_DOMAINS,
+  ENABLE_MONTHLY_ORG_MESSAGE_LIMITS:
+    env.isTest || ENABLE_MONTHLY_ORG_MESSAGE_LIMITS,
+  EXPERIMENTAL_VAN_SYNC: env.isTest || EXPERIMENTAL_VAN_SYNC,
+  FIX_ORGLESS: env.isTest || FIX_ORGLESS,
+  LAMBDA_DEBUG_LOG: env.isTest || LAMBDA_DEBUG_LOG,
+  NOT_IN_USA: env.isTest || NOT_IN_USA,
+  OPTOUTS_SHARE_ALL_ORGS: env.isTest || OPTOUTS_SHARE_ALL_ORGS,
+  SLACK_SYNC_CHANNELS: env.isTest || SLACK_SYNC_CHANNELS,
+  TERMS_REQUIRE: env.isTest || TERMS_REQUIRE
+};
 
 module.exports = { config, clientConfig, ServerMode };
