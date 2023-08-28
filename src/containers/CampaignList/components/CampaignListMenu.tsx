@@ -19,7 +19,6 @@ export interface CampaignOperations {
   archiveCampaign: (campaignId: string) => ClickHandler;
   unarchiveCampaign: (campaignId: string) => ClickHandler;
 }
-
 interface Props extends CampaignOperations {
   campaign: CampaignListEntryFragment;
 }

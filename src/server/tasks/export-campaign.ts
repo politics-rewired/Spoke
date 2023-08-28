@@ -387,7 +387,7 @@ export const processMessagesChunk = async (
 
 interface UploadCampaignContacts {
   campaignTitle: string;
-  interactionSteps: Array<any>;
+  interactionSteps: InteractionStepRecord[];
   contactsCount: number;
   campaignId: number;
   helpers: ProgressTaskHelpers;
@@ -627,55 +627,44 @@ const processAndUploadFilteredContacts = async ({
   return getDownloadUrl(`${filteredContactsKey}.csv`);
 };
 
-export interface ExportCampaignPayload {
-  campaignId: number;
-  requesterId: number;
-  isAutomatedExport?: boolean;
-  spokeOptions: {
-    campaign: boolean;
-    messages: boolean;
-    optOuts: boolean;
-    filteredContacts: boolean;
-  };
+export interface SpokeOptions {
+  campaign: boolean;
+  messages: boolean;
+  optOuts: boolean;
+  filteredContacts: boolean;
 }
 
-export const exportCampaign: ProgressTask<ExportCampaignPayload> = async (
-  payload,
-  helpers
+export interface CampaignDataForExport {
+  fileNameKey: string;
+  campaignId: number;
+  campaignTitle: string;
+  contactsCount: number;
+  helpers: ProgressTaskHelpers;
+  interactionSteps: InteractionStepRecord[];
+  campaignVariableNames: string[];
+}
+
+// kicks off export processes and returns url for email
+export const processExportData = async (
+  campaignData: CampaignDataForExport,
+  spokeOptions: SpokeOptions
 ) => {
-  const {
-    campaignId,
-    requesterId,
-    isAutomatedExport = false,
-    spokeOptions
-  } = payload;
-  const {
-    campaignTitle,
-    notificationEmail,
-    interactionSteps,
-    campaignVariableNames
-  } = await fetchExportData(campaignId, requesterId);
-
-  const countQueryResult = await r
-    .reader("campaign_contact")
-    .count("*")
-    .where({ campaign_id: campaignId });
-  const contactsCount = countQueryResult[0].count as number;
-
-  // Attempt upload to cloud storage
-  let fileNameKey = campaignTitle.replace(/ /g, "_").replace(/\//g, "_");
-
-  if (!isAutomatedExport) {
-    const timestamp = DateTime.local().toFormat("y-mm-d-hh-mm-ss");
-    fileNameKey = `${fileNameKey}-${timestamp}`;
-  }
-
   const {
     campaign: shouldExportCampaign,
     filteredContacts: shouldExportFilteredContacts,
     messages: shouldExportMessages,
     optOuts: shouldExportOptOuts
   } = spokeOptions;
+
+  const {
+    fileNameKey,
+    campaignId,
+    campaignTitle,
+    contactsCount,
+    helpers,
+    interactionSteps,
+    campaignVariableNames
+  } = campaignData;
 
   const campaignExportUrl = shouldExportCampaign
     ? await processAndUploadCampaignContacts({
@@ -719,6 +708,69 @@ export const exportCampaign: ProgressTask<ExportCampaignPayload> = async (
         helpers
       })
     : null;
+
+  return {
+    campaignExportUrl,
+    campaignFilteredContactsExportUrl,
+    campaignOptOutsExportUrl,
+    campaignMessagesExportUrl
+  };
+};
+
+export interface ExportCampaignPayload {
+  campaignId: number;
+  requesterId: number;
+  isAutomatedExport?: boolean;
+  spokeOptions: SpokeOptions;
+}
+
+export const exportCampaign: ProgressTask<ExportCampaignPayload> = async (
+  payload,
+  helpers
+) => {
+  const {
+    campaignId,
+    requesterId,
+    isAutomatedExport = false,
+    spokeOptions
+  } = payload;
+  const {
+    campaignTitle,
+    notificationEmail,
+    interactionSteps,
+    campaignVariableNames
+  } = await fetchExportData(campaignId, requesterId);
+
+  const countQueryResult = await r
+    .reader("campaign_contact")
+    .count("*")
+    .where({ campaign_id: campaignId });
+  const contactsCount = countQueryResult[0].count as number;
+
+  // Attempt upload to cloud storage
+  let fileNameKey = campaignTitle.replace(/ /g, "_").replace(/\//g, "_");
+
+  if (!isAutomatedExport) {
+    const timestamp = DateTime.local().toFormat("y-mm-d-hh-mm-ss");
+    fileNameKey = `${fileNameKey}-${timestamp}`;
+  }
+
+  const campaignMetaData = {
+    fileNameKey,
+    campaignId,
+    campaignTitle,
+    contactsCount,
+    helpers,
+    interactionSteps,
+    campaignVariableNames
+  };
+
+  const {
+    campaignExportUrl,
+    campaignFilteredContactsExportUrl,
+    campaignOptOutsExportUrl,
+    campaignMessagesExportUrl
+  } = await processExportData(campaignMetaData, spokeOptions);
 
   helpers.logger.debug("Waiting for streams to finish");
 

@@ -4,6 +4,7 @@ import React from "react";
 
 import { loadData } from "../hoc/with-operations";
 import AssignmentHUD from "./components/AssignmentHUD";
+import CampaignListHeader from "./components/CampaignListHeader";
 import CampaignListLoader from "./components/CampaignListLoader";
 import { OperationDialog, operations } from "./components/OperationDialog";
 
@@ -50,7 +51,11 @@ export class CampaignList extends React.Component {
       campaignsFilter,
       isAdmin,
       data,
-      mutations
+      mutations,
+      selectForExport,
+      campaignDetailsForExport,
+      filterByCampaignTitle,
+      handleClickExportButton
     } = this.props;
     const { currentAssignmentTargets } = data.organization;
     const { archiveCampaign, unarchiveCampaign } = mutations;
@@ -69,6 +74,11 @@ export class CampaignList extends React.Component {
           />
         )}
         <AssignmentHUD assignmentTargets={currentAssignmentTargets} />
+        <CampaignListHeader
+          campaignDetailsForExport={campaignDetailsForExport}
+          filterByCampaignTitle={filterByCampaignTitle}
+          onClick={handleClickExportButton}
+        />
         <CampaignListLoader
           organizationId={organizationId}
           campaignsFilter={campaignsFilter}
@@ -77,6 +87,8 @@ export class CampaignList extends React.Component {
           startOperation={this.start}
           archiveCampaign={archiveCampaign}
           unarchiveCampaign={unarchiveCampaign}
+          selectForExport={selectForExport}
+          campaignDetailsForExport={campaignDetailsForExport}
         />
       </div>
     );
@@ -88,6 +100,10 @@ CampaignList.propTypes = {
   campaignsFilter: PropTypes.object.isRequired,
   pageSize: PropTypes.number.isRequired,
   isAdmin: PropTypes.bool.isRequired,
+  campaignDetailsForExport: PropTypes.array.isRequired,
+  filterByCampaignTitle: PropTypes.func.isRequired,
+  selectForExport: PropTypes.func.isRequired,
+  handleClickExportButton: PropTypes.func.isRequired,
   data: PropTypes.object.isRequired,
   mutations: PropTypes.object.isRequired
 };
