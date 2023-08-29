@@ -14,6 +14,8 @@ import {
 } from "@spoke/spoke-codegen";
 import React, { useCallback, useMemo, useState } from "react";
 
+import NumberCopiesField from "./NumberCopiesField";
+
 export interface CreateCampaignFromTemplateDialogProps {
   organizationId: string;
   open: boolean;
@@ -21,6 +23,7 @@ export interface CreateCampaignFromTemplateDialogProps {
   defaultTemplate?: TemplateCampaignFragment;
 }
 
+// eslint-disable-next-line max-len
 export const CreateCampaignFromTemplateDialog: React.FC<CreateCampaignFromTemplateDialogProps> = (
   props
 ) => {
@@ -28,7 +31,7 @@ export const CreateCampaignFromTemplateDialog: React.FC<CreateCampaignFromTempla
     selectedTemplate,
     setSelectedTemplate
   ] = useState<TemplateCampaignFragment | null>(props.defaultTemplate ?? null);
-  const [quantity, setQuantity] = useState<number | null>(1);
+  const [quantity, setQuantity] = useState<number>(1);
   const { data, error } = useGetTemplateCampaignsQuery({
     variables: { organizationId: props.organizationId }
   });
@@ -42,32 +45,14 @@ export const CreateCampaignFromTemplateDialog: React.FC<CreateCampaignFromTempla
   const templates =
     data?.organization?.templateCampaigns?.edges?.map(({ node }) => node) ?? [];
 
-  const handleChangeTemplate = useCallback(
-    (
-      _event: React.ChangeEvent<unknown>,
-      value: TemplateCampaignFragment | null
-    ) => {
-      setSelectedTemplate(value);
-    },
-    [setSelectedTemplate]
-  );
+  const handleChangeTemplate = (
+    _event: React.ChangeEvent<unknown>,
+    value: TemplateCampaignFragment | null
+  ) => setSelectedTemplate(value);
 
-  const handleKeyDown: React.KeyboardEventHandler = useCallback((event) => {
-    const badKey = event.keyCode === 69 || event.keyCode === 101;
-    if (badKey) event.preventDefault();
-  }, []);
-
-  const handleChangeQuantity: React.ChangeEventHandler<
-    HTMLInputElement | HTMLTextAreaElement
-  > = useCallback(
-    (event) => {
-      const textValue = event.target.value.replace(/\D/g, "");
-      const intValue = parseInt(textValue, 10);
-      const finalValue = Number.isNaN(intValue) ? null : Math.max(1, intValue);
-      setQuantity(finalValue);
-    },
-    [setQuantity]
-  );
+  const handleChangeQuantity: React.ChangeEventHandler<HTMLInputElement> = (
+    event
+  ) => setQuantity(event.target.valueAsNumber);
 
   const canCreate = useMemo(
     () => quantity !== null && selectedTemplate !== null && !working,
@@ -112,14 +97,7 @@ export const CreateCampaignFromTemplateDialog: React.FC<CreateCampaignFromTempla
           )}
         />
         <br />
-        <TextField
-          fullWidth
-          label="Quantity"
-          type="number"
-          value={quantity ?? ""}
-          onChange={handleChangeQuantity}
-          onKeyDown={handleKeyDown}
-        />
+        <NumberCopiesField qty={quantity} onChange={handleChangeQuantity} />
       </DialogContent>
       <DialogActions>
         <Button onClick={props.onClose}>Cancel</Button>
