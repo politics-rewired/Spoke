@@ -24,6 +24,12 @@ import {
   TASK_IDENTIFIER as exportForVanIdentifier
 } from "./tasks/export-for-van";
 import {
+  EMAIL_TASK_IDENTIFIER as sendEmailForBulkOperationIdentifier,
+  EXPORT_TASK_IDENTIFIER as exportCampaignForBulkOperationIdentifier,
+  exportCampaignForBulkOperation,
+  sendEmailForBulkExportOperation
+} from "./tasks/export-multiple-campaigns";
+import {
   exportOptOuts,
   TASK_IDENTIFIER as exportOptOutsIdentifier
 } from "./tasks/export-opt-outs";
@@ -107,6 +113,18 @@ export const getWorker = async (attempt = 0): Promise<Runner> => {
     [exportForVanIdentifier]: wrapProgressTask(exportForVan, {
       removeOnComplete: true
     }),
+    [exportCampaignForBulkOperationIdentifier]: wrapProgressTask(
+      exportCampaignForBulkOperation,
+      {
+        removeOnComplete: false
+      }
+    ),
+    [sendEmailForBulkOperationIdentifier]: wrapProgressTask(
+      sendEmailForBulkExportOperation,
+      {
+        removeOnComplete: true
+      }
+    ),
     [filterLandlinesIdentifier]: wrapProgressTask(filterLandlines, {
       removeOnComplete: false
     }),

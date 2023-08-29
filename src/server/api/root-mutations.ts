@@ -32,6 +32,7 @@ import { getUserById } from "../models/cacheable_queries";
 import { Notifications, sendUserNotification } from "../notifications";
 import { addExportCampaign } from "../tasks/export-campaign";
 import { addExportForVan } from "../tasks/export-for-van";
+import { addExportMultipleCampaigns } from "../tasks/export-multiple-campaigns";
 import { TASK_IDENTIFIER as exportOptOutsIdentifier } from "../tasks/export-opt-outs";
 import { addFilterLandlines } from "../tasks/filter-landlines";
 import { QUEUE_AUTOSEND_ORGANIZATION_INITIALS_TASK_IDENTIFIER } from "../tasks/queue-autosend-initials";
@@ -325,6 +326,23 @@ const rootMutations = {
           requesterId: user.id
         });
       }
+    },
+
+    exportCampaigns: async (_root, { options }, { user, loaders }) => {
+      const { campaignIds, spokeOptions } = options;
+
+      if (!spokeOptions) {
+        throw new Error("Input must include valid spokeOptions when exporting");
+      }
+      const campaignId = campaignIds[0];
+      const campaign = await loaders.campaign.load(campaignId);
+      const organizationId = campaign.organization_id;
+      await accessRequired(user, organizationId, "ADMIN");
+      return addExportMultipleCampaigns({
+        campaignIds,
+        requesterId: user.id,
+        spokeOptions
+      });
     },
 
     editOrganizationMembership: async (

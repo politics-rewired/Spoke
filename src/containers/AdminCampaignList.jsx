@@ -4,6 +4,7 @@ import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogTitle from "@material-ui/core/DialogTitle";
+import Typography from "@material-ui/core/Typography";
 import CreateIcon from "@material-ui/icons/Create";
 import FileCopyIcon from "@material-ui/icons/FileCopyOutlined";
 import SpeedDial from "@material-ui/lab/SpeedDial";
@@ -18,6 +19,8 @@ import { withRouter } from "react-router-dom";
 import { compose } from "recompose";
 
 import CreateCampaignFromTemplateDialog from "../components/CreateCampaignFromTemplateDialog";
+import ExportCampaignDataSnackbar from "../components/ExportCampaignDataSnackbar";
+import ExportMultipleCampaignDataDialog from "../components/ExportMultipleCampaignDataDialog";
 import LoadingIndicator from "../components/LoadingIndicator";
 import theme from "../styles/theme";
 import { withAuthzContext } from "./AuthzProvider";
@@ -30,6 +33,10 @@ const styles = {
     alignItems: "baseline",
     justifyContent: "space-between",
     padding: 5
+  },
+  filterWrapper: {
+    display: "flex",
+    alignIems: "baseline"
   }
 };
 
@@ -42,12 +49,17 @@ class AdminCampaignList extends React.Component {
     createFromTemplateOpen: false,
     isCreating: false,
     campaignsFilter: {
-      isArchived: false
+      isArchived: false,
+      campaignTitle: ""
     },
     releasingInProgress: false,
     releasingAllReplies: false,
     releaseAllRepliesError: undefined,
-    releaseAllRepliesResult: undefined
+    releaseAllRepliesResult: undefined,
+    campaignDetailsForExport: [],
+    showExportModal: false,
+    showExportSnackbar: false,
+    exportErrorMessage: null
   };
 
   handleClickNewButton = async () => {
@@ -74,10 +86,22 @@ class AdminCampaignList extends React.Component {
     );
   };
 
-  handleFilterChange = (event, index, value) => {
+  handleFilterChangeCurrentOrArchived = (_event, _index, value) => {
+    const { campaignTitle } = this.state.campaignsFilter;
     this.setState({
       campaignsFilter: {
-        isArchived: value
+        isArchived: value,
+        campaignTitle
+      }
+    });
+  };
+
+  handleFilterCampaignTitle = (campaignTitle) => {
+    const { isArchived } = this.state.campaignsFilter;
+    this.setState({
+      campaignsFilter: {
+        isArchived,
+        campaignTitle
       }
     });
   };
@@ -133,11 +157,41 @@ class AdminCampaignList extends React.Component {
       });
   };
 
-  renderFilters() {
+  // handle selecting and de-selecting campaigns via CampaignListMenu
+  handleSelectForExport = (incomingCampaign) => {
+    const { campaignDetailsForExport: currentDetails } = this.state;
+    const currentIds = currentDetails.map((campaign) => campaign.id);
+    const isDeSelecting = currentIds.includes(incomingCampaign.id);
+    if (isDeSelecting) {
+      const filteredCampaigns = currentDetails.filter(
+        (campaign) => campaign.id !== incomingCampaign.id
+      );
+      return this.setState({ campaignDetailsForExport: filteredCampaigns });
+    }
+    return this.setState({
+      campaignDetailsForExport: currentDetails.concat(incomingCampaign)
+    });
+  };
+
+  handleClickExportButton = () => {
+    this.setState({
+      showExportModal: true
+    });
+  };
+
+  handleErrorCampaignExport = (exportErrorMessage) => {
+    this.setState({
+      exportErrorMessage,
+      showExportModal: false,
+      showExportSnackbar: true
+    });
+  };
+
+  renderCurrentCampaignFilter() {
     return (
       <DropDownMenu
         value={this.state.campaignsFilter.isArchived}
-        onChange={this.handleFilterChange}
+        onChange={this.handleFilterChangeCurrentOrArchived}
       >
         <MenuItem value={false} primaryText="Current" />
         <MenuItem value primaryText="Archived" />
@@ -149,7 +203,11 @@ class AdminCampaignList extends React.Component {
     const {
       campaignsFilter,
       releasingAllReplies,
-      releasingInProgress
+      releasingInProgress,
+      campaignDetailsForExport,
+      showExportModal,
+      showExportSnackbar,
+      exportErrorMessage
     } = this.state;
 
     const doneReleasingReplies =
@@ -160,7 +218,12 @@ class AdminCampaignList extends React.Component {
     return (
       <div>
         <div style={styles.flexContainer}>
-          {this.renderFilters()}
+          <div style={styles.filterWrapper}>
+            <Typography variant="h4" style={{ padding: "4px" }}>
+              Campaigns
+            </Typography>
+            {this.renderCurrentCampaignFilter()}
+          </div>
           <Button
             variant="contained"
             color="primary"
@@ -266,6 +329,10 @@ class AdminCampaignList extends React.Component {
             campaignsFilter={campaignsFilter}
             pageSize={DEFAULT_PAGE_SIZE}
             isAdmin={isAdmin}
+            campaignDetailsForExport={campaignDetailsForExport}
+            filterByCampaignTitle={this.handleFilterCampaignTitle}
+            selectForExport={this.handleSelectForExport}
+            handleClickExportButton={this.handleClickExportButton}
           />
         )}
 
@@ -295,6 +362,34 @@ class AdminCampaignList extends React.Component {
           organizationId={organizationId}
           open={this.state.createFromTemplateOpen}
           onClose={() => this.setState({ createFromTemplateOpen: false })}
+        />
+        <ExportMultipleCampaignDataDialog
+          campaignDetailsForExport={campaignDetailsForExport}
+          open={showExportModal}
+          onClose={() =>
+            this.setState({
+              showExportModal: false,
+              campaignDetailsForExport: []
+            })
+          }
+          onError={this.handleErrorCampaignExport}
+          onComplete={() =>
+            this.setState({
+              campaignDetailsForExport: [],
+              showExportModal: false,
+              showExportSnackbar: true
+            })
+          }
+        />
+        <ExportCampaignDataSnackbar
+          open={showExportSnackbar}
+          errorMessage={exportErrorMessage}
+          onClose={() => {
+            this.setState({
+              showExportSnackbar: false,
+              exportErrorMessage: null
+            });
+          }}
         />
       </div>
     );
