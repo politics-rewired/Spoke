@@ -42,7 +42,7 @@ const ExportMultipleCampaigns: React.FC<Props> = ({
           campaignFilteredContactsExportUrl
         } = exportUrls;
         return (
-          <>
+          <div key={campaignId}>
             <p>
               {campaignTitle} - ID: {campaignId}
             </p>
@@ -59,7 +59,7 @@ const ExportMultipleCampaigns: React.FC<Props> = ({
                 {campaignFilteredContactsExportUrl}
               </p>
             )}
-          </>
+          </div>
         );
       })}
       <br />
