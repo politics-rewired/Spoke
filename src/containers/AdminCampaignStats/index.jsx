@@ -216,14 +216,15 @@ class AdminCampaignStats extends React.Component {
       disableVanExportButton,
       disableVanSyncButton
     } = this.state;
-    const { data, match, isAdmin, isSuperadmin } = this.props;
+    const { data, match, isAdmin, isSuperadmin, organizationData } = this.props;
     const { organizationId, campaignId } = match.params;
     const { campaign } = data;
-    const { pendingJobs } = campaign;
+    const { organization } = organizationData;
 
     if (!campaign) {
       return <h1> Uh oh! Campaign {campaignId} doesn't seem to exist </h1>;
     }
+    const { pendingJobs, messagingService } = campaign;
 
     const currentExportJob = pendingJobs.find(
       (job) => job.jobType === "export"
@@ -253,12 +254,21 @@ class AdminCampaignStats extends React.Component {
       ? DateTime.fromISO(campaign.dueBy).toFormat("DD")
       : "No Due Date";
     const isOverdue = DateTime.local() >= DateTime.fromISO(campaign.dueBy);
-    const newTitle = `${this.props.organizationData.organization.name} - Campaigns - ${campaignId}: ${campaign.title}`;
+    const newTitle = `${organization.name} - Campaigns - ${campaignId}: ${campaign.title}`;
 
     // only a superadmin with multiple active orgs can copy a campaign to another org
     const orgLength = this.props.orgs?.organizations?.length;
     const onlyCopyCampaignSameOrg =
       !isSuperadmin || orgLength === undefined || orgLength < 2;
+
+    let msgServiceName = messagingService?.name;
+    if (!msgServiceName) {
+      msgServiceName = messagingService?.id;
+    }
+    const showMessagingServiceName =
+      organization.messagingServices.pageInfo.totalCount > 1 &&
+      campaign.isStarted &&
+      msgServiceName;
 
     return (
       <div>
@@ -293,6 +303,12 @@ class AdminCampaignStats extends React.Component {
             <span style={{ color: isOverdue ? red[600] : undefined }}>
               {dueFormatted} {isOverdue && "(Overdue)"}
             </span>
+            {showMessagingServiceName && (
+              <>
+                <br />
+                Messaging Service: {msgServiceName}
+              </>
+            )}
           </div>
           <div className={css(styles.flexColumn)}>
             <div className={css(styles.rightAlign)}>
