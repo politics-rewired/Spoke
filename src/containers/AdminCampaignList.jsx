@@ -121,11 +121,6 @@ class AdminCampaignList extends React.Component {
     });
   };
 
-  handleClickSpeedDial = () => {
-    const { speedDialOpen } = this.state;
-    this.setState({ speedDialOpen: !speedDialOpen });
-  };
-
   handleCreatedFromTemplateSnackbarClose = (_event, reason) => {
     if (reason === "clickaway") {
       return;
@@ -252,7 +247,6 @@ class AdminCampaignList extends React.Component {
       createdFromTemplateIds,
       createdFromTemplateTitle,
       showCreatedFromTemplateSnackbar,
-      speedDialOpen,
       isCreating
     } = this.state;
 
@@ -330,7 +324,7 @@ class AdminCampaignList extends React.Component {
               {releasingInProgress
                 ? []
                 : doneReleasingReplies
-                  ? [
+                ? [
                     <Button
                       key="done"
                       variant="contained"
@@ -339,7 +333,7 @@ class AdminCampaignList extends React.Component {
                       Done
                     </Button>
                   ]
-                  : [
+                : [
                     <Button
                       key="cancel"
                       variant="contained"
@@ -372,6 +366,7 @@ class AdminCampaignList extends React.Component {
 
         {isAdmin ? (
           <AdminCampaignListSpeedDial
+            id="adminCampaignListSpeedDial"
             ariaLabel="Open create campaign actions"
             style={theme.components.floatingButton}
             onFocus={this.handleSpeedDialOnFocus}
