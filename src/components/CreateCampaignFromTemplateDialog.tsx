@@ -128,6 +128,7 @@ export const CreateCampaignFromTemplateDialog: React.FC<CreateCampaignFromTempla
       onClose={props.onClose}
       aria-labelledby="create-from-template-dialog-title"
       open={props.open}
+      disableRestoreFocus
     >
       <DialogTitle id="create-from-template-dialog-title">
         Create Campaign from Template
