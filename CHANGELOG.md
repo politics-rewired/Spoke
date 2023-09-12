@@ -2,6 +2,33 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [7.2.0-rc.0](https://github.com/politics-rewired/spoke/compare/v7.1.0...v7.2.0-rc.0) (2023-09-12)
+
+
+### Features
+
+* view messaging service name on campaign details page for orgs with multiple msg services ([#1623](https://github.com/politics-rewired/spoke/issues/1623)) ([652b80c](https://github.com/politics-rewired/spoke/commit/652b80c1056093320feb8df00dccbb777d15130f))
+* **start-campaign-button:** warn before starting campaign without survey responses ([#1616](https://github.com/politics-rewired/spoke/issues/1616)) ([9bf1c57](https://github.com/politics-rewired/spoke/commit/9bf1c57d8905f10c7238e4b97c465ebcdbe6829a))
+* indicate new campaign id(s) from template ([#1629](https://github.com/politics-rewired/spoke/issues/1629)) ([0af2c75](https://github.com/politics-rewired/spoke/commit/0af2c75614c80a1208d0b3e1be049cfa377e6335))
+* **campaign-interaction-steps:** add save button to top of section ([#1610](https://github.com/politics-rewired/spoke/issues/1610)) ([0d035af](https://github.com/politics-rewired/spoke/commit/0d035af8130419392fe2055cede716a1e7d79aec))
+* **emails:** add email template with wrapper ([#1588](https://github.com/politics-rewired/spoke/issues/1588)) ([94fc8fa](https://github.com/politics-rewired/spoke/commit/94fc8fa18fbc7b43853cfb34c5c451efbd16cba7))
+
+
+### Bug Fixes
+
+* take campaign to edit link for create from template ([#1673](https://github.com/politics-rewired/spoke/issues/1673)) ([81ec582](https://github.com/politics-rewired/spoke/commit/81ec582b64aaef2638fba8f13cb94e0f38712714))
+* **update-dump:** add cap add flag ([#1668](https://github.com/politics-rewired/spoke/issues/1668)) ([46ddcb1](https://github.com/politics-rewired/spoke/commit/46ddcb129c3ed6f70eb467b75125e0444c5c83be))
+* create campaign speed dial open/close behavior ([#1627](https://github.com/politics-rewired/spoke/issues/1627)) ([d8428e3](https://github.com/politics-rewired/spoke/commit/d8428e3d06c69a2dd059fe48fb903bc8fd784716))
+* link toll free pricing ([#1653](https://github.com/politics-rewired/spoke/issues/1653)) ([37efeac](https://github.com/politics-rewired/spoke/commit/37efeac5efcce053ba0bf50f3e563450f9c58e80))
+* **users:** set preferred notification frequency on signup ([#1630](https://github.com/politics-rewired/spoke/issues/1630)) ([740e865](https://github.com/politics-rewired/spoke/commit/740e8659504f3708fa95061ccf3e7684f71493b5))
+
+
+### Backend Changes
+
+* **telco errors:** add 4785 error code ([#1667](https://github.com/politics-rewired/spoke/issues/1667)) ([053ea74](https://github.com/politics-rewired/spoke/commit/053ea748043e62d39c19a9f13ba71a0b6a52cc13))
+* add docker-compose instructions for local postgres ([#1599](https://github.com/politics-rewired/spoke/issues/1599)) ([fdc0793](https://github.com/politics-rewired/spoke/commit/fdc0793d17210bb4b91eaae8ae0bd8ca0c1c6f55))
+* run update schema dump ([#1666](https://github.com/politics-rewired/spoke/issues/1666)) ([68fb0fa](https://github.com/politics-rewired/spoke/commit/68fb0fa39a1267e7c51188f290fbc8418c7e0b1e))
+
 ## [7.1.0](https://github.com/politics-rewired/spoke/compare/v7.0.0...v7.1.0) (2023-08-02)
 
 
