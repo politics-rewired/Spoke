@@ -452,7 +452,7 @@ class AdminCampaignList extends React.Component {
                     <a
                       key={id}
                       target="_blank"
-                      href={`${window.BASE_URL}/admin/${organizationId}/campaigns/${id}`}
+                      href={`${window.BASE_URL}/admin/${organizationId}/campaigns/${id}/edit`}
                       rel="noreferrer"
                     >
                       Campaign {id}
