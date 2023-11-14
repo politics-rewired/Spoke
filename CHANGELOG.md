@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [7.2.0](https://github.com/politics-rewired/spoke/compare/v7.2.0-rc.0...v7.2.0) (2023-11-14)
+
+
+### Features
+
+* add shutdown notification ([#1674](https://github.com/politics-rewired/spoke/issues/1674)) ([7f33625](https://github.com/politics-rewired/spoke/commit/7f33625203bb2067def7147ba3fb78f28839b215))
+
 ## [7.2.0-rc.0](https://github.com/politics-rewired/spoke/compare/v7.1.0...v7.2.0-rc.0) (2023-09-12)
 
 
