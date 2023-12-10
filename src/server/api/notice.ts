@@ -6,13 +6,17 @@ import {
   isPricing10DlcNotice,
   isPricingTollFreeNotice,
   isRegister10DlcBrandNotice,
-  isRegister10DlcCampaignNotice
+  isRegister10DlcCampaignNotice,
+  isTitleContentNotice
 } from "../../api/notice";
 
 // explicitly setting typename
 export const resolvers = {
   Notice: {
     __resolveType(obj: Notice) {
+      if (isTitleContentNotice(obj)) {
+        return "TitleContentNotice";
+      }
       if (isRegister10DlcBrandNotice(obj)) {
         return "Register10DlcBrandNotice";
       }

@@ -4,9 +4,17 @@ import type {
   Pricing10DlcNotice,
   PricingTollFreeNotice,
   Register10DlcBrandNotice,
-  Register10DlcCampaignNotice
+  Register10DlcCampaignNotice,
+  TitleContentNotice
 } from "@spoke/spoke-codegen";
 import type { GraphQLType } from "graphql";
+
+export function isTitleContentNotice(obj: Notice): obj is TitleContentNotice {
+  return (
+    (obj as TitleContentNotice & GraphQLType).__typename ===
+    "TitleContentNotice"
+  );
+}
 
 export function isRegister10DlcBrandNotice(
   obj: Notice

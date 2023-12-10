@@ -9,12 +9,14 @@ import {
   isPricing10DlcNotice,
   isPricingTollFreeNotice,
   isRegister10DlcBrandNotice,
-  isRegister10DlcCampaignNotice
+  isRegister10DlcCampaignNotice,
+  isTitleContentNotice
 } from "../../../api/notice";
 import Pending10DlcCampaignNoticeCard from "./Pending10DlcCampaignNoticeCard";
 import PricingNoticeCard from "./PricingNoticeCard";
 import Register10DlcNoticeCard from "./Register10DlcNoticeCard";
 import ShutdownNoticeCard from "./ShutdownNoticeCard";
+import TitleContentNoticeCard from "./TitleContentNoticeCard";
 
 interface NotificationCardProps {
   organizationId: string;
@@ -42,6 +44,17 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
   return (
     <div>
       {data?.notices.edges.map(({ node }) => {
+        if (isTitleContentNotice(node)) {
+          return (
+            <TitleContentNoticeCard
+              key={node.id}
+              title={node.title}
+              avatarIcon={node.avatarIcon}
+              avatarColor={node.avatarColor as any}
+              markdownContent={node.markdownContent}
+            />
+          );
+        }
         if (window.SHOW_10DLC_REGISTRATION_NOTICES) {
           if (
             isRegister10DlcBrandNotice(node) ||
