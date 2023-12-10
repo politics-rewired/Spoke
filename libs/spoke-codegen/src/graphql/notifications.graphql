@@ -5,6 +5,13 @@ query getOrganizationNotifications($organizationId: String!) {
     }
     edges {
       node {
+        ... on TitleContentNotice {
+          id
+          title
+          avatarIcon
+          avatarColor
+          markdownContent
+        }
         ... on Register10DlcBrandNotice {
           id
           tcrRegistrationUrl
