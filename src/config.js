@@ -115,6 +115,10 @@ const validators = {
     default: false,
     isClient: true
   }),
+  ENABLE_REWIRED_SHUTDOWN_NOTICE: bool({
+    desc: "Show the Rewired shutdown notice",
+    default: true
+  }),
   DISABLE_ASSIGNMENT_CASCADE: bool({
     desc:
       "Whether to just assign from 1 campaign rather than gathering from multiple to fulfill a request",
