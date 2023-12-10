@@ -72,20 +72,30 @@ export const get10DlcBrandNotices: OrgLevelNotificationGetter = async (
 
   const ownedProfiles = profiles.filter(({ roles }) => roles.includes("OWNER"));
 
-  const profilesWithChannels = await Promise.all(
-    profiles.map(async ({ messaging_service_sid }) => {
-      const payload = {
-        operationName: "GetSwitchboardProfile",
-        query: fetchProfileQuery,
-        variables: {
-          profileId: messaging_service_sid
-        }
-      };
+  let profilesWithChannels: any[] = [];
+  try {
+    profilesWithChannels = await Promise.all(
+      profiles.map(async ({ messaging_service_sid }) => {
+        const payload = {
+          operationName: "GetSwitchboardProfile",
+          query: fetchProfileQuery,
+          variables: {
+            profileId: messaging_service_sid
+          }
+        };
 
-      const profileResponse = await request.post(PORTAL_API_URL).send(payload);
-      return profileResponse.body.data?.profile;
-    })
-  );
+        const profileResponse = await request
+          .post(PORTAL_API_URL)
+          .timeout(1000)
+          .send(payload);
+
+        return profileResponse.body.data?.profile;
+      })
+    );
+  } catch {
+    // Error fetching from Portal (it may not be reachable)
+    return [];
+  }
 
   // if a registered profile exists, show the notice for their lowest cost pricing plan
 
