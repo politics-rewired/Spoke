@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [7.3.0](https://github.com/politics-rewired/spoke/compare/v7.2.0...v7.3.0) (2023-12-10)
+
+
+### Features
+
+* add generic title/content notice type ([#1677](https://github.com/politics-rewired/spoke/issues/1677)) ([adb168d](https://github.com/politics-rewired/spoke/commit/adb168d4036c4f086f6dbb54b4eacd1886bd5a5a))
+* use title/content notice type with envvar for rewired shutdown ([#1678](https://github.com/politics-rewired/spoke/issues/1678)) ([decedcc](https://github.com/politics-rewired/spoke/commit/decedcc394b77f4056f28ec2681e6047cc024a55))
+
+
+### Bug Fixes
+
+* handle spoke-portal being unreachable ([#1675](https://github.com/politics-rewired/spoke/issues/1675)) ([757b872](https://github.com/politics-rewired/spoke/commit/757b872d67255ce79235b36d0fa8a3e01593fba1))
+
 ## [7.2.0](https://github.com/politics-rewired/spoke/compare/v7.2.0-rc.0...v7.2.0) (2023-11-14)
 
 
