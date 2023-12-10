@@ -15,7 +15,6 @@ import {
 import Pending10DlcCampaignNoticeCard from "./Pending10DlcCampaignNoticeCard";
 import PricingNoticeCard from "./PricingNoticeCard";
 import Register10DlcNoticeCard from "./Register10DlcNoticeCard";
-import ShutdownNoticeCard from "./ShutdownNoticeCard";
 import TitleContentNoticeCard from "./TitleContentNoticeCard";
 
 interface NotificationCardProps {
@@ -25,8 +24,6 @@ interface NotificationCardProps {
 export const NotificationCard: React.FC<NotificationCardProps> = ({
   organizationId
 }) => {
-  return <ShutdownNoticeCard />;
-
   const { data, loading, error } = useGetOrganizationNotificationsQuery({
     variables: { organizationId }
   });
