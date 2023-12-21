@@ -1,0 +1,15 @@
+spectaql:
+  displayAllServers: false
+introspection:
+  removeTrailingPeriodFromDescriptions: false
+  schemaFile: ./src/schema.graphql
+  queryNameStrategy: capitalizeFirst
+  fieldExpansionDepth: 2
+  spectaqlDirective:
+    enable: true
+extensions:
+  graphqlScalarExamples: true
+info:
+  title: Spoke GraphQL API Reference
+  description: v6.20.0-rc.0
+  x-url: https://stagingenv.spokerewired.com/graphql
